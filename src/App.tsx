@@ -1,13 +1,34 @@
+import { Route, Routes } from 'react-router'
+import { CompanyRegister, Dashboard, HomePage, LoginPage } from './pages'
+import { Layout, PrivateRoute } from './components'
+
 import './App.css'
-import { Button } from './components/ui/button'
 
 function App() {
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <Button>Click me </Button>
-    </div>
+    <Routes>
+      {/* Rutas públicas */}
+      <Route path="/" element={
+        <Layout>
+          <HomePage />
+        </Layout>
+      } />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/registro-empresa" element={<CompanyRegister />} />
+
+      {/* Ruta protegida con rol */}
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+    </Routes>
   )
 }
 
