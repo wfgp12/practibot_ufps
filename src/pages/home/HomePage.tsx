@@ -85,7 +85,7 @@ export const HomePage = () => {
           </div>
         </div>
       </div>
-      <div className="bg-white py-20 w-full flex  justify-center">
+      <div className="bg-white py-20 w-full flex  justify-center" id="empresas">
         <div className="w-full max-w-4xl flex flex-col items-center justify-center gap-4 px-4">
           <h2 className="text-3xl font-bold text-center ">
             ¿Eres una empresa?
