@@ -1,6 +1,7 @@
 import { VacancyCard } from "@/components/VacancyCard";
 import { useVacancies } from "@/hooks/useVacancies"
 import { Search, FileText, ChartColumnIncreasing } from "lucide-react"
+import { useNavigate } from "react-router";
 
 const steps = [
   {
@@ -22,6 +23,7 @@ const steps = [
 
 export const HomePage = () => {
   const { vacancies } = useVacancies();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -35,12 +37,12 @@ export const HomePage = () => {
             Encuentra y gestiona tus prácticas con apoyo del chatbot UFPS. Conectamos estudiantes de Ingeniería de Sistemas con las mejores oportunidades.
           </p>
           <div className="w-full flex justify-center items-center gap-4">
-            <button className="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+            <a href="#vacantes" className="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
               Explora vacantes
-            </button>
-            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+            </a>
+            <a href="/login" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
               Acceder
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -76,7 +78,7 @@ export const HomePage = () => {
                   modality={vacancy.modality}
                   workday={vacancy.workday}
                   skills={vacancy.skills}
-                  onClick={() => console.log("Vacancy clicked")}
+                  onClick={() => navigate(`/login`)}
                 />
               ))
             }
