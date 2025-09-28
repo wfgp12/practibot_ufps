@@ -1,3 +1,7 @@
 main {
     background-color: #F4F3F3
 }
+
+html {
+  scroll-behavior: smooth;
+}

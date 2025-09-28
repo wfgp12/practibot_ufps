@@ -12,7 +12,7 @@ const Navbar = () => {
     const items = navItems[role];
 
     return (
-        <nav className="flex gap-4 p-4 bg-white justify-between items-center shadow-md ">
+        <nav className="flex gap-4 p-4 bg-white justify-between items-center shadow-md sticky top-0 z-10">
             <div className="flex">
                 <img src={logoLandscape} alt="logo" className="h-11" />
             </div>
