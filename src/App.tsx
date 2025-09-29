@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router'
 import { CompanyRegister, Dashboard, HomePage, LoginPage } from './pages'
-import { Layout, PrivateRoute } from './components'
+import { Layout, PrivateRoute, PublicRoute } from './components'
 
 import './App.css'
 
@@ -10,12 +10,22 @@ function App() {
     <Routes>
       {/* Rutas públicas */}
       <Route path="/" element={
-        <Layout>
-          <HomePage />
-        </Layout>
+        <PublicRoute>
+          <Layout>
+            <HomePage />
+          </Layout>
+        </PublicRoute>
       } />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/registro-empresa" element={<CompanyRegister />} />
+      <Route path="/login" element={
+        <PublicRoute>
+          <LoginPage />
+        </PublicRoute>
+      } />
+      <Route path="/registro-empresa" element={
+        <PublicRoute>
+          <CompanyRegister />
+        </PublicRoute>
+      } />
 
       {/* Ruta protegida con rol */}
       <Route

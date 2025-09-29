@@ -23,7 +23,7 @@ export const VacancyCard = ({
   onClick 
 } : VacancyCardProps) => {
   return (
-    <Card className="w-[300px]">
+    <Card className="w-[300px] transform transition-transform duration-300 hover:scale-110">
       <CardHeader className="flex flex-row justify-between items-start">
         <div>
           <CardTitle className="truncate whitespace-nowrap max-w-[165px]">{title}</CardTitle>
