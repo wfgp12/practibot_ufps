@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useForm, type SubmitHandler } from "react-hook-form"
 import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 
@@ -7,17 +7,39 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useAppDispatch } from "@/store/hooks";
+import { loginThunk } from "@/store/thunks/authThunks";
+
+type LoginFormData = {
+  nit: string
+  password: string
+}
 
 export const LoginPage = () => {
-  const [nit, setNit] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch()
 
-  const navigate = useNavigate()
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log({ nit, password });
-  };
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    try {
+      const result = await dispatch(loginThunk({ nit: data.nit, password: data.password })).unwrap()
+      console.log("✅ Login exitoso:", result)
+      navigate("/dashboard")
+    } catch (err) {
+      console.error("❌ Error en login:", err)
+    }
+  }
+
+  const handleInstitutionalLogin = async () => {
+    try {
+      const result = await dispatch(loginThunk({ institutional: true })).unwrap()
+      console.log("✅ Login institucional:", result)
+      navigate("/dashboard")
+    } catch (err) {
+      console.error("❌ Error en login:", err)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -43,6 +65,7 @@ export const LoginPage = () => {
             <Button
               variant="outline"
               className="w-full justify-center border-gray-300"
+              onClick={handleInstitutionalLogin}
             >
               🚀 Accede con correo institucional
             </Button>
@@ -53,16 +76,24 @@ export const LoginPage = () => {
               <Separator className="flex-1" />
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="nit">NIT de la empresa</Label>
                 <Input
                   id="nit"
                   type="text"
                   placeholder="Ej: 900123456-7"
-                  value={nit}
-                  onChange={(e) => setNit(e.target.value)}
+                  {...register("nit", {
+                    required: "El NIT es obligatorio",
+                    pattern: {
+                      value: /^[0-9]+(-[0-9])?$/, // solo números, opcional guion y un dígito final
+                      message: "Formato inválido (Ej: 900123456-7)"
+                    }
+                  })}
                 />
+                {errors.nit && (
+                  <span className="text-xs text-red-500">{errors.nit.message}</span>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">
@@ -71,9 +102,14 @@ export const LoginPage = () => {
                   id="password"
                   type="password"
                   placeholder="********"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password", {
+                    required: "La contraseña es obligatoria",
+                    minLength: { value: 6, message: "Mínimo 6 caracteres" }
+                  })}
                 />
+                {errors.password && (
+                  <span className="text-xs text-red-500">{errors.password.message}</span>
+                )}
               </div>
 
               <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">

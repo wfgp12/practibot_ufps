@@ -23,7 +23,7 @@ export const loginThunk = createAsyncThunk(
             id: "1",
             name: "Estudiante UFPS",
             email: "user@ufps.edu.co",
-            role: "student",
+            role: "admin",
           }
         } else {
           user = {
