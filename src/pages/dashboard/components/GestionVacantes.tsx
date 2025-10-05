@@ -102,7 +102,7 @@ export const GestionVacantes = () => {
             content: (
                 <>
                     <div className="flex justify-between items-center mb-4">
-                        <h5 className="text-lg font-medium">Empresas con convenio</h5>
+                        <h5 className="text-lg font-medium">Vacantes activas</h5>
                         <Button className="bg-green-600 hover:bg-green-700">
                             Crear nuevo convenio
                         </Button>
@@ -127,7 +127,7 @@ export const GestionVacantes = () => {
             content: (
                 <>
                     <h5 className="text-lg font-medium mb-4">
-                        Solicitudes de convenio
+                        Solicitudes de vacantes
                     </h5>
                     <Table columns={columnasSolicitudes} data={pendingVacancies} />
                 </>

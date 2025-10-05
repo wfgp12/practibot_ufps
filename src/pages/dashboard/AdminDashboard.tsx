@@ -1,6 +1,7 @@
 import { SectionComponent } from "@/components/SectionComponent"
-import { GestionConvenios } from "./GestionConvenios"
-import { GestionVacantes } from "./GestionVacantes"
+import { GestionConvenios } from "./components/GestionConvenios"
+import { GestionVacantes } from "./components/GestionVacantes"
+import { GestionEstudiantes } from "./components/GestionEstudiantes"
 
 export const AdminDashboard = () => {
 
@@ -14,7 +15,7 @@ export const AdminDashboard = () => {
                 <GestionVacantes/>
             </SectionComponent>
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="usuarios">
-                <></>
+                <GestionEstudiantes/>
             </SectionComponent>
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="estudiantes">
                 <></>

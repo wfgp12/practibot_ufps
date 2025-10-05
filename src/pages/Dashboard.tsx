@@ -1,7 +1,7 @@
 import { useAppSelector } from "@/store/hooks"
-import { AdminDashboard } from "./components/AdminDashboard";
-import { CompanyDashboard } from "./components/CompanyDashboard";
-import { StudentDashboard } from "./components/StudentDashboard";
+import { AdminDashboard } from "./dashboard/AdminDashboard";
+import { CompanyDashboard } from "./dashboard/CompanyDashboard";
+import { StudentDashboard } from "./dashboard/StudentDashboard";
 
 export const Dashboard = () => {
   const { user } = useAppSelector(state => state.auth)

@@ -1,8 +1,9 @@
+import { useNavigate } from "react-router";
+import { Search, FileText, ChartColumnIncreasing } from "lucide-react"
+
 import { SectionComponent } from "@/components/SectionComponent";
 import { VacancyCard } from "@/components/VacancyCard";
 import { useVacancies } from "@/hooks/useVacancies"
-import { Search, FileText, ChartColumnIncreasing } from "lucide-react"
-import { useNavigate } from "react-router";
 
 const steps = [
   {
