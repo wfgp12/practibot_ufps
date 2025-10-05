@@ -47,6 +47,7 @@ export const HomePage = () => {
 
       <SectionComponent
         classNameContainer="bg-white"
+        id="como-funciona"
       >
         <h2 className="text-3xl font-bold text-center mb-8">¿Como funciona?</h2>
         <div className="grid grid-cols-1  lg:grid-cols-3 gap-8 ">
@@ -62,6 +63,7 @@ export const HomePage = () => {
 
       <SectionComponent
         classNameContent="max-w-5xl"
+        id="vacantes"
       >
         <h2 className="text-3xl font-bold text-center mb-8">
           Vacantes Destacadas
@@ -82,10 +84,17 @@ export const HomePage = () => {
             ))
           }
         </div>
+        <div className="w-full flex justify-center items-center gap-4 mt-6">
+          <a href="" className="bg-gray-200 hover:bg-gray-500 border-gray-600 font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+            Ver todas las vacantes
+          </a>
+
+        </div>
       </SectionComponent>
 
       <SectionComponent
         classNameContainer="bg-white"
+        id="empresas"
       >
         <h2 className="text-3xl font-bold text-center ">
           ¿Eres una empresa?
