@@ -1,27 +1,28 @@
 import { SectionComponent } from "@/components/SectionComponent"
 import { GestionConvenios } from "./GestionConvenios"
+import { GestionVacantes } from "./GestionVacantes"
 
 export const AdminDashboard = () => {
 
 
     return (
         <>
-            <SectionComponent id="convenios">
+            <SectionComponent classNameContainer="pt-10 pb-5" classNameContent="max-w-6xl" id="convenios">
                 <GestionConvenios />
             </SectionComponent>
-            <SectionComponent id="vacantes">
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
+                <GestionVacantes/>
+            </SectionComponent>
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="usuarios">
                 <></>
             </SectionComponent>
-            <SectionComponent id="usuarios">
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="estudiantes">
                 <></>
             </SectionComponent>
-            <SectionComponent id="estudiantes">
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="documentos">
                 <></>
             </SectionComponent>
-            <SectionComponent id="documentos">
-                <></>
-            </SectionComponent>
-            <SectionComponent id="reportes">
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="reportes">
                 <></>
             </SectionComponent>
         </>

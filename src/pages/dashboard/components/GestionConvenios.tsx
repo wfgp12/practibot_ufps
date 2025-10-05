@@ -1,5 +1,4 @@
 import { Button } from "@/components";
-import { SectionComponent } from "@/components/SectionComponent";
 import { Table, type Column } from "@/components/Table";
 import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,15 +93,13 @@ export const GestionConvenios = () => {
     ];
 
     return (
-        <SectionComponent id="convenios">
-            <Card className="w-full">
-                <CardHeader>
-                    <CardTitle>Gestión de Convenios</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <TabsSection tabs={tabs} defaultValue="convenios" />
-                </CardContent>
-            </Card>
-        </SectionComponent>
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle>Gestión de Convenios</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <TabsSection tabs={tabs} defaultValue="convenios" />
+            </CardContent>
+        </Card>
     );
 };

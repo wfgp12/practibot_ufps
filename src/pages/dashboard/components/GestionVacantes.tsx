@@ -1,0 +1,148 @@
+import { Button } from "@/components";
+import { Table, type Column } from "@/components/Table";
+import { TabsSection, type TabItem } from "@/components/TabsSection";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { useVacancies } from "@/hooks/useVacancies";
+import type { Vacancy } from "@/models/IVacancy";
+
+export const GestionVacantes = () => {
+    const { vacancies, pendingVacancies } = useVacancies();
+
+    const columnasVacantes: Column<Vacancy>[] = [
+        { key: "title", title: "Título" },
+        { key: "company", title: "Empresa" },
+        {
+            key: "skills",
+            title: "Habilidades",
+            render: (skills) => {
+                if (!Array.isArray(skills) || skills.length === 0) return "—";
+
+                const visibleSkills = skills.slice(0, 3);
+                const hasMore = skills.length > 3;
+
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {visibleSkills.map((skill, index) => (
+                            <Badge key={index} variant="outline">
+                                {skill}
+                            </Badge>
+                        ))}
+                        {hasMore && (
+                            <Badge variant="secondary" className="opacity-70">
+                                ...
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            key: "id",
+            title: "Acciones",
+            align: "center",
+            render: () => (
+                <Button
+                    variant="outline"
+                    className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+                >
+                    Ver detalle
+                </Button>
+            ),
+        },
+    ];
+
+    const columnasSolicitudes: Column<Vacancy>[] = [
+        { key: "company", title: "Empresa" },
+        { key: "title", title: "Título" },
+         {
+            key: "skills",
+            title: "Habilidades",
+            render: (skills) => {
+                if (!Array.isArray(skills) || skills.length === 0) return "—";
+
+                const visibleSkills = skills.slice(0, 3);
+                const hasMore = skills.length > 3;
+
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {visibleSkills.map((skill, index) => (
+                            <Badge key={index} variant="outline">
+                                {skill}
+                            </Badge>
+                        ))}
+                        {hasMore && (
+                            <Badge variant="secondary" className="opacity-70">
+                                ...
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
+        },
+        
+        {
+            key: "id",
+            title: "Acciones",
+            align: "center",
+            render: () => (
+                <div className="space-x-2">
+                    <Button className="bg-green-600 hover:bg-green-700">Aprobar</Button>
+                    <Button variant="destructive">Rechazar</Button>
+                </div>
+            ),
+        },
+    ];
+
+    const tabs: TabItem[] = [
+        {
+            label: "Vacantes Activas",
+            value: "vacantes",
+            content: (
+                <>
+                    <div className="flex justify-between items-center mb-4">
+                        <h5 className="text-lg font-medium">Empresas con convenio</h5>
+                        <Button className="bg-green-600 hover:bg-green-700">
+                            Crear nuevo convenio
+                        </Button>
+                    </div>
+
+                    <Table columns={columnasVacantes} data={vacancies} />
+                </>
+            ),
+        },
+        {
+            label: (
+                <div className="flex items-center gap-2">
+                    Solicitudes
+                    {pendingVacancies.length > 0 && (
+                        <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {pendingVacancies.length}
+                        </span>
+                    )}
+                </div>
+            ),
+            value: "solicitudes",
+            content: (
+                <>
+                    <h5 className="text-lg font-medium mb-4">
+                        Solicitudes de convenio
+                    </h5>
+                    <Table columns={columnasSolicitudes} data={pendingVacancies} />
+                </>
+            ),
+        },
+    ];
+
+    return (
+        <Card className="w-full">
+            <CardHeader>
+                <CardTitle>Gestión de Vacantes</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <TabsSection tabs={tabs} defaultValue="vacantes" />
+            </CardContent>
+        </Card>
+    );
+};
