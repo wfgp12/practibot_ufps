@@ -22,8 +22,10 @@ export const navItems: Record<Role, NavItem[]> = {
     { label: "Postulaciones recibidas", href: "/dashboard/postulaciones" },
   ],
   admin: [
-    { label: "Usuarios", href: "/dashboard/usuarios" },
-    { label: "Empresas", href: "/dashboard/empresas" },
-    { label: "Vacantes", href: "/dashboard/vacantes" },
+    { label: "Convenios", href: "#convenios" },
+    { label: "Vacantes", href: "#vacantes" },
+    { label: "Estudiantes", href: "#estudiantes" },
+    { label: "Documentación", href: "#documentos" },
+    { label: "Reportes", href: "#reportes" },
   ],
 };
