@@ -1,3 +1,4 @@
+import { signInWithPopup } from "firebase/auth";
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
@@ -7,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+
 import { useAppDispatch } from "@/store/hooks";
 import { loginThunk } from "@/store/thunks/authThunks";
+import { auth, googleProvider } from "@/firebase";
 
 type LoginFormData = {
   nit: string
@@ -33,13 +36,26 @@ export const LoginPage = () => {
 
   const handleInstitutionalLogin = async () => {
     try {
-      const result = await dispatch(loginThunk({ institutional: true })).unwrap()
-      console.log("✅ Login institucional:", result)
-      navigate("/dashboard")
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Validar correo institucional
+      if (!user.email?.endsWith("@ufps.edu.co")) {
+        alert("Solo correos institucionales permitidos");
+        await auth.signOut();
+        return;
+      }
+
+      // Obtener token de Firebase y enviar al backend
+      const idToken = await user.getIdToken();
+      const loginResult = await dispatch(loginThunk({ googleToken: idToken })).unwrap();
+
+      console.log("✅ Login institucional:", loginResult);
+      navigate("/dashboard");
     } catch (err) {
-      console.error("❌ Error en login:", err)
+      console.error("❌ Error en login institucional:", err);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -67,7 +83,29 @@ export const LoginPage = () => {
               className="w-full justify-center border-gray-300"
               onClick={handleInstitutionalLogin}
             >
-              🚀 Accede con correo institucional
+              <svg
+                className="w-5 h-5"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21.35 11.1H12v2.8h5.55c-.24 1.35-1.05 2.5-2.25 3.3v2.75h3.63c2.12-1.95 3.35-4.83 3.35-8.55 0-.6-.06-1.18-.16-1.75z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 22c2.7 0 4.95-.9 6.6-2.45l-3.63-2.75c-1 .65-2.25 1-3.97 1-3.05 0-5.63-2.05-6.55-4.8H1.7v3c1.65 3.25 4.85 5 8.3 5z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.45 13.05c-.2-.6-.32-1.25-.32-1.95s.12-1.35.32-1.95v-3H1.7C.62 8.15 0 10 0 12s.62 3.85 1.7 5.85l3.75-2.8z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 4.8c1.47 0 2.78.5 3.82 1.45l2.85-2.85C16.95 1.8 14.7.9 12 .9 7.55.9 4.35 2.65 1.7 5.85l3.75 2.8c.9-2.75 3.5-4.85 6.55-4.85z"
+                  fill="#EA4335"
+                />
+              </svg>
+              Accede con correo institucional
             </Button>
 
             <div className="flex items-center">

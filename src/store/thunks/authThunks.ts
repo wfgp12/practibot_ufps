@@ -1,45 +1,43 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import type { IUser } from "@/models/IUser"
 import { loginSuccess } from "../slices/authSlice"
+import { authApi } from "@/api/authApi"
 
 interface LoginPayload {
   nit?: string
   password?: string
-  institutional?: boolean
+  googleToken?: string;
 }
 
 // thunk de login
 export const loginThunk = createAsyncThunk(
   "auth/login",
-  async (payload: LoginPayload, { dispatch }) => {
-    // TODO: implementar la lógica de login
-    const response = await new Promise<{ user: IUser; token: string }>((resolve) => {
-      setTimeout(() => {
-        let user: IUser
-        const token = "fake-jwt-token"
-
-        if (payload.institutional) {
-          user = {
-            id: "1",
-            name: "Estudiante UFPS",
-            email: "user@ufps.edu.co",
-            role: "admin",
-          }
-        } else {
-          user = {
-            id: "2",
-            name: "Empresa demo",
-            email: "empresa@demo.com",
-            role: "company",
-          }
-        }
-
-        resolve({ user, token })
-      }, 1200) // 1.2 seg de delay
-    })
-
-    // 🔹 cuando termine la simulación, actualizamos redux
-    dispatch(loginSuccess(response))
-    return response
+  async (payload: LoginPayload, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await authApi.login(payload);
+      localStorage.setItem("token", response.token);
+      dispatch(loginSuccess(response));
+      return response;
+    } catch (error) {
+      // error ya es string seguro
+      if (error instanceof Error) return rejectWithValue(error.message);
+      return rejectWithValue("Error desconocido");
+    }
   }
-)
+);
+
+export const loadUserThunk = createAsyncThunk(
+  "auth/loadUser",
+  async (_, { dispatch, rejectWithValue }) => {
+    const token = localStorage.getItem("token");
+    if (!token) return rejectWithValue("No token found");
+
+    try {
+      const response = await authApi.loadUserFromToken();
+      dispatch(loginSuccess({ user: response.user, token }));
+      return response;
+    } catch (error) {
+      if (error instanceof Error) return rejectWithValue(error.message);
+      return rejectWithValue("Error desconocido");
+    }
+  }
+);

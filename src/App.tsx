@@ -1,10 +1,20 @@
+import { useEffect } from 'react';
 import { Route, Routes } from 'react-router'
-import { CompanyRegister, Dashboard, HomePage, LoginPage } from './pages'
-import { Layout, PrivateRoute, PublicRoute } from './components'
+
+import { useAppDispatch } from '@/store/hooks';
+import { loadUserThunk } from '@/store/thunks/authThunks';
+
+import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
+import { Layout, PrivateRoute, PublicRoute } from '@/components'
 
 import './App.css'
 
 function App() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(loadUserThunk());
+  }, [dispatch]);
 
   return (
     <Routes>
