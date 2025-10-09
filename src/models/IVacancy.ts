@@ -6,5 +6,6 @@ export interface Vacancy {
     location: string
     workday: string
     skills: string[]
+    description?: string
     status: "Open" | "Closed" | "Pending"
 }

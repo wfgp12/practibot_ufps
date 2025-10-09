@@ -1,9 +1,12 @@
-import { useNavigate } from "react-router";
 import { Search, FileText, ChartColumnIncreasing } from "lucide-react"
 
 import { SectionComponent } from "@/components/SectionComponent";
 import { VacancyCard } from "@/components/VacancyCard";
 import { useVacancies } from "@/hooks/useVacancies"
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { closeVacancyModal, openVacancyModal } from "@/store/slices/uiSlice";
+import { Modal } from "@/components/Modal";
+import { VacancyDetailCard } from "@/components/VacancyDetailCard";
 
 const steps = [
   {
@@ -25,7 +28,10 @@ const steps = [
 
 export const HomePage = () => {
   const { vacancies } = useVacancies();
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { vacancyModalOpen, selectedVacancyId } = useAppSelector((state) => state.ui);
+
+  const selectedVacancy = vacancies.find(v => v.id === selectedVacancyId);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,7 +77,7 @@ export const HomePage = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {
-            vacancies.map((vacancy, idx) => (
+            vacancies.slice(0, 6).map((vacancy, idx) => (
               <VacancyCard
                 key={idx}
                 title={vacancy.title}
@@ -80,16 +86,15 @@ export const HomePage = () => {
                 modality={vacancy.modality}
                 workday={vacancy.workday}
                 skills={vacancy.skills}
-                onClick={() => navigate(`/login`)}
+                onClick={() => dispatch(openVacancyModal(vacancy.id))}
               />
             ))
           }
         </div>
         <div className="w-full flex justify-center items-center gap-4 mt-6">
-          <a href="" className="bg-gray-200 hover:bg-gray-500 border-gray-600 font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+          <a href="/login" className="bg-gray-200 hover:bg-gray-300 border-gray-600 font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Ver todas las vacantes
           </a>
-
         </div>
       </SectionComponent>
 
@@ -109,6 +114,14 @@ export const HomePage = () => {
           </a>
         </div>
       </SectionComponent>
+
+      <Modal
+        isOpen={vacancyModalOpen}
+        onClose={() => dispatch(closeVacancyModal())}
+      >
+        {selectedVacancy && <VacancyDetailCard vacancy={selectedVacancy} />}
+      </Modal>
+
     </div>
   )
 }
