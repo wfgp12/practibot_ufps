@@ -1,8 +1,12 @@
 import { navItems } from "@/config/navItems";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
+import { GraduationCap, Users, BriefcaseBusiness, UserCog, User } from "lucide-react";
 
-import logoLandscape from "../../assets/logo_landscape.png";
+import logoLandscape from "@/assets/logo_landscape.png";
+import logoUfps from "@/assets/Logo-nuevo-vertical.png";
+import escudoColombia from "@/assets/Escudo_presidencial_republica_de_Colombia.png";
+import bannerBackground from "@/assets/banner.png";
 
 const Navbar = () => {
     const dispatch = useAppDispatch();
@@ -12,41 +16,110 @@ const Navbar = () => {
     const items = navItems[role];
 
     return (
-        <nav className="flex gap-4 p-4 bg-white justify-between items-center shadow-md sticky top-0 z-10">
-            <div className="flex">
-                <img src={logoLandscape} alt="logo" className="h-11" />
-            </div>
-
-            <div className="flex gap-4">
-                {items.map((item) => (
-                    <a
-                        key={item.href}
-                        href={item.href}
-                        className="text-gray-700 hover:text-red-600"
-                    >
-                        {item.label}
+        <>
+            <header className="w-full z-10 ">
+                <nav className="bg-[#aa1916] text-white text-sm">
+                    <div className="container mx-auto flex items-center px-4 py-4">
+                        <div className="flex gap-4">
+                            <a
+                                href="https://ww2.ufps.edu.co/universidad/perfiles/aspirantes/952"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <Users className="w-4 h-4" />
+                                Aspirantes
+                            </a>
+                            <a
+                                href="https://divisist2.ufps.edu.co/"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <User className="w-4 h-4" />
+                                Estudiantes
+                            </a>
+                            <a
+                                href="https://ww2.ufps.edu.co/universidad/egresados/2225"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <GraduationCap className="w-4 h-4" />
+                                Graduados
+                            </a>
+                            <a
+                                href="https://docentes.ufps.edu.co/"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <UserCog className="w-4 h-4" />
+                                Docentes
+                            </a>
+                            <a
+                                href="https://administrativos.ufps.edu.co/"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <BriefcaseBusiness className="w-4 h-4" />
+                                Administrativos
+                            </a>
+                            <a
+                                href="https://ww2.ufps.edu.co/universidad/seccion_participa_2021/2329"
+                                className="flex items-center gap-2 hover:text-gray-200 transition-colors"
+                            >
+                                <BriefcaseBusiness className="w-4 h-4" />
+                                Participa
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+                <div
+                    className="relative w-full bg-center bg-no-repeat bg-cover flex justify-between items-center px-20 py-6"
+                    style={{
+                        backgroundImage: `url(${bannerBackground})`,
+                    }}
+                >
+                    <a href=" https://ww2.ufps.edu.co/">
+                        <img src={logoUfps} alt="Logo UFPS" className="h-40 object-contain" />
                     </a>
-                ))}
-            </div>
-
-            <div>
-                {isAuthenticated ? (
-                    <button
-                        onClick={() => dispatch(logout())}
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    >
-                        Cerrar sesión
-                    </button>
-                ) : (
-                    <a
-                        href="/login"
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    >
-                        Iniciar sesión
+                    <a href="http://www.colombia.co/">
+                        <img
+                            src={escudoColombia}
+                            alt="Escudo República de Colombia"
+                            className="h-38 object-contain"
+                        />
                     </a>
-                )}
-            </div>
-        </nav>
+                </div>
+            </header>
+            <nav className="w-full sticky top-0 z-50 flex gap-4 py-2 px-4 bg-[#424242] text-white justify-between items-center shadow-md transition-all duration-300">
+                <div className="flex">
+                    <img src={logoLandscape} alt="logo" className="h-11" />
+                </div>
+
+                <div className="flex gap-4">
+                    {items.map((item) => (
+                        <a
+                            key={item.href}
+                            href={item.href}
+                            className=" hover:text-red-600"
+                        >
+                            {item.label}
+                        </a>
+                    ))}
+                </div>
+
+                <div>
+                    {isAuthenticated ? (
+                        <button
+                            onClick={() => dispatch(logout())}
+                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        >
+                            Cerrar sesión
+                        </button>
+                    ) : (
+                        <a
+                            href="/login"
+                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        >
+                            Iniciar sesión
+                        </a>
+                    )}
+                </div>
+            </nav>
+        </>
     );
 };
 
