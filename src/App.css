@@ -5,6 +5,7 @@ main {
 
 html {
   scroll-behavior: smooth;
+  font-family: "Open Sans", sans-serif;
 }
 
 :target {
