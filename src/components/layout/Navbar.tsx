@@ -1,7 +1,9 @@
+import { GraduationCap, Users, BriefcaseBusiness, UserCog, User } from "lucide-react";
+
 import { navItems } from "@/config/navItems";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
-import { GraduationCap, Users, BriefcaseBusiness, UserCog, User } from "lucide-react";
+import { toggleSidebar } from "@/store/slices/uiSlice";
 
 import logoLandscape from "@/assets/logo_landscape.png";
 import logoUfps from "@/assets/Logo-nuevo-vertical.png";
@@ -91,13 +93,23 @@ const Navbar = () => {
 
                 <div className="flex gap-4">
                     {items.map((item) => (
-                        <a
-                            key={item.href}
-                            href={item.href}
-                            className=" hover:text-red-600"
-                        >
-                            {item.label}
-                        </a>
+                        item.label === "FAQ" ? (
+                            <button
+                                key={item.href}
+                                onClick={() => dispatch(toggleSidebar())}
+                                className="hover:text-red-600"
+                            >
+                                {item.label}
+                            </button>
+                        ) : (
+                            <a
+                                key={item.href}
+                                href={item.href}
+                                className="hover:text-red-600"
+                            >
+                                {item.label}
+                            </a>
+                        )
                     ))}
                 </div>
 

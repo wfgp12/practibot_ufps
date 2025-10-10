@@ -7,6 +7,8 @@ import { loadUserThunk } from '@/store/thunks/authThunks';
 import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
 import { Layout, PrivateRoute, PublicRoute } from '@/components'
 import LoaderBottomRight from '@/components/Loader';
+import { ChatbotButton } from '@/components/ChatbotButton';
+import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 
 import './App.css'
 
@@ -52,6 +54,8 @@ function App() {
         />
       </Routes>
       <LoaderBottomRight />
+      <ChatbotButton />
+      <ChatbotSidebar />
     </>
   )
 }
