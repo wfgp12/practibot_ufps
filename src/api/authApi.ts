@@ -1,35 +1,34 @@
 import type { AxiosError } from "axios";
 import axiosClient from "./axiosClient";
-import type { IUser } from "@/models/IUser";
+import { mapUser, type IUser } from "@/models/IUser";
+import type { LoginBackendResponse, LoginPayload, LoginResponse } from "@/models/IAuth";
 
-interface LoginResponse {
-  user: IUser;
-  token: string;
-}
-
-interface LoginPayload {
-  nit?: string;
-  password?: string;
-  googleToken?: string;
-}
 
 export const authApi = {
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
-
     try {
       if (payload.googleToken) {
-        const { data } = await axiosClient.post("/auth/google-login", {
-          token: payload.googleToken,
+        const { data } = await axiosClient.post<LoginBackendResponse>("/auth/google", {}, {
+          headers: { Authorization: `Bearer ${payload.googleToken}` },
         });
-        return data;
+        return {
+          user: mapUser(data.usuario),
+          token: data.token,
+        };
       } else {
-        const { data } = await axiosClient.post("/auth/login", {
+        const { data } = await axiosClient.post<LoginBackendResponse>("/auth/login", {
           nit: payload.nit,
           password: payload.password,
         });
-        return data;
+        return {
+          user: mapUser(data.usuario),
+          token: data.token,
+        };
       }
+
     } catch (error) {
+      console.log('error', error)
+
       const axiosError = error as AxiosError<{ message: string }>;
       if (axiosError.response?.data?.message) {
         throw new Error(axiosError.response.data.message);
@@ -43,6 +42,7 @@ export const authApi = {
       const { data } = await axiosClient.get<{ user: IUser }>("/auth/me");
       return data;
     } catch (error) {
+      localStorage.removeItem("token");
       const axiosError = error as AxiosError<{ message: string }>;
       if (axiosError.response?.data?.message) {
         throw new Error(axiosError.response.data.message);

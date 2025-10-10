@@ -9,11 +9,11 @@ export const Dashboard = () => {
   if (!user) return <div>No autorizado</div>;
 
    switch (user.role) {
-    case "admin":
+    case "DIRECTOR":
       return <AdminDashboard />;
-    case "company":
+    case "EMPRESA":
       return <CompanyDashboard />;
-    case "student":
+    case "ESTUDIANTE":
       return <StudentDashboard />;
     default:
       return <div>Rol no reconocido</div>;

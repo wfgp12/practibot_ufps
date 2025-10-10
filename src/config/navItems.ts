@@ -12,16 +12,23 @@ export const navItems: Record<Role, NavItem[]> = {
     { label: "Para empresas", href: "#empresas" },
     { label: "FAQ", href: "#faq" },
   ],
-  student: [
+  ESTUDIANTE: [
     { label: "Mi perfil", href: "/dashboard/profile" },
     { label: "Vacantes", href: "/dashboard/vacantes" },
     { label: "Mis postulaciones", href: "/dashboard/postulaciones" },
   ],
-  company: [
+  EMPRESA: [
     { label: "Mis vacantes", href: "/dashboard/mis-vacantes" },
     { label: "Postulaciones recibidas", href: "/dashboard/postulaciones" },
   ],
-  admin: [
+  DIRECTOR: [
+    { label: "Convenios", href: "#convenios" },
+    { label: "Vacantes", href: "#vacantes" },
+    { label: "Estudiantes", href: "#estudiantes" },
+    { label: "Documentación", href: "#documentos" },
+    { label: "Reportes", href: "#reportes" },
+  ],
+  ADMIN: [
     { label: "Convenios", href: "#convenios" },
     { label: "Vacantes", href: "#vacantes" },
     { label: "Estudiantes", href: "#estudiantes" },
