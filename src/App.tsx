@@ -6,6 +6,7 @@ import { loadUserThunk } from '@/store/thunks/authThunks';
 
 import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
 import { Layout, PrivateRoute, PublicRoute } from '@/components'
+import LoaderBottomRight from '@/components/Loader';
 
 import './App.css'
 
@@ -17,38 +18,41 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Routes>
-      {/* Rutas públicas */}
-      <Route path="/" element={
-        <PublicRoute>
-          <Layout>
-            <HomePage />
-          </Layout>
-        </PublicRoute>
-      } />
-      <Route path="/login" element={
-        <PublicRoute>
-          <LoginPage />
-        </PublicRoute>
-      } />
-      <Route path="/registro-empresa" element={
-        <PublicRoute>
-          <CompanyRegister />
-        </PublicRoute>
-      } />
-
-      {/* Ruta protegida con rol */}
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
+    <>
+      <Routes>
+        {/* Rutas públicas */}
+        <Route path="/" element={
+          <PublicRoute>
             <Layout>
-              <Dashboard />
+              <HomePage />
             </Layout>
-          </PrivateRoute>
-        }
-      />
-    </Routes>
+          </PublicRoute>
+        } />
+        <Route path="/login" element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        } />
+        <Route path="/registro-empresa" element={
+          <PublicRoute>
+            <CompanyRegister />
+          </PublicRoute>
+        } />
+
+        {/* Ruta protegida con rol */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+      <LoaderBottomRight />
+    </>
   )
 }
 

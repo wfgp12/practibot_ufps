@@ -11,3 +11,18 @@ html {
 :target {
   scroll-margin-top: 80px; /* ajusta este valor a la altura de tu navbar */
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}

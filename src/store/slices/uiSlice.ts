@@ -5,12 +5,14 @@ interface UIState {
   vacancyModalOpen: boolean;
   selectedVacancyId: string | null;
   sidebarOpen: boolean;
+  loading: boolean;
 }
 
 const initialState: UIState = {
   vacancyModalOpen: false,
   selectedVacancyId: null,
   sidebarOpen: false,
+  loading: false,
 };
 
 const uiSlice = createSlice({
@@ -28,8 +30,14 @@ const uiSlice = createSlice({
     toggleSidebar: (state) => {
       state.sidebarOpen = !state.sidebarOpen;
     },
+    showLoader: (state) => {
+      state.loading = true;
+    },
+    hideLoader: (state) => {
+      state.loading = false;
+    },
   },
 });
 
-export const { openVacancyModal, closeVacancyModal, toggleSidebar } = uiSlice.actions;
+export const { openVacancyModal, closeVacancyModal, toggleSidebar, showLoader, hideLoader } = uiSlice.actions;
 export default uiSlice.reducer;
