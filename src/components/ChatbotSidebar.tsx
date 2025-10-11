@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { SendHorizonal, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar } from "@/store/slices/uiSlice";
 import Logo from "@/assets/logo_landscape.png";
@@ -35,21 +35,21 @@ export const ChatbotSidebar = () => {
         </div>
 
         {/* Contenido */}
-        <div className="flex-1 flex flex-col p-4 gap-3">
+        <div className="flex-1 flex flex-col gap-3">
           {/* Mensajes */}
-          <div className="flex-1 overflow-y-auto border border-gray-200 rounded p-3 bg-gray-50">
+          <div className="flex-1 overflow-y-auto border border-gray-200 p-4 bg-gray-50">
             <p className="text-gray-700 text-sm">Mensajes del chat...</p>
           </div>
 
           {/* Input */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 p-4 mb-6">
             <input
               type="text"
               placeholder="Escribe un mensaje..."
-              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              className="flex-1 border border-gray-300 rounded-full px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
             />
-            <button className="bg-[#aa1916] text-white px-4 py-2 rounded hover:bg-[#b5251e] transition">
-              Enviar
+            <button className="bg-[#aa1916] text-white rounded-full hover:bg-[#b5251e] transition w-[40px] h-[40px] flex items-center justify-center ">
+              <SendHorizonal size={20} />
             </button>
           </div>
         </div>
