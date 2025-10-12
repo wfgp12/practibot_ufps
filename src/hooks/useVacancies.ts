@@ -1,140 +1,105 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { Vacancy } from "@/models/IVacancy";
+import { vacanciesApi } from "@/api/vacanciesApi";
 
-export const useVacancies = () => {
-    const [vacancies, setVacancies] = useState<Vacancy[]>([
-        {
-            id: "1",
-            title: "Desarrollador Frontend",
-            modality: "Presencial",
-            company: "UFPS Empresas",
-            location: "Cúcuta",
-            workday: "Práctica",
-            skills: ["React", "Tailwind", "TypeScript"],
-            status: "Open",
-        },
-        {
-            id: "2",
-            title: "Desarrollador Backend",
-            modality: "Remoto",
-            company: "Tech Solutions",
-            location: "Bogotá",
-            workday: "Tiempo completo",
-            skills: ["Node.js", "PostgreSQL", "Docker"],
-            status: "Open",
-        },
-        {
-            id: "3",
-            title: "Desarrollador Fullstack",
-            modality: "Híbrido",
-            company: "GlobalSoft",
-            location: "Medellín",
-            workday: "Medio tiempo",
-            skills: ["React", "Node.js", "MongoDB"],
-            status: "Open",
-        },
-        {
-            id: "4",
-            title: "UI/UX Designer",
-            modality: "Presencial",
-            company: "Creative Studio",
-            location: "Cali",
-            workday: "Tiempo completo",
-            skills: ["Figma", "Adobe XD"],
-            status: "Open",
-        },
-        {
-            id: "5",
-            title: "Mobile Developer",
-            modality: "Remoto",
-            company: "AppMasters",
-            location: "Remoto",
-            workday: "Freelance",
-            skills: ["React Native", "Expo"],
-            status: "Open",
-        },
-        {
-            id: "6",
-            title: "DevOps Engineer",
-            modality: "Híbrido",
-            company: "CloudOps",
-            location: "Barranquilla",
-            workday: "Tiempo completo",
-            skills: ["AWS", "Kubernetes", "Terraform"],
-            status: "Open",
-        },
-    ]);
+interface UseVacanciesReturn {
+    vacancies: Vacancy[];
+    pendingVacancies: Vacancy[];
+    loading: boolean;
+    error: string | null;
+    fetchVacancies: () => Promise<void>;
+    addVacancy: (vacancy: Omit<Vacancy, "id" | "status">) => Promise<void>;
+    approveVacancy: (id: string) => Promise<void>;
+    rejectVacancy: (id: string) => Promise<void>;
+    toggleVacancyStatus: (id: string) => Promise<void>;
+    removeVacancy: (id: string) => void;
+}
 
-    const [pendingVacancies, setPendingVacancies] = useState<Vacancy[]>([
-        {
-            id: "3",
-            title: "Fullstack Developer",
-            modality: "Híbrido",
-            company: "GlobalSoft",
-            location: "Medellín",
-            workday: "Medio tiempo",
-            skills: ["React", "Node.js", "MongoDB"],
-            status: "Pending",
-        },
-        {
-            id: "4",
-            title: "UI/UX Designer",
-            modality: "Presencial",
-            company: "Creative Studio",
-            location: "Cali",
-            workday: "Tiempo completo",
-            skills: ["Figma", "Adobe XD"],
-            status: "Pending",
-        },
-    ]);
-    /** 🟢 Aprobar vacante pendiente → mover a aprobadas */
-    const approveVacancy = (id: string) => {
-        setPendingVacancies((prev) => {
-            const vacancy = prev.find((v) => v.id === id);
-            if (!vacancy) return prev;
-            setVacancies((vPrev) => [...vPrev, { ...vacancy, status: "Open" }]);
-            return prev.filter((v) => v.id !== id);
-        });
+export const useVacancies = (): UseVacanciesReturn => {
+    const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+    const [pendingVacancies, setPendingVacancies] = useState<Vacancy[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    /** 🔄 Obtener vacantes desde el backend */
+    const fetchVacancies = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const [approved, pending] = await Promise.all([
+                vacanciesApi.getApproved(),
+                vacanciesApi.getPending(),
+            ]);
+
+            setVacancies(approved);
+            setPendingVacancies(pending);
+        } catch (err) {
+            setError((err as Error).message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    /** 🆕 Crear una nueva vacante (queda pendiente) */
+    const addVacancy = async (vacancy: Omit<Vacancy, "id" | "status">) => {
+        try {
+            await vacanciesApi.create(vacancy);
+            await fetchVacancies();
+        } catch (err) {
+            setError((err as Error).message);
+        }
     };
 
-    /** 🔴 Rechazar vacante pendiente → eliminar */
-    const rejectVacancy = (id: string) => {
-        setPendingVacancies((prev) => prev.filter((v) => v.id !== id));
+    /** 🟢 Aprobar una vacante pendiente */
+    const approveVacancy = async (id: string) => {
+        try {
+            await vacanciesApi.approve(id);
+            await fetchVacancies();
+        } catch (err) {
+            setError((err as Error).message);
+        }
     };
 
-    /** ✏️ Alternar estado de publicación (Open/Closed) */
-    const toggleVacancyStatus = (id: string) => {
-        setVacancies((prev) =>
-            prev.map((v) =>
-                v.id === id
-                    ? { ...v, status: v.status === "Open" ? "Closed" : "Open" }
-                    : v
-            )
-        );
+    /** 🔴 Rechazar una vacante pendiente */
+    const rejectVacancy = async (id: string) => {
+        try {
+            await vacanciesApi.reject(id);
+            await fetchVacancies();
+        } catch (err) {
+            setError((err as Error).message);
+        }
     };
 
-    /** ➕ Agregar una nueva vacante → se guarda como pendiente */
-    const addVacancy = (newVacancy: Omit<Vacancy, "id" | "status">) => {
-        const nextId = (vacancies.length + pendingVacancies.length + 1).toString();
-        setPendingVacancies((prev) => [
-            ...prev,
-            { id: nextId, ...newVacancy, status: "Pending" },
-        ]);
+    /** ✏️ Alternar estado (Open / Closed) */
+    const toggleVacancyStatus = async (id: string) => {
+        try {
+            await vacanciesApi.toggleStatus(id);
+            await fetchVacancies();
+        } catch (err) {
+            setError((err as Error).message);
+        }
     };
 
-    /** 🗑️ Eliminar una vacante aprobada */
+    /** 🗑️ Eliminar vacante localmente (si aplica) */
     const removeVacancy = (id: string) => {
         setVacancies((prev) => prev.filter((v) => v.id !== id));
     };
 
+    // Llamar automáticamente al cargar el componente
+    useEffect(() => {
+        fetchVacancies();
+    }, [fetchVacancies]);
+
     return {
-        vacancies,           // Vacantes aprobadas
-        pendingVacancies,    // Vacantes en espera
+        vacancies,
+        pendingVacancies,
+        loading,
+        error,
+        fetchVacancies,
         addVacancy,
         approveVacancy,
         rejectVacancy,
-        removeVacancy,
         toggleVacancyStatus,
+        removeVacancy,
     };
-
 };

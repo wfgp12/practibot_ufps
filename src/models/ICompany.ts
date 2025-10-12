@@ -1,3 +1,5 @@
+import type { IApiUser } from "./IUser";
+
 export interface Solicitud {
   id: number;
   empresa: string;
@@ -9,3 +11,8 @@ export interface Convenio {
   empresa: string;
   nit: string;
 }
+
+export interface IApiCompany {
+    id: number;
+    usuario: Partial<IApiUser>;
+  };

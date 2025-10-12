@@ -8,7 +8,7 @@ export const authApi = {
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
     try {
       if (payload.googleToken) {
-        const { data } = await axiosClient.post<LoginBackendResponse>("/auth/google", {}, {
+        const { data } = await axiosClient.get<LoginBackendResponse>("/auth/verify", {
           headers: { Authorization: `Bearer ${payload.googleToken}` },
         });
         return {
