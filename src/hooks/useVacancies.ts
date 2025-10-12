@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import type { Vacancy } from "@/models/IVacancy";
+import type { IFormCreateVacancy, Vacancy } from "@/models/IVacancy";
 import { vacanciesApi } from "@/api/vacanciesApi";
 
 interface UseVacanciesReturn {
@@ -8,7 +8,7 @@ interface UseVacanciesReturn {
     loading: boolean;
     error: string | null;
     fetchVacancies: () => Promise<void>;
-    addVacancy: (vacancy: Omit<Vacancy, "id" | "status">) => Promise<void>;
+    addVacancy: (vacancy: IFormCreateVacancy) => Promise<void>;
     approveVacancy: (id: string) => Promise<void>;
     rejectVacancy: (id: string) => Promise<void>;
     toggleVacancyStatus: (id: string) => Promise<void>;
@@ -41,14 +41,11 @@ export const useVacancies = (): UseVacanciesReturn => {
     }, []);
 
     /** 🆕 Crear una nueva vacante (queda pendiente) */
-    const addVacancy = async (vacancy: Omit<Vacancy, "id" | "status">) => {
-        try {
-            await vacanciesApi.create(vacancy);
-            await fetchVacancies();
-        } catch (err) {
-            setError((err as Error).message);
-        }
+    const addVacancy = async (formData: IFormCreateVacancy) => {
+        const newVacancy = await vacanciesApi.create(formData);
+        setVacancies((prev) => [...prev, newVacancy]);
     };
+
 
     /** 🟢 Aprobar una vacante pendiente */
     const approveVacancy = async (id: string) => {

@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios";
 import axiosClient from "./axiosClient";
-import { mapUser, type IUser } from "@/models/IUser";
+import { mapUser, type IApiUser, type IUser } from "@/models/IUser";
 import type { LoginBackendResponse, LoginPayload, LoginResponse } from "@/models/IAuth";
 
 
@@ -39,8 +39,8 @@ export const authApi = {
   },
   loadUserFromToken: async (): Promise<{ user: IUser }> => {
     try {
-      const { data } = await axiosClient.get<{ user: IUser }>("/auth/me");
-      return data;
+      const { data } = await axiosClient.get<{ usuario: IApiUser }>("/auth/refresh");
+      return { user: mapUser(data.usuario) };
     } catch (error) {
       localStorage.removeItem("token");
       const axiosError = error as AxiosError<{ message: string }>;

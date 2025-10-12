@@ -1,15 +1,15 @@
 import type { IApiCompany } from "./ICompany"
 
 export interface Vacancy {
-    id: string
-    title: string
-    modality: string
-    company: string
-    location: string
-    workday: string
-    skills: string[]
-    description?: string
-    status: "Open" | "Closed" | "Pending"
+  id: string
+  title: string
+  modality: string
+  company: string
+  location: string
+  workday: string
+  skills: string[]
+  description?: string
+  status: "Open" | "Closed" | "Pending"
 }
 
 export interface IApiVacancy {
@@ -24,6 +24,15 @@ export interface IApiVacancy {
   directorValidaId: number;
   creadaEn: string;
 }
+
+export interface IFormCreateVacancy {
+  titulo: string;
+  modalidad: string;
+  tipoJornada: string;
+  descripcion: string;
+  requisitos: string;
+}
+
 
 
 // ✅ Mapper que transforma los datos del backend al formato del frontend
@@ -44,3 +53,12 @@ export const mapApiVacancyToVacancy = (apiVacancy: Partial<IApiVacancy>): Vacanc
 // ✅ Mapper para listas
 export const mapApiVacancies = (data: Partial<IApiVacancy>[] = []): Vacancy[] =>
   data.map(mapApiVacancyToVacancy);
+
+export const mapFormToApiVacancy = (
+  form: IFormCreateVacancy
+) => ({
+  titulo: form.titulo,
+  descripcion: form.descripcion,
+  area: form.modalidad, // 🔁 "modalidad" del form → "area" del back
+  requisitos: form.requisitos,
+});

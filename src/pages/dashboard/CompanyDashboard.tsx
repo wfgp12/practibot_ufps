@@ -1,8 +1,10 @@
+import { Building2, Factory, Mail, MapPin, Phone } from "lucide-react";
+
 import { SectionComponent } from "@/components/SectionComponent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useCompany } from "@/hooks/useCompany";
-import { Building2, Factory, Mail, MapPin, Phone } from "lucide-react";
+import { CreateVacancyCard } from "./components/CreateVacancyCard ";
 
 export const CompanyDashboard = () => {
   const { company, loading, error } = useCompany();
@@ -79,8 +81,7 @@ export const CompanyDashboard = () => {
       </SectionComponent>
 
       <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
-        <p>Bienvenido, empresa.</p>
-        {/* Aquí luego agregas la tarjeta para crear vacantes */}
+        <CreateVacancyCard />
       </SectionComponent>
     </div>
   );

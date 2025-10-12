@@ -26,8 +26,7 @@ export const LoginPage = () => {
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     try {
-      const result = await dispatch(loginThunk({ nit: data.nit, password: data.password })).unwrap()
-      console.log("✅ Login exitoso:", result)
+      await dispatch(loginThunk({ nit: data.nit, password: data.password })).unwrap()
       navigate("/dashboard")
     } catch (err) {
       console.error("❌ Error en login:", err)

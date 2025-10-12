@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router'
+import { Toaster } from 'sonner';
 
 import { useAppDispatch } from '@/store/hooks';
 import { loadUserThunk } from '@/store/thunks/authThunks';
@@ -56,6 +57,13 @@ function App() {
       <LoaderBottomRight />
       <ChatbotButton />
       <ChatbotSidebar />
+
+      <Toaster
+        position="bottom-right"
+        richColors
+        closeButton
+        expand
+      />
     </>
   )
 }

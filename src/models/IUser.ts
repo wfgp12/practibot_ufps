@@ -8,7 +8,7 @@ export interface IUser {
 }
 
 // Interfaz opcional de cómo viene del backend
-export interface IUserFromBackend {
+export interface IApiUser {
   id: string;
   nombre?: string;   
   name?: string;     
@@ -17,7 +17,7 @@ export interface IUserFromBackend {
 }
 
 // Mapper para transformar el usuario de backend a frontend
-export const mapUser = (backendUser: IUserFromBackend): IUser => {
+export const mapUser = (backendUser: IApiUser): IUser => {
   return {
     id: backendUser.id,
     name: backendUser.nombre || backendUser.name || "Sin nombre",
