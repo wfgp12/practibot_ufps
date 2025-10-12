@@ -16,7 +16,7 @@ export const authApi = {
           token: data.token,
         };
       } else {
-        const { data } = await axiosClient.post<LoginBackendResponse>("/auth/login", {
+        const { data } = await axiosClient.post<LoginBackendResponse>("/empresas/login", {
           nit: payload.nit,
           password: payload.password,
         });

@@ -1,4 +1,4 @@
-import type { IUser, IApiUser } from "./IUser";
+import type { IUser, IUserFromBackend } from "./IUser";
 
 export interface LoginPayload {
     nit?: string;
@@ -14,6 +14,6 @@ export interface LoginResponse {
 
 export interface LoginBackendResponse {
     message?: string;
-    usuario: IApiUser;
+    usuario: IUserFromBackend;
     token: string;
 }
