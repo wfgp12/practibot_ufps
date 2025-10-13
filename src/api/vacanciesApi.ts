@@ -44,7 +44,7 @@ export const vacanciesApi = {
 
     /** 🔴 Rechazar una vacante */
     async reject(id: string): Promise<void> {
-        await axiosClient.delete(`/vacantes/${id}`);
+        await axiosClient.patch(`/vacantes/${id}/rechazar`);
     },
 
     /** ⚙️ Cambiar estado (Open/Closed) */

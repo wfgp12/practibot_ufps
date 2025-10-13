@@ -4,14 +4,15 @@ import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useConvenios } from "@/hooks/useAgreement";
-import type { Convenio, Solicitud } from "@/models/ICompany";
+import type { ICompany } from "@/models/ICompany";
 
 export const GestionConvenios = () => {
 
     const { convenios, solicitudes } = useConvenios();
-    const columnasConvenios: Column<Convenio>[] = [
-        { key: "empresa", title: "Empresa" },
+    const columnasConvenios: Column<ICompany>[] = [
+        { key: "nombre", title: "Empresa" },
         { key: "nit", title: "NIT" },
+        { key: "correo", title: "Correo" },
         {
             key: "id",
             title: "Acciones",
@@ -30,23 +31,18 @@ export const GestionConvenios = () => {
         },
     ];
 
-    const columnasSolicitudes: Column<Solicitud>[] = [
-        { key: "empresa", title: "Empresa" },
-        {
-            key: "estado",
-            title: "Estado",
-            render: (value) => (
-                <span className="text-yellow-600 font-medium">{value}</span>
-            ),
-        },
+    const columnasSolicitudes: Column<ICompany>[] = [
+        { key: "nombre", title: "Empresa" },
+        { key: "nit", title: "NIT" },
+        { key: "correo", title: "Correo" },
+        { key: "sector", title: "Sector" },
         {
             key: "id",
             title: "Acciones",
             align: "center",
             render: () => (
                 <div className="space-x-2">
-                    <Button className="bg-green-600 hover:bg-green-700">Admitir</Button>
-                    <Button variant="destructive">Rechazar</Button>
+                    <Button className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline">Ver a detalles</Button>
                 </div>
             ),
         },

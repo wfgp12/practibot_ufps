@@ -1,16 +1,43 @@
-import type { Convenio, Solicitud } from "@/models/ICompany";
+import type { ICompany } from "@/models/ICompany";
 import { useState, useCallback } from "react";
 
 
 export function useConvenios() {
   // --- Estados principales ---
-  const [convenios, setConvenios] = useState<Convenio[]>([
-    { id: 1, empresa: "Tecnologías XYZ", nit: "900123456-7" },
+  const [convenios, setConvenios] = useState<ICompany[]>([
+    {
+      id: "1",
+      nombre: "Tecnologías XYZ",
+      nit: "900123456-7",
+      correo: "tecnolog@xyz.com",
+      direccion: "Calle 123",
+      sector: "Tecnología",
+      descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
+      telefono: "123456789"
+    },
   ]);
 
-  const [solicitudes, setSolicitudes] = useState<Solicitud[]>([
-    { id: 1, empresa: "Servicios IT Cúcuta", estado: "Pendiente" },
-    { id: 2, empresa: "DataSoft S.A.", estado: "Pendiente" },
+  const [solicitudes, setSolicitudes] = useState<ICompany[]>([
+    {
+      id: "1",
+      nombre: "Servicios IT Cúcuta",
+      nit: "900123456-7",
+      direccion: "Calle 123",
+      sector: "Tecnología",
+      descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
+      telefono: "123456789",
+      correo: "servicios@xyz.com"
+    },
+    {
+      id: "2",
+      nombre: "DataSoft S.A.",
+      nit: "900123456-7",
+      direccion: "Calle 123",
+      sector: "Tecnología",
+      descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
+      telefono: "123456789",
+      correo: "datasoft@xyz.com"
+    },
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -38,15 +65,15 @@ export function useConvenios() {
     }
   }, []);
 
-  const crearConvenio = useCallback((nuevo: Convenio) => {
-    setConvenios((prev) => [...prev, { ...nuevo, id: Date.now() }]);
+  const crearConvenio = useCallback((nuevo: ICompany) => {
+    setConvenios((prev) => [...prev, { ...nuevo, id: Date.now().toString() }]);
   }, []);
 
-  const eliminarConvenio = useCallback((id: number) => {
+  const eliminarConvenio = useCallback((id: string) => {
     setConvenios((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
-  const admitirSolicitud = useCallback((id: number) => {
+  const admitirSolicitud = useCallback((id: string) => {
     setSolicitudes((prev) =>
       prev.map((s) =>
         s.id === id ? { ...s, estado: "Aprobada" } : s
@@ -54,7 +81,7 @@ export function useConvenios() {
     );
   }, []);
 
-  const rechazarSolicitud = useCallback((id: number) => {
+  const rechazarSolicitud = useCallback((id: string) => {
     setSolicitudes((prev) =>
       prev.map((s) =>
         s.id === id ? { ...s, estado: "Rechazada" } : s

@@ -52,11 +52,9 @@ export const CreateVacancyCard = () => {
     const onSubmit = async (data: VacancyFormData) => {
         try {
             setSubmitting(true);
-
             await addVacancy(data);
-
-            toast.success("Vacante enviada a revisión");
             reset();
+            toast.success("Vacante enviada a revisión");
         } catch (error) {
             console.error(error);
             toast.error("Error al enviar la vacante");

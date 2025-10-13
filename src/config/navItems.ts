@@ -13,13 +13,13 @@ export const navItems: Record<Role, NavItem[]> = {
     { label: "FAQ", href: "#faq" },
   ],
   ESTUDIANTE: [
-    { label: "Mi perfil", href: "/dashboard/profile" },
-    { label: "Vacantes", href: "/dashboard/vacantes" },
-    { label: "Mis postulaciones", href: "/dashboard/postulaciones" },
+    { label: "Mi perfil", href: "#perfil" },
+    { label: "Vacantes", href: "#vacantes" },
+    { label: "Mis postulaciones", href: "#postulaciones" },
   ],
   EMPRESA: [
-    { label: "Mis vacantes", href: "/dashboard/mis-vacantes" },
-    { label: "Postulaciones recibidas", href: "/dashboard/postulaciones" },
+    { label: "Mis vacantes", href: "#vacantes" },
+    { label: "Postulaciones recibidas", href: "#postulaciones" },
   ],
   DIRECTOR: [
     { label: "Convenios", href: "#convenios" },

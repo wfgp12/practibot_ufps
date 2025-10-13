@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useVacancies } from "@/hooks/useVacancies";
 import type { Vacancy } from "@/models/IVacancy";
+import { useNavigate } from "react-router";
 
 export const GestionVacantes = () => {
     const { vacancies, pendingVacancies } = useVacancies();
+    const navigate = useNavigate();
 
     const columnasVacantes: Column<Vacancy>[] = [
         { key: "title", title: "Título" },
@@ -86,10 +88,9 @@ export const GestionVacantes = () => {
             key: "id",
             title: "Acciones",
             align: "center",
-            render: () => (
+            render: (_value ,record) => (
                 <div className="space-x-2">
-                    <Button className="bg-green-600 hover:bg-green-700">Aprobar</Button>
-                    <Button variant="destructive">Rechazar</Button>
+                    <Button className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline" onClick={() => navigate(`/dashboard/vacancy/${record.id}`)}>Ver detalle</Button>
                 </div>
             ),
         },

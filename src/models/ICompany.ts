@@ -1,11 +1,5 @@
 import type { IApiUser } from "./IUser";
 
-export interface Solicitud {
-  id: number;
-  empresa: string;
-  estado: "Pendiente" | "Aprobada" | "Rechazada";
-}
-
 /** 💠 Respuesta directa del backend */
 export interface IApiCompany {
   id: string;

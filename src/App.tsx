@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { Route, Routes } from 'react-router'
+import { Outlet, Route, Routes } from 'react-router'
 import { Toaster } from 'sonner';
 
 import { useAppDispatch } from '@/store/hooks';
 import { loadUserThunk } from '@/store/thunks/authThunks';
 
 import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
+import { VacancyDetail } from '@/pages/dashboard/components/vancancy/VacancyDetail';
 import { Layout, PrivateRoute, PublicRoute } from '@/components'
 import LoaderBottomRight from '@/components/Loader';
 import { ChatbotButton } from '@/components/ChatbotButton';
@@ -48,12 +49,17 @@ function App() {
           element={
             <PrivateRoute>
               <Layout>
-                <Dashboard />
+                <Outlet />
               </Layout>
             </PrivateRoute>
           }
-        />
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="vacancy/:id" element={<VacancyDetail />} />
+          {/* <Route path="agreement/:id" element={<AgreementDetail />} /> */}
+        </Route>
       </Routes>
+
       <LoaderBottomRight />
       <ChatbotButton />
       <ChatbotSidebar />
