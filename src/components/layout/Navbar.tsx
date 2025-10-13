@@ -9,13 +9,34 @@ import logoLandscape from "@/assets/logo_landscape.png";
 import logoUfps from "@/assets/Logo-nuevo-vertical.png";
 import escudoColombia from "@/assets/Escudo_presidencial_republica_de_Colombia.png";
 import bannerBackground from "@/assets/banner.png";
+import { useLocation, useNavigate } from "react-router";
 
 const Navbar = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const dispatch = useAppDispatch();
     const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
     const role = user?.role ?? "guest"; // si no está logueado → guest
     const items = navItems[role];
+
+    const handleNavClick = (href: string) => {
+        if (href.startsWith("#")) {
+            const basePath = location.pathname.startsWith("/dashboard") ? "/dashboard" : "/";
+
+            if (location.pathname === basePath) {
+                // Scroll directo si ya estás en la página
+                const el = document.querySelector(href);
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+            } else {
+                // Navegar a la página base y agregar hash
+                navigate(`${basePath}${href}`);
+            }
+        } else {
+            navigate(href);
+        }
+    };
 
     return (
         <>
@@ -102,13 +123,13 @@ const Navbar = () => {
                                 {item.label}
                             </button>
                         ) : (
-                            <a
+                            <button
                                 key={item.href}
-                                href={item.href}
+                                onClick={() => handleNavClick(item.href)}
                                 className="hover:text-red-600"
                             >
                                 {item.label}
-                            </a>
+                            </button>
                         )
                     ))}
                 </div>

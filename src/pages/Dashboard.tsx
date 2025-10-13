@@ -2,9 +2,20 @@ import { useAppSelector } from "@/store/hooks"
 import { AdminDashboard } from "./dashboard/AdminDashboard";
 import { CompanyDashboard } from "./dashboard/CompanyDashboard";
 import { StudentDashboard } from "./dashboard/StudentDashboard";
+import { useEffect } from "react";
 
 export const Dashboard = () => {
-  const { user } = useAppSelector(state => state.auth)
+  const { user } = useAppSelector(state => state.auth);
+
+  useEffect(() => {
+    if (location.hash) {
+      // Espera un tick para que el DOM se renderice
+      setTimeout(() => {
+        const el = document.querySelector(location.hash);
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 0);
+    }
+  }, [location]);
 
   if (!user) return <div>No autorizado</div>;
 
