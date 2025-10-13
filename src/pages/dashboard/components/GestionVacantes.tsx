@@ -44,13 +44,14 @@ export const GestionVacantes = () => {
             key: "id",
             title: "Acciones",
             align: "center",
-            render: () => (
-                <Button
-                    variant="outline"
-                    className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
-                >
-                    Ver detalle
-                </Button>
+            render: (_value ,record) => (
+                <Button 
+                        className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" 
+                        variant="outline" 
+                        onClick={() => navigate(`/dashboard/vacancy/${record.id}`)}
+                    >
+                        Ver detalle
+                    </Button>
             ),
         },
     ];
@@ -90,7 +91,13 @@ export const GestionVacantes = () => {
             align: "center",
             render: (_value ,record) => (
                 <div className="space-x-2">
-                    <Button className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline" onClick={() => navigate(`/dashboard/vacancy/${record.id}`)}>Ver detalle</Button>
+                    <Button 
+                        className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" 
+                        variant="outline" 
+                        onClick={() => navigate(`/dashboard/vacancy/${record.id}`)}
+                    >
+                        Ver detalle
+                    </Button>
                 </div>
             ),
         },

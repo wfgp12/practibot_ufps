@@ -37,6 +37,11 @@ export const vacanciesApi = {
         return mapApiVacancies([data.data])[0];
     },
 
+    async getById(id: string): Promise<Vacancy> {
+        const { data } = await axiosClient.get<ApiResponse<IApiVacancy>>(`/vacantes/${id}`);
+        return mapApiVacancies([data.data])[0];
+    },
+
     /** 🟣 Aprobar vacante pendiente */
     async approve(id: string): Promise<void> {
         await axiosClient.patch(`/vacantes/${id}/aprobar`);

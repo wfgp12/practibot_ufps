@@ -8,6 +8,7 @@ interface UseVacanciesReturn {
     loading: boolean;
     error: string | null;
     fetchVacancies: () => Promise<void>;
+    fetchVacancyById: (id: string) => Promise<Vacancy | null>;
     addVacancy: (vacancy: IFormCreateVacancy) => Promise<void>;
     approveVacancy: (id: string) => Promise<void>;
     rejectVacancy: (id: string) => Promise<void>;
@@ -35,6 +36,20 @@ export const useVacancies = (): UseVacanciesReturn => {
             setPendingVacancies(pending);
         } catch (err) {
             setError((err as Error).message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchVacancyById = useCallback(async (id: string): Promise<Vacancy | null> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const vacante = await vacanciesApi.getById(id);
+            return vacante;
+        } catch (err) {
+            setError((err as Error).message);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -93,6 +108,7 @@ export const useVacancies = (): UseVacanciesReturn => {
         loading,
         error,
         fetchVacancies,
+        fetchVacancyById,
         addVacancy,
         approveVacancy,
         rejectVacancy,
