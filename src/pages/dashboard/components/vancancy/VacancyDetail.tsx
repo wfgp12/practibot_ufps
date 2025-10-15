@@ -5,19 +5,24 @@ import { ArrowLeft, Briefcase, Building2, Clock, MapPin, Wrench } from "lucide-r
 import { Badge, Button, Card, SectionComponent } from "@/components";
 import type { Vacancy } from "@/models/IVacancy";
 import { useVacancies } from "@/hooks/useVacancies";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAppSelector } from "@/store/hooks";
 
 export const VacancyDetail = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { 
-        approveVacancy, 
-        rejectVacancy, 
-        toggleVacancyStatus, 
-        fetchVacancyById, 
-        loading 
+    const {
+        approveVacancy,
+        rejectVacancy,
+        toggleVacancyStatus,
+        fetchVacancyById,
+        loading
     } = useVacancies();
 
     const [vacancy, setVacancy] = useState<Vacancy | null>(null);
+    const { user } = useAppSelector(state => state.auth);
+    const userRole = user?.role || "guest";
+    const isOwner = vacancy?.company === user?.name;
 
     // 🔄 Obtener vacante por ID
     const loadVacancy = useCallback(async () => {
@@ -30,7 +35,49 @@ export const VacancyDetail = () => {
         loadVacancy();
     }, [loadVacancy]);
 
-    if (loading || !vacancy) return <div>Cargando...</div>;
+    if (loading || !vacancy) {
+        return (
+            <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0">
+                <div className="w-full mb-4">
+                    <Skeleton className="h-10 w-32 rounded" />
+                </div>
+
+                <Card className="w-full p-6 space-y-4">
+                    <div className="flex items-start justify-between">
+                        <div className="space-y-2">
+                            <Skeleton className="h-8 w-64 rounded" />
+                            <Skeleton className="h-4 w-40 rounded" />
+                        </div>
+                        <div className="flex gap-2">
+                            <Skeleton className="h-10 w-24 rounded" />
+                            <Skeleton className="h-10 w-24 rounded" />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        <Skeleton className="h-6 w-20 rounded" />
+                        <Skeleton className="h-6 w-20 rounded" />
+                        <Skeleton className="h-6 w-20 rounded" />
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                        <Skeleton className="h-6 w-40 rounded" />
+                        <div className="flex flex-wrap gap-2">
+                            <Skeleton className="h-6 w-16 rounded" />
+                            <Skeleton className="h-6 w-16 rounded" />
+                            <Skeleton className="h-6 w-16 rounded" />
+                        </div>
+                    </div>
+
+                    <div className="mt-6 border-t pt-4 space-y-2">
+                        <Skeleton className="h-6 w-48 rounded" />
+                        <Skeleton className="h-4 w-full rounded" />
+                        <Skeleton className="h-4 w-full rounded" />
+                    </div>
+                </Card>
+            </SectionComponent>
+        );
+    }
 
     const handleApprove = async () => {
         await approveVacancy(vacancy.id);
@@ -48,10 +95,10 @@ export const VacancyDetail = () => {
     };
 
     return (
-        <SectionComponent classNameContent="max-w-4xl" id="vacantes">
+        <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0" id="vacantes">
             <div className="w-full mb-4">
-                <button 
-                    className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded duration-200 hover:gap-3 transition-all hover:bg-[#e4e2e2] hover:scale-105 hover:-translate-x-1" 
+                <button
+                    className="flex items-center gap-2 text-gray-400 px-4 py-2 rounded duration-200 hover:gap-3 transition-all hover:bg-[#e4e2e2] hover:scale-105 hover:-translate-x-1"
                     onClick={() => navigate(-1)}
                 >
                     <ArrowLeft size={24} /> Volver
@@ -69,7 +116,7 @@ export const VacancyDetail = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {vacancy.status === "Pending" ? (
+                        {vacancy.status === "Pending" && (userRole === "EMPRESA" && isOwner || userRole === "DIRECTOR") && (
                             <>
                                 <Button className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>
                                     Aprobar
@@ -78,10 +125,27 @@ export const VacancyDetail = () => {
                                     Rechazar
                                 </Button>
                             </>
-                        ) : (
-                            <Button onClick={handleToggleStatus}>
-                                {vacancy.status === "Open" ? "Desactivar" : "Activar"}
-                            </Button>
+                        )}
+
+                        {vacancy.status === "Open" && (
+                            <>
+                                {userRole === "ESTUDIANTE" && (
+                                    <Button className="bg-blue-600 hover:bg-blue-700">
+                                        Aplicar
+                                    </Button>
+                                )}
+
+                                {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
+                                    <>
+                                        <Button onClick={handleToggleStatus}>
+                                            {vacancy.status === "Open" ? "Desactivar" : "Activar"}
+                                        </Button>
+                                        <Button onClick={() => navigate(`/vacancies/edit/${vacancy.id}`)}>
+                                            Editar
+                                        </Button>
+                                    </>
+                                ) : null}
+                            </>
                         )}
                     </div>
                 </div>
