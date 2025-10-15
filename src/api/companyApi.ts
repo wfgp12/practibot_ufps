@@ -24,4 +24,22 @@ export const companyApi = {
     const { data } = await axiosClient.get(`/empresas/${id}`);
     return mapCompanyFromApi(data);
   },
+  
+  /** ✅ Aprobar empresa pendiente */
+  approve: async (id: string | number): Promise<ICompany> => {
+    const { data } = await axiosClient.patch(`/empresas/${id}/aprobar`);
+    return mapCompanyFromApi(data.data);
+  },
+
+  /** ❌ Rechazar empresa pendiente */
+  reject: async (id: string | number): Promise<ICompany> => {
+    const { data } = await axiosClient.patch(`/empresas/${id}/rechazar`);
+    return mapCompanyFromApi(data.data);
+  },
+
+  /** 🔄 Cambiar estado de empresa aprobada entre APROBADA e INACTIVA */
+  toggleState: async (id: string | number, estado: "APROBADA" | "INACTIVA"): Promise<ICompany> => {
+    const { data } = await axiosClient.patch(`/empresas/${id}/estado`, { estado });
+    return mapCompanyFromApi(data.data);
+  },
 };

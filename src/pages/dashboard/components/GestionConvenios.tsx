@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useCompanies } from "@/hooks/useCompanies";
 import type { ICompany } from "@/models/ICompany";
+import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router";
 
 export const GestionConvenios = () => {
@@ -16,6 +17,20 @@ export const GestionConvenios = () => {
         { key: "sector", title: "Sector" },
         { key: "correo", title: "Correo" },
         { key: "telefono", title: "Teléfono" },
+        {
+            key: "estado", title: "Estado",
+            render: (estado) => (
+                <Badge
+                    variant="outline"
+                    className={`
+                        ${estado === "APROBADA" ? "border-green-500 text-green-500" : ""}
+                        ${estado === "INACTIVA" ? "border-red-500 text-red-500" : ""}
+                    `}
+                >
+                    {estado}
+                </Badge>
+            )
+        },
         {
             key: "id",
             title: "Acciones",

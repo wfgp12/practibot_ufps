@@ -22,7 +22,7 @@ export const TabsSection = ({ tabs, defaultValue, className }: TabsSectionProps)
     <Tabs defaultValue={defaultValue || tabs[0].value} className={`w-full ${className}`}>
       <TabsList className="flex w-fit mb-4">
         {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value} className="relative">
+          <TabsTrigger key={tab.value} value={tab.value} className="relative data-[state=active]:bg-[#424242] data-[state=active]:text-white">
             {tab.label}
           </TabsTrigger>
         ))}

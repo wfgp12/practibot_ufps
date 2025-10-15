@@ -11,7 +11,7 @@ import { useAppSelector } from "@/store/hooks";
 export const CompanyDetail = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { fetchCompanyById, loading } = useCompanies();
+    const { fetchCompanyById, loading, approveCompany, rejectCompany, toggleCompanyState } = useCompanies();
     const [company, setCompany] = useState<ICompany | null>(null);
     const { user } = useAppSelector(state => state.auth);
 
@@ -42,17 +42,25 @@ export const CompanyDetail = () => {
         );
     }
 
-    const handleApprove = () => {
-        console.log("Aprobar empresa");
-    }
+    /** Handlers conectados al hook */
+    const handleApprove = async () => {
+        if (!company) return;
+        await approveCompany(company.id);
+        loadCompany();
+    };
 
-    const handleReject = () => {
-        console.log("Rechazar empresa");
-    }
+    const handleReject = async () => {
+        if (!company) return;
+        await rejectCompany(company.id);
+        loadCompany();
+    };
 
-    const handleToggleStatus = () => {
-        console.log("Activar/Desactivar empresa");
-    }
+    const handleToggleStatus = async () => {
+        if (!company) return;
+        const newEstado = company.estado === "APROBADA" ? "INACTIVA" : "APROBADA";
+        await toggleCompanyState(company.id, newEstado);
+        loadCompany();
+    };
 
     return (
         <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0">
@@ -83,31 +91,29 @@ export const CompanyDetail = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {company.estado === "Pending" && (userRole === "EMPRESA" && isOwner || userRole === "DIRECTOR") && (
+                        {company.estado === "PENDIENTE" ? (userRole === "EMPRESA" && isOwner || userRole === "DIRECTOR") && (
                             <>
-                                <Button className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>
+                                <Button className="bg-[#AA1916] text-white hover:bg-red-800" onClick={handleApprove}>
                                     Aprobar
                                 </Button>
-                                <Button variant="destructive" onClick={handleReject}>
+                                <Button className="bg-[#424242] text-white hover:bg-gray-700" variant="destructive" onClick={handleReject}>
                                     Rechazar
                                 </Button>
                             </>
-                        )}
-
-                        {company.estado === "Open" && (
+                        ) : (
                             <>
                                 {userRole === "ESTUDIANTE" && (
-                                    <Button className="bg-blue-600 hover:bg-blue-700">
+                                    <Button className="bg-[#AA1916] text-white hover:bg-red-800">
                                         Aplicar
                                     </Button>
                                 )}
 
                                 {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
                                     <>
-                                        <Button onClick={handleToggleStatus}>
-                                            {company.estado === "Open" ? "Desactivar" : "Activar"}
+                                        <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
+                                            {company.estado === "APROBADA" ? "Desactivar" : "Activar"}
                                         </Button>
-                                        <Button onClick={() => console.log("Editar empresa")}>
+                                        <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar empresa")}>
                                             Editar
                                         </Button>
                                     </>
@@ -127,15 +133,6 @@ export const CompanyDetail = () => {
                     <div className="mt-4 border-t pt-4">
                         <h3 className="text-lg font-semibold mb-2">Descripción</h3>
                         <p className="text-gray-700">{company.descripcion}</p>
-                    </div>
-                )}
-
-                {(userRole === "DIRECTOR" || (userRole === "EMPRESA" && isOwner)) && (
-                    <div className="mt-4 flex gap-2">
-                        <Button onClick={() => navigate(`/companies/edit/${company.id}`)}>
-                            Editar
-                        </Button>
-                        {/* Aquí podrías agregar botones de aprobar/rechazar si aplica */}
                     </div>
                 )}
             </Card>

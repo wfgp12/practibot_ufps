@@ -116,31 +116,29 @@ export const VacancyDetail = () => {
                     </div>
 
                     <div className="flex gap-2">
-                        {vacancy.status === "Pending" && (userRole === "EMPRESA" && isOwner || userRole === "DIRECTOR") && (
+                        {vacancy.status === "Pending" ? (userRole === "EMPRESA" && isOwner || userRole === "DIRECTOR") && (
                             <>
-                                <Button className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>
+                                <Button className="bg-[#AA1916] text-white hover:bg-red-800" onClick={handleApprove}>
                                     Aprobar
                                 </Button>
-                                <Button variant="destructive" onClick={handleReject}>
+                                <Button className="bg-[#424242] text-white hover:bg-gray-700" variant="destructive" onClick={handleReject}>
                                     Rechazar
                                 </Button>
                             </>
-                        )}
-
-                        {vacancy.status === "Open" && (
+                        ) : (
                             <>
                                 {userRole === "ESTUDIANTE" && (
-                                    <Button className="bg-blue-600 hover:bg-blue-700">
+                                    <Button className="bg-[#AA1916] text-white hover:bg-red-800">
                                         Aplicar
                                     </Button>
                                 )}
 
                                 {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
                                     <>
-                                        <Button onClick={handleToggleStatus}>
+                                        <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {vacancy.status === "Open" ? "Desactivar" : "Activar"}
                                         </Button>
-                                        <Button onClick={() => navigate(`/vacancies/edit/${vacancy.id}`)}>
+                                        <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar vacante")}>
                                             Editar
                                         </Button>
                                     </>
