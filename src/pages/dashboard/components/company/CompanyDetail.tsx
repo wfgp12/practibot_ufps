@@ -53,7 +53,7 @@ export const CompanyDetail = () => {
     const handleReject = async () => {
         if (!company) return;
         await rejectCompany(company.id);
-        loadCompany();
+        navigate(-1);
     };
 
     const handleToggleStatus = async () => {

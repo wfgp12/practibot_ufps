@@ -63,7 +63,7 @@ export const GestionConvenios = () => {
 
     const tabs: TabItem[] = [
         {
-            label: "Convenios Activos",
+            label: "Convenios",
             value: "convenios",
             content: (
                 <>
