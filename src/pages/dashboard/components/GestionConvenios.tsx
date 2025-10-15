@@ -69,9 +69,9 @@ export const GestionConvenios = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Empresas con convenio</h5>
-                        <Button className="bg-green-600 hover:bg-green-700">
+                        {/* <Button className="bg-green-600 hover:bg-green-700">
                             Crear nuevo convenio
-                        </Button>
+                        </Button> */}
                     </div>
 
                     <Table columns={columnasConvenios} data={companies} />

@@ -105,15 +105,15 @@ export const GestionVacantes = () => {
 
     const tabs: TabItem[] = [
         {
-            label: "Vacantes Activas",
+            label: "Vacantes",
             value: "vacantes",
             content: (
                 <>
                     <div className="flex justify-between items-center mb-4">
-                        <h5 className="text-lg font-medium">Vacantes activas</h5>
-                        <Button className="bg-green-600 hover:bg-green-700">
+                        <h5 className="text-lg font-medium">Vacantes</h5>
+                        {/* <Button className="bg-green-600 hover:bg-green-700">
                             Crear nuevo convenio
-                        </Button>
+                        </Button> */}
                     </div>
 
                     <Table columns={columnasVacantes} data={vacancies} />

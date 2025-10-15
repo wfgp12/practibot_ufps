@@ -135,12 +135,12 @@ export const VacancyDetail = () => {
 
                                 {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
                                     <>
-                                        <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
+                                        {/* <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {vacancy.status === "Open" ? "Desactivar" : "Activar"}
                                         </Button>
                                         <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar vacante")}>
                                             Editar
-                                        </Button>
+                                        </Button> */}
                                     </>
                                 ) : null}
                             </>
