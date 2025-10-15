@@ -1,7 +1,13 @@
 import axiosClient from "./axiosClient";
-import { mapCompanyFromApi, type IApiCompany, type ICompany } from "@/models/ICompany";
+import { mapCompanyFromApi, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
 
 export const companyApi = {
+
+  register: async (data: IRegisterCompanyData): Promise<ICompany> => {
+    const { data: res } = await axiosClient.post<IApiCompany>("/empresas/registro", data);
+    return mapCompanyFromApi(res);
+  },
+
   /** 🟢 Obtener empresa autenticada */
   async getProfile(): Promise<ICompany> {
     const { data } = await axiosClient.get<IApiCompany>("/empresas/profile");
@@ -24,7 +30,7 @@ export const companyApi = {
     const { data } = await axiosClient.get(`/empresas/${id}`);
     return mapCompanyFromApi(data);
   },
-  
+
   /** ✅ Aprobar empresa pendiente */
   approve: async (id: string | number): Promise<ICompany> => {
     const { data } = await axiosClient.patch(`/empresas/${id}/aprobar`);

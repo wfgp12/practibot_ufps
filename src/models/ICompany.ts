@@ -12,6 +12,16 @@ export interface IApiCompany {
   usuario: Partial<IApiUser>;
 }
 
+export interface IRegisterCompanyData {
+  nombre: string;
+  email: string;
+  nit: string;
+  telefono?: string;
+  direccion?: string;
+  sector?: string;
+  descripcion?: string;
+}
+
 /** 💠 Modelo interno del front */
 export interface ICompany {
   id: string;
