@@ -14,7 +14,7 @@ export const VacancyDetail = () => {
     const {
         approveVacancy,
         rejectVacancy,
-        toggleVacancyStatus,
+        // toggleVacancyStatus,
         fetchVacancyById,
         loading
     } = useVacancies();
@@ -89,10 +89,10 @@ export const VacancyDetail = () => {
         navigate("/dashboard");
     };
 
-    const handleToggleStatus = async () => {
-        await toggleVacancyStatus(vacancy.id);
-        loadVacancy(); // refresca los datos después de actualizar el estado
-    };
+    // const handleToggleStatus = async () => {
+    //     await toggleVacancyStatus(vacancy.id);
+    //     loadVacancy(); // refresca los datos después de actualizar el estado
+    // };
 
     return (
         <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0" id="vacantes">

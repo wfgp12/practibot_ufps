@@ -13,7 +13,9 @@ export function useConvenios() {
       direccion: "Calle 123",
       sector: "Tecnología",
       descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
-      telefono: "123456789"
+      telefono: "123456789",
+      estado: "APROBADA",
+      userId: "1",
     },
   ]);
 
@@ -26,7 +28,9 @@ export function useConvenios() {
       sector: "Tecnología",
       descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
       telefono: "123456789",
-      correo: "servicios@xyz.com"
+      correo: "servicios@xyz.com",
+      estado: "PENDIENTE",
+      userId: "1",
     },
     {
       id: "2",
@@ -36,7 +40,9 @@ export function useConvenios() {
       sector: "Tecnología",
       descripcion: "Estamos en la fase de diseño de una nueva solución para nuestros clientes.",
       telefono: "123456789",
-      correo: "datasoft@xyz.com"
+      correo: "datasoft@xyz.com",
+      estado: "PENDIENTE",
+      userId: "1",
     },
   ]);
 

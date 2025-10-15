@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { closeVacancyModal, openVacancyModal } from "@/store/slices/uiSlice";
 import { Modal } from "@/components/Modal";
 import { VacancyDetailCard } from "@/components/VacancyDetailCard";
+import { useNavigate } from "react-router";
 
 const steps = [
   {
@@ -28,6 +29,7 @@ const steps = [
 
 export const HomePage = () => {
   const { vacancies } = useVacancies();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { vacancyModalOpen, selectedVacancyId } = useAppSelector((state) => state.ui);
 
@@ -46,9 +48,9 @@ export const HomePage = () => {
           <a href="#vacantes" className="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Explora vacantes
           </a>
-          <a href="/login" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+          <button onClick={() => navigate("/login")} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Acceder
-          </a>
+          </button>
         </div>
       </SectionComponent>
 
@@ -92,9 +94,9 @@ export const HomePage = () => {
           }
         </div>
         <div className="w-full flex justify-center items-center gap-4 mt-6">
-          <a href="/login" className="bg-gray-200 hover:bg-gray-300 border-gray-600 font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+          <button onClick={() => navigate("/login")} className="bg-gray-200 hover:bg-gray-300 border-gray-600 font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Ver todas las vacantes
-          </a>
+          </button>
         </div>
       </SectionComponent>
 
@@ -109,9 +111,9 @@ export const HomePage = () => {
           Solicita un convenio y publica tus vacantes de prácticas en pocos pasos.
         </p>
         <div className="w-full flex justify-center items-center gap-4 mt-6">
-          <a href="/registro-empresa" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+          <button onClick={() => navigate("/registro-empresa")} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Solicitar convenio
-          </a>
+          </button>
         </div>
       </SectionComponent>
 

@@ -148,12 +148,12 @@ const Navbar = () => {
                             Cerrar sesión
                         </button>
                     ) : (
-                        <a
-                            href="/login"
+                        <button
+                            onClick={() => navigate('/login')}
                             className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                         >
                             Iniciar sesión
-                        </a>
+                        </button>
                     )}
                 </div>
             </nav>
