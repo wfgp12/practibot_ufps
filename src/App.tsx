@@ -7,6 +7,7 @@ import { loadUserThunk } from '@/store/thunks/authThunks';
 
 import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
 import { VacancyDetail } from '@/pages/dashboard/components/vancancy/VacancyDetail';
+import { CompanyDetail } from '@/pages/dashboard/components/company/companyDetail';
 import { Layout, PrivateRoute, PublicRoute } from '@/components'
 import LoaderBottomRight from '@/components/Loader';
 import { ChatbotButton } from '@/components/ChatbotButton';
@@ -56,7 +57,7 @@ function App() {
         >
           <Route index element={<Dashboard />} />
           <Route path="vacancy/:id" element={<VacancyDetail />} />
-          {/* <Route path="agreement/:id" element={<AgreementDetail />} /> */}
+          <Route path="company/:id" element={<CompanyDetail />} />
         </Route>
       </Routes>
 

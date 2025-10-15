@@ -3,29 +3,26 @@ import { Table, type Column } from "@/components/Table";
 import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { useConvenios } from "@/hooks/useAgreement";
+import { useCompanies } from "@/hooks/useCompanies";
 import type { ICompany } from "@/models/ICompany";
+import { useNavigate } from "react-router";
 
 export const GestionConvenios = () => {
-
-    const { convenios, solicitudes } = useConvenios();
+    const navigate = useNavigate();
+    const { companies, pendingCompanies } = useCompanies();
     const columnasConvenios: Column<ICompany>[] = [
         { key: "nombre", title: "Empresa" },
         { key: "nit", title: "NIT" },
+        { key: "sector", title: "Sector" },
         { key: "correo", title: "Correo" },
+        { key: "telefono", title: "Teléfono" },
         {
             key: "id",
             title: "Acciones",
             align: "center",
-            render: () => (
+            render: (_, company) => (
                 <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
-                    >
-                        Editar
-                    </Button>
-                    <Button variant="destructive">Eliminar</Button>
+                    <Button onClick={() => navigate(`/dashboard/company/${company.id}`)} className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline">Ver a detalles</Button>
                 </div>
             ),
         },
@@ -34,15 +31,16 @@ export const GestionConvenios = () => {
     const columnasSolicitudes: Column<ICompany>[] = [
         { key: "nombre", title: "Empresa" },
         { key: "nit", title: "NIT" },
-        { key: "correo", title: "Correo" },
         { key: "sector", title: "Sector" },
+        { key: "correo", title: "Correo" },
+        { key: "telefono", title: "Teléfono" },
         {
             key: "id",
             title: "Acciones",
             align: "center",
-            render: () => (
+            render: (_, company) => (
                 <div className="space-x-2">
-                    <Button className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline">Ver a detalles</Button>
+                    <Button onClick={() => navigate(`/dashboard/company/${company.id}`)} className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white" variant="outline">Ver a detalles</Button>
                 </div>
             ),
         },
@@ -61,7 +59,7 @@ export const GestionConvenios = () => {
                         </Button>
                     </div>
 
-                    <Table columns={columnasConvenios} data={convenios} />
+                    <Table columns={columnasConvenios} data={companies} />
                 </>
             ),
         },
@@ -69,9 +67,9 @@ export const GestionConvenios = () => {
             label: (
                 <div className="flex items-center gap-2">
                     Solicitudes
-                    {solicitudes.length > 0 && (
+                    {pendingCompanies.length > 0 && (
                         <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            {solicitudes.length}
+                            {pendingCompanies.length}
                         </span>
                     )}
                 </div>
@@ -82,7 +80,7 @@ export const GestionConvenios = () => {
                     <h5 className="text-lg font-medium mb-4">
                         Solicitudes de convenio
                     </h5>
-                    <Table columns={columnasSolicitudes} data={solicitudes} />
+                    <Table columns={columnasSolicitudes} data={pendingCompanies} />
                 </>
             ),
         },
