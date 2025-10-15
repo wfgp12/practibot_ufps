@@ -38,6 +38,11 @@ const Navbar = () => {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        dispatch(logout());
+    };
+
     return (
         <>
             <header className="w-full z-10 ">
@@ -137,7 +142,7 @@ const Navbar = () => {
                 <div>
                     {isAuthenticated ? (
                         <button
-                            onClick={() => dispatch(logout())}
+                            onClick={handleLogout}
                             className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                         >
                             Cerrar sesión
