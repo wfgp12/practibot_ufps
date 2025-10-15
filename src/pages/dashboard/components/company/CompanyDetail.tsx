@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft, Building2, Hash, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, Building2, Hash, Mail, MapPin, Phone } from "lucide-react";
 
 import { Button, Card, SectionComponent } from "@/components";
 import type { ICompany } from "@/models/ICompany";
 import { useCompanies } from "@/hooks/useCompanies";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/store/hooks";
+import { EditCompanyDialog } from "@/components/EditCompanyModal";
 
 export const CompanyDetail = () => {
     const navigate = useNavigate();
@@ -113,9 +114,10 @@ export const CompanyDetail = () => {
                                         <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {company.estado === "APROBADA" ? "Desactivar" : "Activar"}
                                         </Button>
-                                        <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar empresa")}>
-                                            Editar
-                                        </Button>
+                                        <EditCompanyDialog
+                                            company={company}
+                                            onUpdated={(updated) => setCompany(updated)} // actualiza la UI automáticamente
+                                        />
                                     </>
                                 ) : null}
                             </>
@@ -127,6 +129,9 @@ export const CompanyDetail = () => {
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                     <Phone size={18} /> {company.telefono}
+                </div>
+                <div className="flex items-center gap-2 text-gray-600">
+                    <Mail size={18} /> {company.correo}
                 </div>
 
                 {company.descripcion && (

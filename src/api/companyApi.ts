@@ -1,11 +1,21 @@
 import axiosClient from "./axiosClient";
 import { mapCompanyFromApi, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
 
+interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
 export const companyApi = {
 
   register: async (data: IRegisterCompanyData): Promise<ICompany> => {
     const { data: res } = await axiosClient.post<IApiCompany>("/empresas/registro", data);
     return mapCompanyFromApi(res);
+  },
+ 
+  update: async (id: string, data: IRegisterCompanyData): Promise<ICompany> => {
+    const { data: res } = await axiosClient.put<ApiResponse<IApiCompany>>(`/empresas/${id}/editar`, data);
+    console.log(res)
+    return mapCompanyFromApi(res.data);
   },
 
   /** 🟢 Obtener empresa autenticada */

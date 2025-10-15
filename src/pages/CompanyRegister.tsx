@@ -3,61 +3,27 @@
 import { useNavigate } from "react-router"
 import { ChevronLeft } from "lucide-react"
 
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+  import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Controller, useForm } from "react-hook-form"
 import { useAppDispatch } from "@/store/hooks"
 import { companyApi } from "@/api/companyApi"
 import { hideLoader, showLoader } from "@/store/slices/uiSlice"
 import { toast } from "sonner"
-
-interface IFormData {
-  nombreEmpresa: string
-  nit: string
-  correo: string
-  telefono?: string
-  direccion?: string
-  sector?: string
-  descripcion?: string
-}
+import { CompanyForm } from "@/components/CompanyForm"
+import type { IRegisterCompanyData } from "@/models/ICompany"
 
 export const CompanyRegister = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { handleSubmit, control, reset } = useForm<IFormData>({
-    defaultValues: {
-      nombreEmpresa: "",
-      nit: "",
-      correo: "",
-      telefono: "",
-      direccion: "",
-      sector: "",
-      descripcion: "",
-    },
-  })
-
-  const onSubmit = async (data: IFormData) => {
+  const onSubmit = async (data: IRegisterCompanyData) => {
     try {
       dispatch(showLoader())
 
-      const payload = {
-        nombre: data.nombreEmpresa, // <--- mapeo aquí
-        email: data.correo,         // <--- mapeo aquí
-        nit: data.nit,
-        telefono: data.telefono || "",
-        direccion: data.direccion || "",
-        sector: data.sector || "",
-        descripcion: data.descripcion || "",
-      }
+      console.log({data})
 
-      await companyApi.register(payload)
+      await companyApi.register(data)
       toast.success("Solicitud enviada correctamente. Su empresa será revisada.")
-      reset()
       navigate(-1)
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -95,102 +61,7 @@ export const CompanyRegister = () => {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            {/* Nombre empresa */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="nombreEmpresa">Nombre de la empresa</Label>
-              <Controller
-                name="nombreEmpresa"
-                control={control}
-                rules={{ required: "El nombre es obligatorio" }}
-                render={({ field }) => <Input {...field} placeholder="Ej: Tecnologías XYZ" />}
-              />
-            </div>
-
-            {/* NIT */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="nit">NIT</Label>
-              <Controller
-                name="nit"
-                control={control}
-                rules={{ required: "El NIT es obligatorio" }}
-                render={({ field }) => <Input {...field} placeholder="900123456-7" />}
-              />
-            </div>
-
-            {/* Correo */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="correo">Correo de contacto</Label>
-              <Controller
-                name="correo"
-                control={control}
-                rules={{ required: "El correo es obligatorio" }}
-                render={({ field }) => <Input {...field} type="email" placeholder="contacto@empresa.co" />}
-              />
-            </div>
-
-            {/* Teléfono */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="telefono">Teléfono de contacto</Label>
-              <Controller
-                name="telefono"
-                control={control}
-                render={({ field }) => <Input {...field} type="tel" placeholder="+57 300 123 4567" />}
-              />
-            </div>
-
-            {/* Dirección */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="direccion">Dirección</Label>
-              <Controller
-                name="direccion"
-                control={control}
-                render={({ field }) => <Input {...field} placeholder="Cl 10 #1 - 23, Cúcuta" />}
-              />
-            </div>
-
-            {/* Sector */}
-            <div className="flex flex-col gap-2">
-              <Label>Sector empresarial</Label>
-              <Controller
-                name="sector"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un sector" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tecnologia">Tecnología</SelectItem>
-                      <SelectItem value="comercio">Comercio</SelectItem>
-                      <SelectItem value="salud">Salud</SelectItem>
-                      <SelectItem value="educacion">Educación</SelectItem>
-                      <SelectItem value="otro">Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-
-            {/* Descripción */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="descripcion">Descripción de la empresa</Label>
-              <Controller
-                name="descripcion"
-                control={control}
-                render={({ field }) => (
-                  <Textarea
-                    {...field}
-                    placeholder="Describe brevemente la trayectoria y actividades principales de la empresa"
-                  />
-                )}
-              />
-            </div>
-
-            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
-              Enviar solicitud
-            </Button>
-          </form>
+          <CompanyForm onSubmit={onSubmit} submitLabel="Enviar solicitud" />
         </CardContent>
 
         <CardFooter />
