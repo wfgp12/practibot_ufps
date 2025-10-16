@@ -10,8 +10,10 @@ import { VacancyDetail } from '@/pages/dashboard/components/vancancy/VacancyDeta
 import { CompanyDetail } from '@/pages/dashboard/components/company/CompanyDetail';
 import { Layout, PrivateRoute, PublicRoute } from '@/components'
 import LoaderBottomRight from '@/components/Loader';
-import { ChatbotButton } from '@/components/ChatbotButton';
-import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+// import { ChatbotButton } from '@/components/ChatbotButton';
+// import { ChatbotSidebar } from '@/components/ChatbotSidebar';
+import '@n8n/chat/style.css';
+import { createChat } from '@n8n/chat';
 
 import './App.css'
 
@@ -21,6 +23,25 @@ function App() {
   useEffect(() => {
     dispatch(loadUserThunk());
   }, [dispatch]);
+
+  useEffect(() => {
+		createChat({
+			webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
+      initialMessages: [
+        '¡Hola! 👋',
+        'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
+      ],
+      i18n: {
+        en: {
+          title: '¡Hola! 👋',
+          subtitle: "Inicia un chat. Estamos aquí para ayudarte 24/7.",
+          footer: '',
+          getStarted: 'Nueva Conversación',
+          inputPlaceholder: 'Escribe tu pregunta..',
+        },
+      },
+		});
+	}, []);
 
   return (
     <>
@@ -62,9 +83,8 @@ function App() {
       </Routes>
 
       <LoaderBottomRight />
-      <ChatbotButton />
-      <ChatbotSidebar />
-
+      {/* <ChatbotButton />
+      <ChatbotSidebar /> */}
       <Toaster
         position="bottom-right"
         richColors
