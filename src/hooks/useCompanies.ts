@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { companyApi } from "@/api/companyApi";
-import type { ICompany } from "@/models/ICompany";
+import type { ICompany, IRegisterCompanyData } from "@/models/ICompany";
 
 export const useCompanies = () => {
     const [pendingCompanies, setPendingCompanies] = useState<ICompany[]>([]);
@@ -111,6 +111,18 @@ export const useCompanies = () => {
         []
     );
 
+    const createCompany = useCallback(async (data: IRegisterCompanyData) => {
+        try {
+            setLoading(true);
+            await companyApi.create(data);
+        } catch (err: unknown) {
+            if (err instanceof Error) setError(err.message);
+            else setError("Error desconocido al crear empresa");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         pendingCompanies,
         companies,
@@ -118,6 +130,7 @@ export const useCompanies = () => {
         error,
         fetchCompanyById,
         fetchCompanies,
+        createCompany,
         approveCompany,
         rejectCompany,
         toggleCompanyState,

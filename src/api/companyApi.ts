@@ -7,6 +7,11 @@ interface ApiResponse<T> {
 }
 export const companyApi = {
 
+  create: async (data: IRegisterCompanyData): Promise<ICompany> => {
+    const { data: res } = await axiosClient.post<IApiCompany>("/empresas/create", data);
+    return mapCompanyFromApi(res);
+  },
+
   register: async (data: IRegisterCompanyData): Promise<ICompany> => {
     const { data: res } = await axiosClient.post<IApiCompany>("/empresas/registro", data);
     return mapCompanyFromApi(res);

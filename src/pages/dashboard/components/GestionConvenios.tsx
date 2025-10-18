@@ -2,6 +2,7 @@ import { Button } from "@/components";
 import { Table, type Column } from "@/components/Table";
 import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreateCompanyModal } from "./company/CreateCompanyModal";
 
 import { useCompanies } from "@/hooks/useCompanies";
 import type { ICompany } from "@/models/ICompany";
@@ -10,7 +11,7 @@ import { useNavigate } from "react-router";
 
 export const GestionConvenios = () => {
     const navigate = useNavigate();
-    const { companies, pendingCompanies } = useCompanies();
+    const { companies, pendingCompanies, createCompany } = useCompanies();
     const columnasConvenios: Column<ICompany>[] = [
         { key: "nombre", title: "Empresa" },
         { key: "nit", title: "NIT" },
@@ -69,9 +70,7 @@ export const GestionConvenios = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Empresas con convenio</h5>
-                        {/* <Button className="bg-green-600 hover:bg-green-700">
-                            Crear nuevo convenio
-                        </Button> */}
+                        <CreateCompanyModal onSubmit={createCompany} />
                     </div>
 
                     <Table columns={columnasConvenios} data={companies} />
