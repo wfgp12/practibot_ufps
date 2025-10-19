@@ -11,15 +11,21 @@ import { useNavigate } from "react-router";
 
 export const GestionConvenios = () => {
     const navigate = useNavigate();
-    const { companies, pendingCompanies, createCompany } = useCompanies();
+    const { companies, pendingCompanies, createCompany, fetchCompanies, fetchPendingCompanies } = useCompanies();
     const columnasConvenios: Column<ICompany>[] = [
-        { key: "nombre", title: "Empresa" },
-        { key: "nit", title: "NIT" },
+        { key: "nombre", title: "Empresa", filterType: "text" },
+        { key: "nit", title: "NIT", filterType: "text" },
         { key: "sector", title: "Sector" },
-        { key: "correo", title: "Correo" },
+        { key: "correo", title: "Correo", filterType: "text" },
         { key: "telefono", title: "Teléfono" },
         {
             key: "estado", title: "Estado",
+            filterType: "select",
+            filterOptions: [
+                { label: "Aprobada", value: "APROBADA" },
+                { label: "Inactiva", value: "INACTIVA" },
+                { label: "Rechazada", value: "RECHAZADA" },
+            ],
             render: (estado) => (
                 <Badge
                     variant="outline"
@@ -73,7 +79,15 @@ export const GestionConvenios = () => {
                         <CreateCompanyModal onSubmit={createCompany} />
                     </div>
 
-                    <Table columns={columnasConvenios} data={companies} />
+                    <Table
+                        columns={columnasConvenios}
+                        data={companies.data}
+                        total={companies.total}
+                        page={companies.page}
+                        pageSize={companies.pageSize}                        
+                        onChange={({ filters, page }) => fetchCompanies({ filters, page })} 
+                    
+                    />
                 </>
             ),
         },
@@ -81,9 +95,9 @@ export const GestionConvenios = () => {
             label: (
                 <div className="flex items-center gap-2">
                     Solicitudes
-                    {pendingCompanies.length > 0 && (
+                    {pendingCompanies.total > 0 && (
                         <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            {pendingCompanies.length}
+                            {pendingCompanies.total}
                         </span>
                     )}
                 </div>
@@ -94,7 +108,14 @@ export const GestionConvenios = () => {
                     <h5 className="text-lg font-medium mb-4">
                         Solicitudes de convenio
                     </h5>
-                    <Table columns={columnasSolicitudes} data={pendingCompanies} />
+                    <Table 
+                        columns={columnasSolicitudes} 
+                        data={pendingCompanies.data} 
+                        total={pendingCompanies.total}
+                        page={pendingCompanies.page}
+                        pageSize={pendingCompanies.pageSize}
+                        onChange={({ filters, page }) => fetchPendingCompanies({ filters, page })}
+                    />
                 </>
             ),
         },

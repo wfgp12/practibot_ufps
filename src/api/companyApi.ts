@@ -1,10 +1,22 @@
+import type { IApiPaginatedResponse } from "@/models/IApi";
 import axiosClient from "./axiosClient";
 import { mapCompanyFromApi, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
 
 interface ApiResponse<T> {
   data: T;
-  message: string;
+  message?: string;
 }
+
+interface PaginationParams {
+  page?: number;
+  pageSize?: number;
+  estado?: string;
+  nombre?: string;
+  correo?: string;
+  nit?: string;
+  sector?: string;
+}
+
 export const companyApi = {
 
   create: async (data: IRegisterCompanyData): Promise<ICompany> => {
@@ -24,21 +36,31 @@ export const companyApi = {
   },
 
   /** 🟢 Obtener empresa autenticada */
-  async getProfile(): Promise<ICompany> {
+  getProfile: async (): Promise<ICompany> => {
     const { data } = await axiosClient.get<IApiCompany>("/empresas/profile");
     return mapCompanyFromApi(data);
   },
 
   /** 🟢 Listar todas las empresas */
-  async getAll(): Promise<ICompany[]> {
-    const { data } = await axiosClient.get<IApiCompany[]>("/empresas");
-    return data.map(mapCompanyFromApi);
+  getAll: async (params?: PaginationParams): Promise<IApiPaginatedResponse<ICompany>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<IApiCompany>>("/empresas", {params});
+    return {
+      data: data.data.map(mapCompanyFromApi),
+      total: data.total,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   },
 
   /** 🟢 Listar empresas pendientes */
-  async getPending(): Promise<ICompany[]> {
-    const { data } = await axiosClient.get<IApiCompany[]>("/empresas/pendientes");
-    return data.map(mapCompanyFromApi);
+  getPending: async (params?: PaginationParams): Promise<IApiPaginatedResponse<ICompany>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<IApiCompany>>("/empresas/pendientes", { params });
+    return {
+      data: data.data.map(mapCompanyFromApi),
+      total: data.total,
+      page: data.page,
+      pageSize: data.pageSize,
+    };
   },
 
   getById: async (id: string | number): Promise<ICompany> => {

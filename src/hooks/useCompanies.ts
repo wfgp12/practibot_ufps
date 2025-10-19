@@ -1,37 +1,113 @@
 import { useState, useEffect, useCallback } from "react";
 import { companyApi } from "@/api/companyApi";
 import type { ICompany, IRegisterCompanyData } from "@/models/ICompany";
+import type { IApiPaginatedResponse } from "@/models/IApi";
 
+interface TableState<T> {
+    data: T[];
+    total: number;
+    page: number;
+    pageSize: number;
+    filters: Record<string, string>;
+}
 export const useCompanies = () => {
-    const [pendingCompanies, setPendingCompanies] = useState<ICompany[]>([]);
-    const [companies, setCompanies] = useState<ICompany[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [companies, setCompanies] = useState<TableState<ICompany>>({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        filters: {},
+    });
+
+    const [pendingCompanies, setPendingCompanies] = useState<TableState<ICompany>>({
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        filters: {},
+    });
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    /** 🔄 Obtener todas las empresas y pendientes */
-    const fetchCompanies = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
+    /** 📦 Obtener empresas (no pendientes) */
+    const fetchCompanies = useCallback(
+        async (params?: Partial<TableState<ICompany>>) => {
+            try {
+                setLoading(true);
+                setError(null);
 
-            const [pending, all] = await Promise.all([
-                companyApi.getPending(),
-                companyApi.getAll(),
-            ]);
+                const cleanFilters = Object.fromEntries(
+                    Object.entries(params?.filters ?? {}).filter(
+                        ([, value]) => value && value.toLowerCase() !== "all"
+                    )
+                );
 
-            setPendingCompanies(pending);
-            setCompanies(all);
-        } catch (err: unknown) {
-            if (err instanceof Error) setError(err.message);
-            else setError("Error desconocido al obtener la información de las empresas");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+                const query = {
+                    page: params?.page ?? companies.page,
+                    pageSize: params?.pageSize ?? companies.pageSize,
+                    ...cleanFilters,
+                };
 
+                const response: IApiPaginatedResponse<ICompany> = await companyApi.getAll(query);
+
+                setCompanies(prev => ({
+                    ...prev,
+                    data: response.data,
+                    total: response.total,
+                    page: response.page,
+                    filters: params?.filters ?? prev.filters,
+                }));
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : "Error al obtener empresas");
+            } finally {
+                setLoading(false);
+            }
+        },
+        [companies]
+    );
+
+    /** 📦 Obtener empresas pendientes */
+    const fetchPendingCompanies = useCallback(
+        async (params?: Partial<TableState<ICompany>>) => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const cleanFilters = Object.fromEntries(
+                    Object.entries(params?.filters ?? {}).filter(
+                        ([, value]) => value && value !== "ALL"
+                    )
+                );
+
+                const query = {
+                    page: params?.page ?? pendingCompanies.page,
+                    pageSize: params?.pageSize ?? pendingCompanies.pageSize,
+                    ...cleanFilters,
+                };
+
+                const response: IApiPaginatedResponse<ICompany> = await companyApi.getPending(query);
+
+                setPendingCompanies(prev => ({
+                    ...prev,
+                    data: response.data,
+                    total: response.total,
+                    page: response.page,
+                    filters: params?.filters ?? prev.filters,
+                }));
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : "Error al obtener empresas pendientes");
+            } finally {
+                setLoading(false);
+            }
+        },
+        [pendingCompanies]
+    );
+
+    /** 🔁 Cargar ambos listados al iniciar */
     useEffect(() => {
         fetchCompanies();
-    }, [fetchCompanies]);
+        fetchPendingCompanies();
+    }, []);
 
     const fetchCompanyById = useCallback(async (id: string | number) => {
         try {
@@ -47,92 +123,89 @@ export const useCompanies = () => {
         }
     }, []);
 
-    /** ✅ Aprobar empresa pendiente */
+    /** ✅ Aprobar empresa */
     const approveCompany = useCallback(async (id: string | number) => {
         try {
             setLoading(true);
             const updated = await companyApi.approve(id);
-
-            // Actualizar listas
-            setPendingCompanies(prev => prev.filter(c => c.id !== id));
-            setCompanies(prev => [updated, ...prev]);
-
+            setPendingCompanies(prev => ({
+                ...prev,
+                data: prev.data.filter(c => c.id !== id),
+                total: prev.total - 1,
+            }));
+            setCompanies(prev => ({
+                ...prev,
+                data: [updated, ...prev.data],
+                total: prev.total + 1,
+            }));
             return updated;
         } catch (err: unknown) {
-            if (err instanceof Error) setError(err.message);
-            else setError("Error desconocido al aprobar empresa");
+            setError(err instanceof Error ? err.message : "Error al aprobar empresa");
             return null;
         } finally {
             setLoading(false);
         }
     }, []);
 
-    /** ❌ Rechazar empresa pendiente */
+    /** ❌ Rechazar empresa */
     const rejectCompany = useCallback(async (id: string | number) => {
         try {
             setLoading(true);
-            const updated = await companyApi.reject(id);
+            await companyApi.reject(id);
+            setPendingCompanies(prev => ({
+                ...prev,
+                data: prev.data.filter(c => c.id !== id),
+                total: prev.total - 1,
+            }));
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Error al rechazar empresa");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-            // Actualizar listas
-            setPendingCompanies(prev => prev.filter(c => c.id !== id));
-            setCompanies(prev => [updated, ...prev]);
-
+    /** 🔄 Cambiar estado */
+    const toggleCompanyState = useCallback(async (id: string | number, estado: "APROBADA" | "INACTIVA") => {
+        try {
+            setLoading(true);
+            const updated = await companyApi.toggleState(id, estado);
+            setCompanies(prev => ({
+                ...prev,
+                data: prev.data.map(c => (c.id === id ? updated : c)),
+            }));
             return updated;
         } catch (err: unknown) {
-            if (err instanceof Error) setError(err.message);
-            else setError("Error desconocido al rechazar empresa");
+            setError(err instanceof Error ? err.message : "Error al cambiar estado de empresa");
             return null;
         } finally {
             setLoading(false);
         }
     }, []);
 
-    /** 🔄 Cambiar estado de empresa (APROBADA ↔ INACTIVA) */
-    const toggleCompanyState = useCallback(
-        async (id: string | number, estado: "APROBADA" | "INACTIVA") => {
-            try {
-                setLoading(true);
-                const updated = await companyApi.toggleState(id, estado);
-
-                // Actualizar lista de empresas
-                setCompanies(prev =>
-                    prev.map(c => (c.id === id ? updated : c))
-                );
-
-                return updated;
-            } catch (err: unknown) {
-                if (err instanceof Error) setError(err.message);
-                else setError("Error desconocido al cambiar estado de empresa");
-                return null;
-            } finally {
-                setLoading(false);
-            }
-        },
-        []
-    );
-
+    /** 🏗️ Crear empresa */
     const createCompany = useCallback(async (data: IRegisterCompanyData) => {
         try {
             setLoading(true);
             await companyApi.create(data);
+            await fetchCompanies();
         } catch (err: unknown) {
-            if (err instanceof Error) setError(err.message);
-            else setError("Error desconocido al crear empresa");
+            setError(err instanceof Error ? err.message : "Error al crear empresa");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [fetchCompanies]);
 
     return {
-        pendingCompanies,
         companies,
+        pendingCompanies,
         loading,
         error,
-        fetchCompanyById,
         fetchCompanies,
-        createCompany,
+        fetchPendingCompanies,
+        fetchCompanyById,
         approveCompany,
         rejectCompany,
         toggleCompanyState,
+        createCompany,
     };
 };
