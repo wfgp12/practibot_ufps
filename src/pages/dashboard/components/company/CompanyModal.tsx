@@ -15,10 +15,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Building2, Mail, Phone, MapPin } from "lucide-react"
 import { toast } from "sonner"
-import type { IRegisterCompanyData } from "@/models/ICompany"
+import type { ICompany, IRegisterCompanyData } from "@/models/ICompany"
 import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
+import { hideLoader, showLoader } from "@/store/slices/uiSlice"
 
-// 🧾 Validación con zod
+
 const empresaSchema = z.object({
   nombre: z.string().min(3, "El nombre es obligatorio"),
   nit: z.string().min(5, "El NIT es obligatorio"),
@@ -32,22 +34,27 @@ const empresaSchema = z.object({
 type CompanyFormSchema = z.infer<typeof empresaSchema>
 
 interface CreateCompanyModalProps {
-  onSubmit: (data: IRegisterCompanyData) => Promise<void>
+  company?: ICompany
+  onSubmit: (data: IRegisterCompanyData, id?: string) => Promise<void>
 }
 
-export const CreateCompanyModal =({ onSubmit }: CreateCompanyModalProps) => {
-    const [open, setOpen] = useState(false)
- 
-    const form = useForm({
+export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => {
+  const dispatch = useAppDispatch()
+  const { loading } = useAppSelector(state => state.ui)
+  const [open, setOpen] = useState(false);
+
+
+
+  const form = useForm<CompanyFormSchema>({
     resolver: zodResolver(empresaSchema),
     defaultValues: {
-      nombre: "",
-      nit: "",
-      telefono: "",
-      direccion: "",
-      email: "",
-      sector: "",
-      descripcion: "",
+      nombre: company?.nombre || "",
+      nit: company?.nit || "",
+      telefono: company?.telefono || "",
+      direccion: company?.direccion || "",
+      email: company?.correo || "",
+      sector: company?.sector || "",
+      descripcion: company?.descripcion || "",
     },
   })
 
@@ -62,28 +69,33 @@ export const CreateCompanyModal =({ onSubmit }: CreateCompanyModalProps) => {
   ]
 
   const handleSubmit = async (values: CompanyFormSchema) => {
+    dispatch(showLoader());
     try {
-      await onSubmit(values)
-      toast.success("Empresa creada correctamente")
+      await onSubmit(values, company?.id)
+      toast.success(company ? "Empresa actualizada correctamente" : "Empresa creada correctamente")
       form.reset()
-       setOpen(false)
+      setOpen(false)
     } catch {
       toast.error("Ocurrió un error al crear la empresa")
+    } finally {
+      dispatch(hideLoader())
     }
   }
+
+  const isEditMode = !!company
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2 bg-red-500 hover:bg-red-800">
           <Building2 className="w-4 h-4" />
-          Crear Empresa
+          {isEditMode ? "Editar Empresa" : "Crear Empresa"}
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Registrar nueva empresa</DialogTitle>
+          <DialogTitle>{isEditMode ? "Editar empresa" : "Registrar nueva empresa"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -123,7 +135,7 @@ export const CreateCompanyModal =({ onSubmit }: CreateCompanyModalProps) => {
 
           <div className="grid gap-3">
             <Label>Sector</Label>
-            <Select onValueChange={(value) => form.setValue("sector", value)}>
+            <Select onValueChange={(value) => form.setValue("sector", value)} value={form.watch("sector")} >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona un sector" />
               </SelectTrigger>
@@ -143,8 +155,8 @@ export const CreateCompanyModal =({ onSubmit }: CreateCompanyModalProps) => {
           </div>
 
           <div className="pt-2 flex justify-end">
-            <Button type="submit" className="w-full bg-red-500 hover:bg-red-800">
-              Registrar Empresa
+            <Button type="submit" className={`w-full disabled:bg-gray-500 bg-red-500 hover:bg-red-800`} disabled={loading}>
+              {loading ? (isEditMode ? "Actualizando..." : "Creando...") : isEditMode ? "Actualizar" : "Registrar Empresa"}
             </Button>
           </div>
         </form>

@@ -2,7 +2,7 @@ import { Button } from "@/components";
 import { Table, type Column } from "@/components/Table";
 import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreateCompanyModal } from "./company/CreateCompanyModal";
+import { CompanyModal } from "./company/CompanyModal";
 
 import { useCompanies } from "@/hooks/useCompanies";
 import type { ICompany } from "@/models/ICompany";
@@ -76,7 +76,7 @@ export const GestionConvenios = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Empresas con convenio</h5>
-                        <CreateCompanyModal onSubmit={createCompany} />
+                        <CompanyModal onSubmit={createCompany} />
                     </div>
 
                     <Table

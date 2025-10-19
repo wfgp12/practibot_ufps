@@ -195,6 +195,36 @@ export const useCompanies = () => {
         }
     }, [fetchCompanies]);
 
+    /** 🔄 Actualizar empresa */
+    const updateCompany = useCallback(
+        async (id: string, data: IRegisterCompanyData) => {
+            try {
+                setLoading(true);
+                const updated = await companyApi.update(id, data);
+
+                // Actualiza la empresa en la lista general
+                setCompanies(prev => ({
+                    ...prev,
+                    data: prev.data.map(c => (c.id === id ? updated : c)),
+                }));
+
+                // También actualiza en pendientes si existiera
+                setPendingCompanies(prev => ({
+                    ...prev,
+                    data: prev.data.map(c => (c.id === id ? updated : c)),
+                }));
+
+                return updated;
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : "Error al actualizar empresa");
+                return null;
+            } finally {
+                setLoading(false);
+            }
+        },
+        []
+    );
+
     return {
         companies,
         pendingCompanies,
@@ -207,5 +237,6 @@ export const useCompanies = () => {
         rejectCompany,
         toggleCompanyState,
         createCompany,
+        updateCompany,
     };
 };

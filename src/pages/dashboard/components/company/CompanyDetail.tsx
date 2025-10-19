@@ -3,16 +3,23 @@ import { useEffect, useState, useCallback } from "react";
 import { ArrowLeft, Building2, Hash, Mail, MapPin, Phone } from "lucide-react";
 
 import { Button, Card, SectionComponent } from "@/components";
-import type { ICompany } from "@/models/ICompany";
+import type { ICompany, IRegisterCompanyData } from "@/models/ICompany";
 import { useCompanies } from "@/hooks/useCompanies";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/store/hooks";
-import { EditCompanyDialog } from "@/components/EditCompanyModal";
+import { CompanyModal } from "./CompanyModal";
 
 export const CompanyDetail = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const { fetchCompanyById, loading, approveCompany, rejectCompany, toggleCompanyState } = useCompanies();
+    const { 
+        loading, 
+        fetchCompanyById, 
+        approveCompany, 
+        rejectCompany, 
+        toggleCompanyState, 
+        updateCompany 
+    } = useCompanies();
     const [company, setCompany] = useState<ICompany | null>(null);
     const { user } = useAppSelector(state => state.auth);
 
@@ -62,6 +69,12 @@ export const CompanyDetail = () => {
         await toggleCompanyState(company.id, newEstado);
         loadCompany();
     };
+
+    const handleEdit = async (data: IRegisterCompanyData, id?: string) => {
+        if (!id) return;
+        const updated = await updateCompany(id, data);
+        if (updated) setCompany(updated);
+    }
 
     return (
         <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0">
@@ -114,9 +127,9 @@ export const CompanyDetail = () => {
                                         <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {company.estado === "APROBADA" ? "Desactivar" : "Activar"}
                                         </Button>
-                                        <EditCompanyDialog
+                                        <CompanyModal
                                             company={company}
-                                            onUpdated={(updated) => setCompany(updated)} // actualiza la UI automáticamente
+                                            onSubmit={handleEdit}
                                         />
                                     </>
                                 ) : null}
