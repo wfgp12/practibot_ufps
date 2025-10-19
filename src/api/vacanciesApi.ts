@@ -1,5 +1,5 @@
 import axiosClient from "./axiosClient";
-import { mapApiVacancies, mapFormToApiVacancy, type IApiVacancy, type IFormCreateVacancy, type Vacancy } from "@/models/IVacancy";
+import { mapApiVacancies, mapFormToApiRegisterVacancy, mapFormToApiVacancy, type IApiVacancy, type IFormCreateVacancy, type IFormRegisterVacancy, type Vacancy } from "@/models/IVacancy";
 
 interface ApiResponse<T> {
     message: string;
@@ -34,6 +34,15 @@ export const vacanciesApi = {
             payload
         );
 
+        return mapApiVacancies([data.data])[0];
+    },
+
+    async registerApproved(form: IFormRegisterVacancy): Promise<Vacancy> {
+        const payload = mapFormToApiRegisterVacancy(form);
+        const { data } = await axiosClient.post<ApiResponse<IApiVacancy>>(
+            "/vacantes/registrar",
+            payload
+        );
         return mapApiVacancies([data.data])[0];
     },
 

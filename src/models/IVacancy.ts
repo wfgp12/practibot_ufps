@@ -33,10 +33,14 @@ export interface IFormCreateVacancy {
   requisitos: string;
 }
 
+export interface IFormRegisterVacancy extends IFormCreateVacancy {
+  empresaId: number;
+}
 
-
-// ✅ Mapper que transforma los datos del backend al formato del frontend
-export const mapApiVacancyToVacancy = (apiVacancy: Partial<IApiVacancy>): Vacancy => ({
+// ✅ API → FRONT
+export const mapApiVacancyToVacancy = (
+  apiVacancy: Partial<IApiVacancy>
+): Vacancy => ({
   id: apiVacancy.id?.toString() ?? crypto.randomUUID(),
   title: apiVacancy.titulo ?? "Sin título",
   modality: apiVacancy.area ?? "No especificado",
@@ -47,18 +51,31 @@ export const mapApiVacancyToVacancy = (apiVacancy: Partial<IApiVacancy>): Vacanc
     ? apiVacancy.requisitos.split(",").map((s) => s.trim())
     : [],
   description: apiVacancy.descripcion,
-  status: apiVacancy.estado === "APROBADA" ? "Open" : "Pending",
+  status:
+    apiVacancy.estado === "APROBADA"
+      ? "Open"
+      : apiVacancy.estado === "INACTIVA"
+      ? "Closed"
+      : "Pending",
 });
 
-// ✅ Mapper para listas
+// ✅ Para listas
 export const mapApiVacancies = (data: Partial<IApiVacancy>[] = []): Vacancy[] =>
   data.map(mapApiVacancyToVacancy);
 
-export const mapFormToApiVacancy = (
-  form: IFormCreateVacancy
-) => ({
+// ✅ FRONT FORM → API BODY (empresa crea vacante)
+export const mapFormToApiVacancy = (form: IFormCreateVacancy) => ({
   titulo: form.titulo,
   descripcion: form.descripcion,
   area: form.modalidad, // 🔁 "modalidad" del form → "area" del back
   requisitos: form.requisitos,
+});
+
+// ✅ FRONT FORM → API BODY (director/admin registra vacante aprobada)
+export const mapFormToApiRegisterVacancy = (form: IFormRegisterVacancy) => ({
+  titulo: form.titulo,
+  descripcion: form.descripcion,
+  area: form.modalidad,
+  requisitos: form.requisitos,
+  empresaId: form.empresaId,
 });

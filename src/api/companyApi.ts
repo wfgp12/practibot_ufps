@@ -1,11 +1,7 @@
-import type { IApiPaginatedResponse } from "@/models/IApi";
+import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 import axiosClient from "./axiosClient";
-import { mapCompanyFromApi, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
+import { mapCompanyFromApi, type CompanyOption, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
 
-interface ApiResponse<T> {
-  data: T;
-  message?: string;
-}
 
 interface PaginationParams {
   page?: number;
@@ -30,7 +26,7 @@ export const companyApi = {
   },
  
   update: async (id: string, data: IRegisterCompanyData): Promise<ICompany> => {
-    const { data: res } = await axiosClient.put<ApiResponse<IApiCompany>>(`/empresas/${id}/editar`, data);
+    const { data: res } = await axiosClient.put<IApiResponse<IApiCompany>>(`/empresas/${id}/editar`, data);
     console.log(res)
     return mapCompanyFromApi(res.data);
   },
@@ -85,4 +81,11 @@ export const companyApi = {
     const { data } = await axiosClient.patch(`/empresas/${id}/estado`, { estado });
     return mapCompanyFromApi(data.data);
   },
+
+  async listCompanies(): Promise<CompanyOption[]> {
+  const { data } = await axiosClient.get<IApiResponse<CompanyOption[]>>(
+    "/empresas/listar"
+  );
+  return data.data;
+}
 };

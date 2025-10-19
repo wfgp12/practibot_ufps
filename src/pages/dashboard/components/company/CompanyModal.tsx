@@ -43,8 +43,6 @@ export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => 
   const { loading } = useAppSelector(state => state.ui)
   const [open, setOpen] = useState(false);
 
-
-
   const form = useForm<CompanyFormSchema>({
     resolver: zodResolver(empresaSchema),
     defaultValues: {

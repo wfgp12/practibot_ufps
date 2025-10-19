@@ -36,6 +36,12 @@ export interface ICompany {
   descripcion: string;
 }
 
+export interface CompanyOption {
+  id: string | number;
+  nombre: string;
+  email: string;
+}
+
 /** 🧠 Mapper para transformar respuesta del backend */
 export const mapCompanyFromApi = (apiCompany: IApiCompany): ICompany => ({
   id: apiCompany.id,

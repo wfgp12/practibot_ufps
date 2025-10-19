@@ -1,9 +1,9 @@
 import { SectionComponent } from "@/components/SectionComponent"
 import { GestionConvenios } from "./components/GestionConvenios"
 import { GestionVacantes } from "./components/GestionVacantes"
-import { GestionEstudiantes } from "./components/GestionEstudiantes"
-import { GestionDocumentos } from "./components/GestionDocumentos"
-import { QuickReports } from "./components/QuickReports"
+// import { GestionEstudiantes } from "./components/GestionEstudiantes"
+// import { GestionDocumentos } from "./components/GestionDocumentos"
+// import { QuickReports } from "./components/QuickReports"
 
 export const AdminDashboard = () => {
 
@@ -16,7 +16,7 @@ export const AdminDashboard = () => {
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
                 <GestionVacantes/>
             </SectionComponent>
-            <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="estudiantes">
+            {/* <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="estudiantes">
                 <GestionEstudiantes/>
             </SectionComponent>
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="documentos">
@@ -24,7 +24,7 @@ export const AdminDashboard = () => {
             </SectionComponent>
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="reportes">
                 <QuickReports/>
-            </SectionComponent>
+            </SectionComponent> */}
         </>
     )
 }

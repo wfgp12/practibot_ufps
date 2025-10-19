@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useVacancies } from "@/hooks/useVacancies";
 import type { Vacancy } from "@/models/IVacancy";
 import { useNavigate } from "react-router";
+import { VacancyModal } from "./vancancy/VacancyModal";
 
 export const GestionVacantes = () => {
-    const { vacancies, pendingVacancies } = useVacancies();
+    const { vacancies, pendingVacancies, registerVacancy } = useVacancies();
     const navigate = useNavigate();
 
     const columnasVacantes: Column<Vacancy>[] = [
@@ -111,9 +112,7 @@ export const GestionVacantes = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Vacantes</h5>
-                        {/* <Button className="bg-green-600 hover:bg-green-700">
-                            Crear nuevo convenio
-                        </Button> */}
+                        <VacancyModal onSubmit={registerVacancy} />
                     </div>
 
                     <Table columns={columnasVacantes} data={vacancies} />

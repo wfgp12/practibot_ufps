@@ -1,15 +1,20 @@
 import { useEffect, useState, useCallback } from "react";
-import type { IFormCreateVacancy, Vacancy } from "@/models/IVacancy";
+import type { IFormCreateVacancy, IFormRegisterVacancy, Vacancy } from "@/models/IVacancy";
 import { vacanciesApi } from "@/api/vacanciesApi";
+import type { CompanyOption } from "@/models/ICompany";
+import { companyApi } from "@/api/companyApi";
 
 interface UseVacanciesReturn {
     vacancies: Vacancy[];
     pendingVacancies: Vacancy[];
+    companiesList: CompanyOption[];
     loading: boolean;
     error: string | null;
     fetchVacancies: () => Promise<void>;
     fetchVacancyById: (id: string) => Promise<Vacancy | null>;
     addVacancy: (vacancy: IFormCreateVacancy) => Promise<void>;
+    fetchListCompanies: () => Promise<void>;
+    registerVacancy: (vacancy: IFormRegisterVacancy) => Promise<void>;
     approveVacancy: (id: string) => Promise<void>;
     rejectVacancy: (id: string) => Promise<void>;
     toggleVacancyStatus: (id: string) => Promise<void>;
@@ -19,6 +24,8 @@ interface UseVacanciesReturn {
 export const useVacancies = (): UseVacanciesReturn => {
     const [vacancies, setVacancies] = useState<Vacancy[]>([]);
     const [pendingVacancies, setPendingVacancies] = useState<Vacancy[]>([]);
+    const [companiesList, setCompaniesList] = useState<CompanyOption[]>([]);
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +41,19 @@ export const useVacancies = (): UseVacanciesReturn => {
 
             setVacancies(approved);
             setPendingVacancies(pending);
+        } catch (err) {
+            setError((err as Error).message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchListCompanies = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await companyApi.listCompanies();
+            setCompaniesList(data);
         } catch (err) {
             setError((err as Error).message);
         } finally {
@@ -61,6 +81,17 @@ export const useVacancies = (): UseVacanciesReturn => {
         setVacancies((prev) => [...prev, newVacancy]);
     };
 
+    const registerVacancy = async (formData: IFormRegisterVacancy) => {
+        setLoading(true);
+        try {
+            const newVacancy = await vacanciesApi.registerApproved(formData);
+            setVacancies((prev) => [...prev, newVacancy]);
+        } catch (err) {
+            setError((err as Error).message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     /** 🟢 Aprobar una vacante pendiente */
     const approveVacancy = async (id: string) => {
@@ -105,6 +136,7 @@ export const useVacancies = (): UseVacanciesReturn => {
     return {
         vacancies,
         pendingVacancies,
+        companiesList,
         loading,
         error,
         fetchVacancies,
@@ -113,6 +145,8 @@ export const useVacancies = (): UseVacanciesReturn => {
         approveVacancy,
         rejectVacancy,
         toggleVacancyStatus,
+        fetchListCompanies,
         removeVacancy,
+        registerVacancy,
     };
 };
