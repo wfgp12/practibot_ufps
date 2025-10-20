@@ -14,7 +14,7 @@ export const VacancyDetail = () => {
     const {
         approveVacancy,
         rejectVacancy,
-        // toggleVacancyStatus,
+        toggleVacancyStatus,
         fetchVacancyById,
         loading
     } = useVacancies();
@@ -89,10 +89,10 @@ export const VacancyDetail = () => {
         navigate("/dashboard");
     };
 
-    // const handleToggleStatus = async () => {
-    //     await toggleVacancyStatus(vacancy.id);
-    //     loadVacancy(); // refresca los datos después de actualizar el estado
-    // };
+    const handleToggleStatus = async () => {
+        await toggleVacancyStatus(vacancy);
+        loadVacancy();
+    };
 
     return (
         <SectionComponent classNameContent="max-w-4xl" classNameContainer="pt-0" id="vacantes">
@@ -135,12 +135,12 @@ export const VacancyDetail = () => {
 
                                 {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
                                     <>
-                                        {/* <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
+                                        <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {vacancy.status === "Open" ? "Desactivar" : "Activar"}
                                         </Button>
                                         <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar vacante")}>
                                             Editar
-                                        </Button> */}
+                                        </Button>
                                     </>
                                 ) : null}
                             </>

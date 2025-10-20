@@ -214,21 +214,30 @@ export const useVacancies = () => {
     }
   }, []);
 
-  /** ⚙️ Cambiar estado */
-  const toggleVacancyStatus = useCallback(
-    async (id: string) => {
-      try {
-        setLoading(true);
-        await vacanciesApi.toggleStatus(id);
-        await fetchVacancies();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error al cambiar estado de vacante");
-      } finally {
-        setLoading(false);
+  /** ⚙️ Cambiar estado (activar o inactivar) */
+const toggleVacancyStatus = useCallback(
+  async (vacante: Vacancy) => {
+    try {
+      setLoading(true);
+
+      if (vacante.status === "Closed") {
+        // Si está inactiva o cerrada → activarla
+        await vacanciesApi.activate(vacante.id);
+      } else {
+        // Si está activa → inactivarla
+        await vacanciesApi.inactivate(vacante.id);
       }
-    },
-    [fetchVacancies]
-  );
+
+      // 🔄 Refrescar lista principal
+      await fetchVacancies();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cambiar estado de la vacante");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [fetchVacancies]
+);
 
   /** 🔁 Cargar ambos listados al iniciar */
   useEffect(() => {

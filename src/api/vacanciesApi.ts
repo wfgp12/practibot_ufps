@@ -89,8 +89,13 @@ export const vacanciesApi = {
         await axiosClient.patch(`/vacantes/${id}/rechazar`);
     },
 
-    /** ⚙️ Cambiar estado (Open/Closed) */
-    async toggleStatus(id: string): Promise<void> {
-        await axiosClient.patch(`/vacantes/${id}/toggle`);
+    /** 🟢 Activar vacante inactiva */
+    async activate(id: string): Promise<void> {
+        await axiosClient.patch(`/vacantes/${id}/activar`);
+    },
+
+    /** 🔴 Inactivar vacante activa */
+    async inactivate(id: string): Promise<void> {
+        await axiosClient.patch(`/vacantes/${id}/inactivar`);
     },
 };
