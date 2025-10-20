@@ -27,8 +27,6 @@ export const authApi = {
       }
 
     } catch (error) {
-      console.log('error', error)
-
       const axiosError = error as AxiosError<{ message: string }>;
       if (axiosError.response?.data?.message) {
         throw new Error(axiosError.response.data.message);

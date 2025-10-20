@@ -20,8 +20,6 @@ export const CompanyRegister = () => {
     try {
       dispatch(showLoader())
 
-      console.log({data})
-
       await companyApi.register(data)
       toast.success("Solicitud enviada correctamente. Su empresa será revisada.")
       navigate(-1)

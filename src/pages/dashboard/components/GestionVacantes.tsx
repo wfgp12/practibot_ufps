@@ -13,8 +13,6 @@ export const GestionVacantes = () => {
     const { vacancies, pendingVacancies, registerVacancy, fetchVacancies, fetchPendingVacancies } = useVacancies();
     const navigate = useNavigate();
 
-    console.log({vacancies}, {pendingVacancies});
-
     const columnasVacantes: Column<Vacancy>[] = [
         { key: "title", title: "Título" },
         { key: "company", title: "Empresa", filterType: "text" },

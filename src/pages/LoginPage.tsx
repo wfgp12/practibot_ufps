@@ -47,9 +47,7 @@ export const LoginPage = () => {
 
       // Obtener token de Firebase y enviar al backend
       const idToken = await user.getIdToken();
-      const loginResult = await dispatch(loginThunk({ googleToken: idToken })).unwrap();
-
-      console.log("✅ Login institucional:", loginResult);
+      await dispatch(loginThunk({ googleToken: idToken })).unwrap();
       navigate("/dashboard");
     } catch (err) {
       console.error("❌ Error en login institucional:", err);
