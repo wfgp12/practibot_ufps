@@ -32,6 +32,7 @@ import type { IFormRegisterVacancy } from "@/models/IVacancy";
 const vacancySchema = z.object({
     empresaId: z.string().min(1, "Selecciona una empresa"),
     titulo: z.string().min(3, "El título es obligatorio"),
+    area: z.string().min(3, "El área es obligatoria"),
     modalidad: z.string().min(3, "La modalidad es obligatoria"),
     tipoJornada: z.string().min(3, "El tipo de jornada es obligatoria"),
     descripcion: z.string().min(10, "Agrega una descripción más detallada"),
@@ -56,7 +57,7 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
         defaultValues: {
             empresaId: String(vacancy?.empresaId) || "",
             titulo: vacancy?.titulo || "",
-            modalidad: vacancy?.modalidad || "",
+            area: vacancy?.area || "",
             tipoJornada: vacancy?.tipoJornada || "",
             descripcion: vacancy?.descripcion || "",
             requisitos: vacancy?.requisitos || "",
@@ -122,9 +123,9 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                         <div className="flex items-center gap-2">
                             <Building2 className="w-4 h-4 text-gray-500" />
                             <Select
-                                onValueChange={(value) => form.setValue("empresaId", value)}
-                                defaultValue={form.watch("empresaId") || undefined}
-
+                                key={form.watch("empresaId")} 
+                                value={form.watch("empresaId")}
+                                onValueChange={(val) => form.setValue("empresaId", val)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecciona una empresa" />
@@ -146,6 +147,15 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                         <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4 text-gray-500" />
                             <Input {...form.register("titulo")} placeholder="Ej: Desarrollador Frontend" />
+                        </div>
+                    </div>
+
+                    {/* Area */}
+                    <div className="grid gap-3">
+                        <Label>Area</Label>
+                        <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-gray-500" />
+                            <Input {...form.register("area")} placeholder="Ej: Desarrollador, DevOps, Frontend" />
                         </div>
                     </div>
 

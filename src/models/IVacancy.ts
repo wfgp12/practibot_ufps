@@ -29,6 +29,7 @@ export interface IApiVacancy {
 export interface IFormCreateVacancy {
   titulo: string;
   modalidad: string;
+  area: string;
   tipoJornada: string;
   descripcion: string;
   requisitos: string;
@@ -64,17 +65,17 @@ export const mapApiVacancies = (data: Partial<IApiVacancy>[] = []): Vacancy[] =>
 export const mapFormToApiVacancy = (form: IFormCreateVacancy) => ({
   titulo: form.titulo,
   descripcion: form.descripcion,
-  area: form.modalidad, // 🔁 "modalidad" del form → "area" del back
+  area: form.area, // 🔁 "modalidad" del form → "area" del back
   requisitos: form.requisitos,
 });
 
 // ✅ FRONT FORM → API BODY (director/admin registra vacante aprobada)
-export const mapFormToApiRegisterVacancy = (form: IFormRegisterVacancy) => ({
-  titulo: form.titulo,
-  descripcion: form.descripcion,
-  area: form.modalidad,
-  requisitos: form.requisitos,
-  empresaId: form.empresaId,
+export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>) => ({
+  titulo: form?.titulo ?? "",
+  descripcion: form?.descripcion ?? "",
+  area: form?.area ?? "",
+  requisitos: form?.requisitos ?? "",
+  empresaId: form?.empresaId ?? 0,
 });
 
 export type VacancyFilters = Partial<
@@ -138,3 +139,16 @@ export const mapApiStatusToFront = (estado?: IApiVacancy["estado"]): Vacancy["st
       return "Open";
   }
 };
+
+export const mapVacancyToFormRegisterVacancy = (
+  vacancy: Vacancy,
+  empresaId: number
+): IFormRegisterVacancy => ({
+  titulo: vacancy.title,
+  area: vacancy.area,
+  modalidad: vacancy.modality,
+  tipoJornada: vacancy.workday,
+  descripcion: vacancy.description ?? "",
+  requisitos: vacancy.skills.join(","),
+  empresaId,
+});

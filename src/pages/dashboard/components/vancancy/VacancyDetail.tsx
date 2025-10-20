@@ -3,10 +3,12 @@ import { useEffect, useState, useCallback } from "react";
 import { ArrowLeft, Briefcase, Building2, Clock, MapPin, Wrench } from "lucide-react";
 
 import { Badge, Button, Card, SectionComponent } from "@/components";
-import type { Vacancy } from "@/models/IVacancy";
-import { useVacancies } from "@/hooks/useVacancies";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useVacancies } from "@/hooks/useVacancies";
+import { VacancyModal } from "./VacancyModal";
 import { useAppSelector } from "@/store/hooks";
+
+import { mapVacancyToFormRegisterVacancy, type Vacancy } from "@/models/IVacancy";
 
 export const VacancyDetail = () => {
     const navigate = useNavigate();
@@ -16,6 +18,7 @@ export const VacancyDetail = () => {
         rejectVacancy,
         toggleVacancyStatus,
         fetchVacancyById,
+        updateVacancy,
         loading
     } = useVacancies();
 
@@ -138,9 +141,13 @@ export const VacancyDetail = () => {
                                         <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
                                             {vacancy.status === "Open" ? "Desactivar" : "Activar"}
                                         </Button>
-                                        <Button className="bg-white text-[#AA1916] border border-[#AA1916] hover:bg-[#AA1916] hover:text-white" onClick={() => console.log("Editar vacante")}>
-                                            Editar
-                                        </Button>
+                                        <VacancyModal
+                                            vacancy={mapVacancyToFormRegisterVacancy(vacancy, Number(id))}
+                                            onSubmit={async (data, vacancyId) => {
+                                                await updateVacancy(data, vacancyId);
+                                                await loadVacancy();
+                                            }}
+                                        />
                                     </>
                                 ) : null}
                             </>

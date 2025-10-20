@@ -74,6 +74,17 @@ export const vacanciesApi = {
         return mapApiVacancies([data.data])[0];
     },
 
+    /** 🟡 Actualizar vacante (solo ADMIN o DIRECTOR) */
+    async updateAdminDirector(idVacancy: string, vacancy: IFormCreateVacancy | Partial<IFormCreateVacancy>): Promise<Vacancy> {
+        const payload = mapFormToApiRegisterVacancy(vacancy); // o crea un map específico si quieres
+        const { data } = await axiosClient.put<ApiResponse<IApiVacancy>>(
+            `/vacantes/${idVacancy}/editar`,
+            payload
+        );
+
+        return mapApiVacancies([data.data])[0];
+    },
+
     async getById(id: string): Promise<Vacancy> {
         const { data } = await axiosClient.get<ApiResponse<IApiVacancy>>(`/vacantes/${id}`);
         return mapApiVacancies([data.data])[0];

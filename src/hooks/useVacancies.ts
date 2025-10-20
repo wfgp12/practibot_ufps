@@ -176,6 +176,21 @@ export const useVacancies = () => {
     [fetchVacancies]
   );
 
+  const updateVacancy = useCallback(
+  async (formData: IFormRegisterVacancy, id?: string) => {
+    try {
+      setLoading(true);
+      await vacanciesApi.updateAdminDirector(id!, formData);
+      await fetchVacancies();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al actualizar la vacante");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [fetchVacancies]
+);
+
   /** 🟢 Aprobar vacante */
   const approveVacancy = useCallback(
     async (id: string) => {
@@ -261,5 +276,6 @@ const toggleVacancyStatus = useCallback(
     toggleVacancyStatus,
     fetchListCompanies,
     registerVacancy,
+    updateVacancy,
   };
 };
