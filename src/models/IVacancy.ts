@@ -3,13 +3,14 @@ import type { IApiCompany } from "./ICompany"
 export interface Vacancy {
   id: string
   title: string
+  area: string
   modality: string
   company: string
   location: string
   workday: string
   skills: string[]
   description?: string
-  status: "Open" | "Closed" | "Pending"
+  status: "Open" | "Closed" | "Pending" | "Rejected";
 }
 
 export interface IApiVacancy {
@@ -18,7 +19,7 @@ export interface IApiVacancy {
   area: string;
   descripcion: string;
   requisitos: string;
-  estado: string;
+  estado: "PENDIENTE" | "APROBADA" | "INACTIVA" | "RECHAZADA";
   empresa: IApiCompany;
   empresaId: number;
   directorValidaId: number;
@@ -43,6 +44,7 @@ export const mapApiVacancyToVacancy = (
 ): Vacancy => ({
   id: apiVacancy.id?.toString() ?? crypto.randomUUID(),
   title: apiVacancy.titulo ?? "Sin título",
+  area: apiVacancy.area ?? "No especificado",
   modality: apiVacancy.area ?? "No especificado",
   company: apiVacancy.empresa?.usuario?.nombre ?? "Sin empresa",
   location: "Colombia",
@@ -51,12 +53,7 @@ export const mapApiVacancyToVacancy = (
     ? apiVacancy.requisitos.split(",").map((s) => s.trim())
     : [],
   description: apiVacancy.descripcion,
-  status:
-    apiVacancy.estado === "APROBADA"
-      ? "Open"
-      : apiVacancy.estado === "INACTIVA"
-      ? "Closed"
-      : "Pending",
+  status: mapApiStatusToFront(apiVacancy.estado),
 });
 
 // ✅ Para listas
@@ -79,3 +76,65 @@ export const mapFormToApiRegisterVacancy = (form: IFormRegisterVacancy) => ({
   requisitos: form.requisitos,
   empresaId: form.empresaId,
 });
+
+export type VacancyFilters = Partial<
+  Pick<
+    Vacancy,
+    | "title"
+    | "company"
+    | "modality"
+    | "area"
+    | "location"
+    | "workday"
+    | "status"
+    | "skills"
+  >
+>;
+
+/** FRONT → BACK */
+export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
+  const mapped: Record<string, string> = {};
+
+  if (filters.title) mapped.titulo = filters.title;
+  if (filters.company) mapped.empresa = filters.company;
+  if (filters.area) mapped.area = filters.area;
+  if (filters.modality) mapped.modalidad = filters.modality;
+  if (filters.location) mapped.ubicacion = filters.location;
+  if (filters.workday) mapped.tipoJornada = filters.workday;
+  if (filters.status)
+    mapped.estado = mapFrontStatusToApi(filters.status);
+  if (filters.skills?.length)
+    mapped.requisitos = filters.skills.join(",");
+
+  return mapped;
+};
+
+export const mapFrontStatusToApi = (status: Vacancy["status"]): IApiVacancy["estado"] => {
+  switch (status) {
+    case "Open":
+      return "APROBADA";
+    case "Closed":
+      return "INACTIVA";
+    case "Pending":
+      return "PENDIENTE";
+    case "Rejected":
+      return "RECHAZADA";
+    default:
+      return "APROBADA";
+  }
+};
+
+export const mapApiStatusToFront = (estado?: IApiVacancy["estado"]): Vacancy["status"] => {
+  switch (estado) {
+    case "APROBADA":
+      return "Open";
+    case "INACTIVA":
+      return "Closed";
+    case "PENDIENTE":
+      return "Pending";
+    case "RECHAZADA":
+      return "Rejected";
+    default:
+      return "Open";
+  }
+};

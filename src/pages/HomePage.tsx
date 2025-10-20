@@ -33,7 +33,7 @@ export const HomePage = () => {
   const dispatch = useAppDispatch();
   const { vacancyModalOpen, selectedVacancyId } = useAppSelector((state) => state.ui);
 
-  const selectedVacancy = vacancies.find(v => v.id === selectedVacancyId);
+  const selectedVacancy = vacancies.data.find(v => v.id === selectedVacancyId);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -79,7 +79,7 @@ export const HomePage = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {
-            vacancies.slice(0, 6).map((vacancy, idx) => (
+            vacancies.data.slice(0, 6).map((vacancy, idx) => (
               <VacancyCard
                 key={idx}
                 title={vacancy.title}

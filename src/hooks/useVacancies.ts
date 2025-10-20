@@ -1,152 +1,256 @@
 import { useEffect, useState, useCallback } from "react";
-import type { IFormCreateVacancy, IFormRegisterVacancy, Vacancy } from "@/models/IVacancy";
+import { mapVacancyFiltersToApi, type IFormCreateVacancy, type IFormRegisterVacancy, type Vacancy } from "@/models/IVacancy";
 import { vacanciesApi } from "@/api/vacanciesApi";
 import type { CompanyOption } from "@/models/ICompany";
 import { companyApi } from "@/api/companyApi";
+import type { IApiPaginatedResponse } from "@/models/IApi";
 
-interface UseVacanciesReturn {
-    vacancies: Vacancy[];
-    pendingVacancies: Vacancy[];
-    companiesList: CompanyOption[];
-    loading: boolean;
-    error: string | null;
-    fetchVacancies: () => Promise<void>;
-    fetchVacancyById: (id: string) => Promise<Vacancy | null>;
-    addVacancy: (vacancy: IFormCreateVacancy) => Promise<void>;
-    fetchListCompanies: () => Promise<void>;
-    registerVacancy: (vacancy: IFormRegisterVacancy) => Promise<void>;
-    approveVacancy: (id: string) => Promise<void>;
-    rejectVacancy: (id: string) => Promise<void>;
-    toggleVacancyStatus: (id: string) => Promise<void>;
-    removeVacancy: (id: string) => void;
+interface TableState<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  filters: Record<string, string>;
 }
 
-export const useVacancies = (): UseVacanciesReturn => {
-    const [vacancies, setVacancies] = useState<Vacancy[]>([]);
-    const [pendingVacancies, setPendingVacancies] = useState<Vacancy[]>([]);
-    const [companiesList, setCompaniesList] = useState<CompanyOption[]>([]);
+export const useVacancies = () => {
+  const [vacancies, setVacancies] = useState<TableState<Vacancy>>({
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    filters: {},
+  });
 
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+  const [pendingVacancies, setPendingVacancies] = useState<TableState<Vacancy>>({
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    filters: {},
+  });
 
-    /** 🔄 Obtener vacantes desde el backend */
-    const fetchVacancies = useCallback(async () => {
+  const [companiesList, setCompaniesList] = useState<CompanyOption[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /** 📦 Obtener vacantes aprobadas */
+  const fetchVacancies = useCallback(
+    async (params?: Partial<TableState<Vacancy>>) => {
+      try {
         setLoading(true);
         setError(null);
-        try {
-            const [approved, pending] = await Promise.all([
-                vacanciesApi.getApproved(),
-                vacanciesApi.getPending(),
-            ]);
 
-            setVacancies(approved);
-            setPendingVacancies(pending);
-        } catch (err) {
-            setError((err as Error).message);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        // 🔹 Limpiar filtros (evita enviar valores vacíos o "all")
+        const cleanFilters = Object.fromEntries(
+          Object.entries(params?.filters ?? {}).filter(
+            ([, value]) => value && value.toLowerCase() !== "all"
+          )
+        );
 
-    const fetchListCompanies = useCallback(async () => {
+        const mappedFilters = mapVacancyFiltersToApi(cleanFilters);
+
+        const query = {
+          page: params?.page ?? vacancies.page,
+          limit: params?.pageSize ?? vacancies.pageSize,
+          ...mappedFilters,
+        };
+
+        const response: IApiPaginatedResponse<Vacancy> =
+          await vacanciesApi.getApproved(query);
+
+        setVacancies((prev) => ({
+          ...prev,
+          data: response.data,
+          total: response.total,
+          page: response.page,
+          pageSize: params?.pageSize ?? prev.pageSize,
+          filters: params?.filters ?? prev.filters,
+        }));
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al obtener vacantes aprobadas");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [vacancies.page, vacancies.pageSize]
+  );
+
+  /** 📦 Obtener vacantes pendientes */
+  const fetchPendingVacancies = useCallback(
+    async (params?: Partial<TableState<Vacancy>>) => {
+      try {
         setLoading(true);
         setError(null);
-        try {
-            const data = await companyApi.listCompanies();
-            setCompaniesList(data);
-        } catch (err) {
-            setError((err as Error).message);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
 
-    const fetchVacancyById = useCallback(async (id: string): Promise<Vacancy | null> => {
+        const cleanFilters = Object.fromEntries(
+          Object.entries(params?.filters ?? {}).filter(
+            ([, value]) => value && value.toLowerCase() !== "all"
+          )
+        );
+
+        const mappedFilters = mapVacancyFiltersToApi(cleanFilters);
+
+        const query = {
+          page: params?.page ?? pendingVacancies.page,
+          limit: params?.pageSize ?? pendingVacancies.pageSize,
+          ...mappedFilters,
+        };
+
+        const response: IApiPaginatedResponse<Vacancy> =
+          await vacanciesApi.getPending(query);
+
+        setPendingVacancies((prev) => ({
+          ...prev,
+          data: response.data,
+          total: response.total,
+          page: response.page,
+          pageSize: params?.pageSize ?? prev.pageSize,
+          filters: params?.filters ?? prev.filters,
+        }));
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error al obtener vacantes pendientes");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pendingVacancies.page, pendingVacancies.pageSize]
+  );
+
+  /** 🏢 Listado de empresas */
+  const fetchListCompanies = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await companyApi.listCompanies();
+      setCompaniesList(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al obtener empresas");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /** 🔍 Obtener vacante por ID */
+  const fetchVacancyById = useCallback(async (id: string): Promise<Vacancy | null> => {
+    try {
+      setLoading(true);
+      const vacante = await vacanciesApi.getById(id);
+      return vacante;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al obtener vacante");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /** 🆕 Crear vacante */
+  const addVacancy = useCallback(
+    async (formData: IFormCreateVacancy) => {
+      try {
         setLoading(true);
-        setError(null);
-        try {
-            const vacante = await vacanciesApi.getById(id);
-            return vacante;
-        } catch (err) {
-            setError((err as Error).message);
-            return null;
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        await vacanciesApi.create(formData);
+        await fetchPendingVacancies();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al crear vacante");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchPendingVacancies]
+  );
 
-    /** 🆕 Crear una nueva vacante (queda pendiente) */
-    const addVacancy = async (formData: IFormCreateVacancy) => {
-        const newVacancy = await vacanciesApi.create(formData);
-        setVacancies((prev) => [...prev, newVacancy]);
-    };
-
-    const registerVacancy = async (formData: IFormRegisterVacancy) => {
+  /** 📝 Registrar vacante aprobada */
+  const registerVacancy = useCallback(
+    async (formData: IFormRegisterVacancy) => {
+      try {
         setLoading(true);
-        try {
-            const newVacancy = await vacanciesApi.registerApproved(formData);
-            setVacancies((prev) => [...prev, newVacancy]);
-        } catch (err) {
-            setError((err as Error).message);
-        } finally {
-            setLoading(false);
-        }
-    };
+        await vacanciesApi.registerApproved(formData);
+        await fetchVacancies();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al registrar vacante");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchVacancies]
+  );
 
-    /** 🟢 Aprobar una vacante pendiente */
-    const approveVacancy = async (id: string) => {
-        try {
-            await vacanciesApi.approve(id);
-            await fetchVacancies();
-        } catch (err) {
-            setError((err as Error).message);
-        }
-    };
+  /** 🟢 Aprobar vacante */
+  const approveVacancy = useCallback(
+    async (id: string) => {
+      try {
+        setLoading(true);
+        await vacanciesApi.approve(id);
+        setPendingVacancies((prev) => ({
+          ...prev,
+          data: prev.data.filter((v) => v.id !== id),
+          total: prev.total - 1,
+        }));
+        await fetchVacancies();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al aprobar vacante");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchVacancies]
+  );
 
-    /** 🔴 Rechazar una vacante pendiente */
-    const rejectVacancy = async (id: string) => {
-        try {
-            await vacanciesApi.reject(id);
-            await fetchVacancies();
-        } catch (err) {
-            setError((err as Error).message);
-        }
-    };
+  /** ❌ Rechazar vacante */
+  const rejectVacancy = useCallback(async (id: string) => {
+    try {
+      setLoading(true);
+      await vacanciesApi.reject(id);
+      setPendingVacancies((prev) => ({
+        ...prev,
+        data: prev.data.filter((v) => v.id !== id),
+        total: prev.total - 1,
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al rechazar vacante");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    /** ✏️ Alternar estado (Open / Closed) */
-    const toggleVacancyStatus = async (id: string) => {
-        try {
-            await vacanciesApi.toggleStatus(id);
-            await fetchVacancies();
-        } catch (err) {
-            setError((err as Error).message);
-        }
-    };
+  /** ⚙️ Cambiar estado */
+  const toggleVacancyStatus = useCallback(
+    async (id: string) => {
+      try {
+        setLoading(true);
+        await vacanciesApi.toggleStatus(id);
+        await fetchVacancies();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error al cambiar estado de vacante");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchVacancies]
+  );
 
-    /** 🗑️ Eliminar vacante localmente (si aplica) */
-    const removeVacancy = (id: string) => {
-        setVacancies((prev) => prev.filter((v) => v.id !== id));
-    };
+  /** 🔁 Cargar ambos listados al iniciar */
+  useEffect(() => {
+    (async () => {
+      await Promise.all([fetchVacancies(), fetchPendingVacancies()]);
+    })();
+  }, [fetchVacancies, fetchPendingVacancies]);
 
-    // Llamar automáticamente al cargar el componente
-    useEffect(() => {
-        fetchVacancies();
-    }, [fetchVacancies]);
-
-    return {
-        vacancies,
-        pendingVacancies,
-        companiesList,
-        loading,
-        error,
-        fetchVacancies,
-        fetchVacancyById,
-        addVacancy,
-        approveVacancy,
-        rejectVacancy,
-        toggleVacancyStatus,
-        fetchListCompanies,
-        removeVacancy,
-        registerVacancy,
-    };
+  return {
+    vacancies,
+    pendingVacancies,
+    companiesList,
+    loading,
+    error,
+    fetchVacancies,
+    fetchPendingVacancies,
+    fetchVacancyById,
+    addVacancy,
+    approveVacancy,
+    rejectVacancy,
+    toggleVacancyStatus,
+    fetchListCompanies,
+    registerVacancy,
+  };
 };

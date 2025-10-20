@@ -1,3 +1,4 @@
+import type { IApiPaginatedResponse } from "@/models/IApi";
 import axiosClient from "./axiosClient";
 import { mapApiVacancies, mapFormToApiRegisterVacancy, mapFormToApiVacancy, type IApiVacancy, type IFormCreateVacancy, type IFormRegisterVacancy, type Vacancy } from "@/models/IVacancy";
 
@@ -8,22 +9,49 @@ interface ApiResponse<T> {
 }
 
 export const vacanciesApi = {
-    /** 🟢 Obtener vacantes aprobadas */
-    async getApproved(): Promise<Vacancy[]> {
-        const { data } = await axiosClient.get<ApiResponse<IApiVacancy[]>>(
-            "/vacantes/aprobadas"
+    /** 🟢 Obtener vacantes aprobadas (con filtros y paginación) */
+    async getApproved(params?: {
+        page?: number;
+        limit?: number;
+        titulo?: string;
+        empresa?: string;
+        estado?: string;
+        modalidad?: string;
+    }): Promise<IApiPaginatedResponse<Vacancy>> {
+        const { data } = await axiosClient.get<IApiPaginatedResponse<IApiVacancy>>(
+            "/vacantes/aprobadas",
+            { params }
         );
-        const mapped = mapApiVacancies(data.data);
-        return mapped;
+        const pageSize = params?.limit ?? 10;
+
+        return {
+            data: mapApiVacancies(data.data),
+            total: data.total,
+            page: data.page,
+            pageSize, // ✅ agregado para cumplir con la interfaz
+        };
     },
 
-    /** 🟡 Obtener vacantes pendientes */
-    async getPending(): Promise<Vacancy[]> {
-        const { data } = await axiosClient.get<ApiResponse<IApiVacancy[]>>(
-            "/vacantes/pendientes"
+    /** 🟡 Obtener vacantes pendientes (con filtros y paginación) */
+    async getPending(params?: {
+        page?: number;
+        limit?: number;
+        titulo?: string;
+        empresa?: string;
+        modalidad?: string;
+    }): Promise<IApiPaginatedResponse<Vacancy>> {
+        const { data } = await axiosClient.get<IApiPaginatedResponse<IApiVacancy>>(
+            "/vacantes/pendientes",
+            { params }
         );
-        const mapped = mapApiVacancies(data.data);
-        return mapped;
+        const pageSize = params?.limit ?? 10;
+
+        return {
+            data: mapApiVacancies(data.data),
+            total: data.total,
+            page: data.page,
+            pageSize, // ✅ agregado
+        };
     },
 
     /** 🆕 Crear una nueva vacante */
