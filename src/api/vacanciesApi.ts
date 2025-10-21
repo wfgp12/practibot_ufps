@@ -53,6 +53,21 @@ export const vacanciesApi = {
             pageSize, // ✅ agregado
         };
     },
+    getByCompany : async (params?: {
+        page?: number;
+        limit?: number;
+        titulo?: string;
+        estado?: string;
+        requisitos?: string;
+    }) => {
+        const { data } = await axiosClient.get<IApiPaginatedResponse<IApiVacancy>>('/vacantes/empresa', { params });
+        return {
+            data: mapApiVacancies(data.data),
+            total: data.total,
+            page: data.page,
+            pageSize: params?.limit ?? 10, // ✅ agregado
+        };
+    },
 
     /** 🆕 Crear una nueva vacante */
     async create(vacancy: IFormCreateVacancy): Promise<Vacancy> {

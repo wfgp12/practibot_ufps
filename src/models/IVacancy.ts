@@ -79,8 +79,7 @@ export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>)
 });
 
 export type VacancyFilters = Partial<
-  Pick<
-    Vacancy,
+  Pick<Vacancy,
     | "title"
     | "company"
     | "modality"
@@ -88,15 +87,17 @@ export type VacancyFilters = Partial<
     | "location"
     | "workday"
     | "status"
-    | "skills"
   >
->;
+> & {
+  skills?: string; 
+};
 
 /** FRONT → BACK */
 export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
   const mapped: Record<string, string> = {};
 
   if (filters.title) mapped.titulo = filters.title;
+  if (filters.skills) mapped.requisitos = filters.skills as string;
   if (filters.company) mapped.empresa = filters.company;
   if (filters.area) mapped.area = filters.area;
   if (filters.modality) mapped.modalidad = filters.modality;
@@ -104,9 +105,7 @@ export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
   if (filters.workday) mapped.tipoJornada = filters.workday;
   if (filters.status)
     mapped.estado = mapFrontStatusToApi(filters.status);
-  if (filters.skills?.length)
-    mapped.requisitos = filters.skills.join(",");
-
+ 
   return mapped;
 };
 

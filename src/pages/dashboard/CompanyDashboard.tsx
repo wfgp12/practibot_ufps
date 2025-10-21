@@ -5,9 +5,87 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { useCompany } from "@/hooks/useCompany";
 import { CreateVacancyCard } from "./components/CreateVacancyCard ";
+import { ChangePasswordCard } from "@/components/ChangePasswordCard";
+import { Badge, Button, Table, type Column } from "@/components";
+import type { Vacancy } from "@/models/IVacancy";
+import { useNavigate } from "react-router";
+import { useVacancies } from "@/hooks/useVacancies";
 
 export const CompanyDashboard = () => {
   const { company, loading, error } = useCompany();
+  const navigate = useNavigate();
+
+  const { companyVacancies, fetchCompanyVacancies } = useVacancies();
+
+  const columnasVacantes: Column<Vacancy>[] = [
+    { key: "title", title: "Título" },
+    {
+      key: "area",
+      title: "Area",
+      filterType: "text",
+    },
+    {
+      key: "skills",
+      title: "Habilidades",
+      filterType: "text",
+      render: (skills) => {
+        if (!Array.isArray(skills) || skills.length === 0) return "—";
+
+        const visibleSkills = skills.slice(0, 3);
+        const hasMore = skills.length > 3;
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {visibleSkills.map((skill, index) => (
+              <Badge key={index} variant="outline">
+                {skill}
+              </Badge>
+            ))}
+            {hasMore && (
+              <Badge variant="secondary" className="opacity-70">
+                ...
+              </Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "status",
+      align: "center",
+      title: "Estado",
+      filterType: "select",
+      filterOptions: [
+        { label: "Abierto", value: "Open" },
+        { label: "Cerrado", value: "Closed" },
+      ],
+      render: (status) => (
+        <Badge
+          variant="outline"
+          className={`
+                        ${status === "Open" ? "border-green-500 text-green-500" : ""}
+                        ${status === "Closed" ? "border-red-500 text-red-500" : ""}
+                    `}
+        >
+          {status === "Open" ? "Abierto" : "Cerrado"}
+        </Badge>
+      ),
+    },
+    {
+      key: "id",
+      title: "Acciones",
+      align: "center",
+      render: (_value, record) => (
+        <Button
+          className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+          variant="outline"
+          onClick={() => navigate(`/dashboard/vacancy/${record.id}`)}
+        >
+          Ver detalle
+        </Button>
+      ),
+    },
+  ];
 
   if (loading)
     return (
@@ -80,8 +158,32 @@ export const CompanyDashboard = () => {
         </Card>
       </SectionComponent>
 
+      <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="change-password">
+        <ChangePasswordCard />
+      </SectionComponent>
+
       <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
         <CreateVacancyCard />
+      </SectionComponent>
+
+      <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
+        <Card className="w-full">
+          <CardHeader className="flex flex-col gap-1">
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              Vacantes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table
+              columns={columnasVacantes}
+              data={companyVacancies.data}
+              page={companyVacancies.page}
+              total={companyVacancies.total}
+              pageSize={companyVacancies.pageSize}
+              onChange={({ filters, page }) => fetchCompanyVacancies({ filters, page })}
+            />
+          </CardContent>
+        </Card>
       </SectionComponent>
     </div>
   );
