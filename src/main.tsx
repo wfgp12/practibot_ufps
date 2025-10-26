@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router'
+import { HashRouter } from 'react-router'
 import { Provider } from 'react-redux'
 
 import App from './App.tsx'
@@ -10,10 +10,12 @@ import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
-    <BrowserRouter>
+    {/* <BrowserRouter> */}
+    <HashRouter >
       <StrictMode>
         <App />
       </StrictMode>
-    </BrowserRouter>
+    </HashRouter>
+    {/* </BrowserRouter> */}
   </Provider>
 )
