@@ -45,9 +45,19 @@ export const HomePage = () => {
           Encuentra y gestiona tus prácticas con apoyo del chatbot UFPS. Conectamos estudiantes de Ingeniería de Sistemas con las mejores oportunidades.
         </p>
         <div className="w-full flex justify-center items-center gap-4">
-          <a href="#vacantes" className="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
+          <button
+            onClick={() => {
+              const section = document.getElementById("vacantes");
+              if (section) {
+                section.scrollIntoView({ behavior: "smooth" });
+              } else {
+                console.warn("No se encontró la sección con id='vacantes'");
+              }
+            }}
+            className="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110"
+          >
             Explora vacantes
-          </a>
+          </button>
           <button onClick={() => navigate("/login")} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transform transition-transform duration-300 hover:scale-110">
             Acceder
           </button>

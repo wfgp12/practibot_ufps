@@ -25,23 +25,24 @@ function App() {
   }, [dispatch]);
 
   useEffect(() => {
-		createChat({
-			webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
-      initialMessages: [
-        '¡Hola! 👋',
-        'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
-      ],
-      i18n: {
-        en: {
-          title: '¡Hola! 👋',
-          subtitle: "Inicia un chat. Estamos aquí para ayudarte 24/7.",
-          footer: '',
-          getStarted: 'Nueva Conversación',
-          inputPlaceholder: 'Escribe tu pregunta..',
-        },
+  createChat({
+    webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
+    initialMessages: [
+      '¡Hola! 👋',
+      'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
+    ],
+    i18n: {
+      en: {
+        title: '¡Hola! 👋',
+        subtitle: "Inicia un chat. Estamos aquí para ayudarte 24/7.",
+        footer: '',
+        getStarted: 'Nueva Conversación',
+        inputPlaceholder: 'Escribe tu pregunta..',
+        closeButtonTooltip: 'Cerrar', // <- obligatorio
       },
-		});
-	}, []);
+    },
+  });
+}, []);
 
   return (
     <>
