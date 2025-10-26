@@ -15,7 +15,7 @@ export const VacancyDetailCard = ({ vacancy }: VacancyDetailCardProps) => {
           <CardTitle className="text-2xl">{vacancy.title}</CardTitle>
           <Badge variant={
             vacancy.status === "Open" ? "default" :
-            vacancy.status === "Closed" ? "destructive" : "secondary"
+              vacancy.status === "Closed" ? "destructive" : "secondary"
           }>
             {vacancy.status}
           </Badge>
@@ -34,12 +34,26 @@ export const VacancyDetailCard = ({ vacancy }: VacancyDetailCardProps) => {
         </p>
 
         <div>
-          <span className="font-semibold text-gray-800">Habilidades:</span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {vacancy.skills.map((skill, idx) => (
-              <Badge key={idx} variant="outline">{skill}</Badge>
-            ))}
+          <h3 className="font-bold text-gray-800">Habilidades:</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="flex flex-wrap gap-2 mt-2">
+              <span className="font-semibold text-gray-800">Habilidades Blandas:</span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {vacancy.softSkills.map((skill, idx) => (
+                  <Badge key={idx} variant="outline">{skill}</Badge>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <span className="font-semibold text-gray-800">Habilidades Técnicas:</span>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {vacancy.softSkills.map((skill, idx) => (
+                  <Badge key={idx} variant="outline">{skill}</Badge>
+                ))}
+              </div>
+            </div>
           </div>
+
         </div>
 
         {vacancy.description && (
