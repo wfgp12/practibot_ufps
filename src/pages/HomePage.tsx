@@ -87,7 +87,7 @@ export const HomePage = () => {
                 location={vacancy.location}
                 modality={vacancy.modality}
                 workday={vacancy.workday}
-                skills={vacancy.skills}
+                skills={vacancy.technicalSkills}
                 onClick={() => dispatch(openVacancyModal(vacancy.id))}
               />
             ))

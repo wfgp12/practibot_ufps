@@ -171,17 +171,39 @@ export const VacancyDetail = () => {
                     <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1">
                         <Wrench size={16} /> Habilidades requeridas
                     </h3>
-                    <div className="flex flex-wrap gap-2">
-                        {vacancy.skills.map((skill) => (
-                            <Badge key={skill} variant="outline" className="text-sm">
-                                {skill}
-                            </Badge>
-                        ))}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Habilidades Blandas */}
+                        {vacancy.softSkills && vacancy.softSkills.length > 0 && (
+                            <div className="gap-4 ml-5">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-1">Habilidades blandas</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {vacancy.softSkills.map((skill) => (
+                                        <Badge key={skill} variant="outline" className="text-sm">
+                                            {skill}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Habilidades Técnicas */}
+                        {vacancy.technicalSkills && vacancy.technicalSkills.length > 0 && (
+                            <div className="gap-4 ml-5">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-1">Habilidades técnicas</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {vacancy.technicalSkills.map((skill) => (
+                                        <Badge key={skill} variant="outline" className="text-sm">
+                                            {skill}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-
                 {vacancy.description && (
-                    <div className="mt-6 border-t pt-4">
+                    <div className="mt-2 border-t pt-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             Descripción del cargo
                         </h3>

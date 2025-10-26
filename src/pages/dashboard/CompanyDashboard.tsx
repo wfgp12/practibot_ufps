@@ -4,18 +4,19 @@ import { SectionComponent } from "@/components/SectionComponent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useCompany } from "@/hooks/useCompany";
-import { CreateVacancyCard } from "./components/CreateVacancyCard ";
 import { ChangePasswordCard } from "@/components/ChangePasswordCard";
 import { Badge, Button, Table, type Column } from "@/components";
 import type { Vacancy } from "@/models/IVacancy";
 import { useNavigate } from "react-router";
 import { useVacancies } from "@/hooks/useVacancies";
+import { VacancyModal } from "./components/vancancy/VacancyModal";
+import { toast } from "sonner";
 
 export const CompanyDashboard = () => {
   const { company, loading, error } = useCompany();
   const navigate = useNavigate();
 
-  const { companyVacancies, fetchCompanyVacancies } = useVacancies();
+  const { companyVacancies, fetchCompanyVacancies, addVacancy } = useVacancies();
 
   const columnasVacantes: Column<Vacancy>[] = [
     { key: "title", title: "Título" },
@@ -25,8 +26,8 @@ export const CompanyDashboard = () => {
       filterType: "text",
     },
     {
-      key: "skills",
-      title: "Habilidades",
+      key: "technicalSkills",
+      title: "Habilidades Técnicas",
       filterType: "text",
       render: (skills) => {
         if (!Array.isArray(skills) || skills.length === 0) return "—";
@@ -163,15 +164,22 @@ export const CompanyDashboard = () => {
       </SectionComponent>
 
       <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
-        <CreateVacancyCard />
-      </SectionComponent>
-
-      <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
         <Card className="w-full">
           <CardHeader className="flex flex-col gap-1">
-            <CardTitle className="text-2xl font-bold flex items-center gap-2">
-              Vacantes
-            </CardTitle>
+            <div className="w-full flex flex-row items-center justify-between ">
+              <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                Vacantes
+              </CardTitle>
+              <VacancyModal onSubmit={async (data) => {
+                try {
+                  await addVacancy(data);
+                  toast.success("Vacante enviada a revisión");
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Error al enviar la vacante");
+                }
+              }} />
+            </div>
           </CardHeader>
           <CardContent>
             <Table

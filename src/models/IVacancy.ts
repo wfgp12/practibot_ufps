@@ -1,44 +1,59 @@
 import type { IApiCompany } from "./ICompany"
 
+// ╔══════════════════════════════════════════════╗
+// ║              MODELOS DEL FRONT               ║
+// ╚══════════════════════════════════════════════╝
 export interface Vacancy {
   id: string
   title: string
   area: string
-  modality: string
+  modality: IModality
   company: string
   location: string
   workday: string
-  skills: string[]
+  technicalSkills: string[]
+  softSkills: string[]
   description?: string
   status: "Open" | "Closed" | "Pending" | "Rejected";
 }
 
+// ╔══════════════════════════════════════════════╗
+// ║                MODELOS API                   ║
+// ╚══════════════════════════════════════════════╝
+
+export type IModality = "PRESENCIAL" | "REMOTO" | "HIBRIDO";
+export type IVacancyStatus = "PENDIENTE" | "APROBADA" | "INACTIVA" | "RECHAZADA";
 export interface IApiVacancy {
   id: number;
   titulo: string;
   area: string;
   descripcion: string;
-  requisitos: string;
-  estado: "PENDIENTE" | "APROBADA" | "INACTIVA" | "RECHAZADA";
+  modalidad: IModality;
+  habilidadesBlandas?: string;
+  habilidadesTecnicas?: string;
+  estado: IVacancyStatus;
   empresa: IApiCompany;
   empresaId: number;
-  directorValidaId: number;
+  directorValidaId?: number;
   creadaEn: string;
 }
 
 export interface IFormCreateVacancy {
   titulo: string;
-  modalidad: string;
-  area: string;
-  tipoJornada: string;
+  modalidad: IModality;
+  area?: string;
   descripcion: string;
-  requisitos: string;
+  habilidadesBlandas?: string;
+  habilidadesTecnicas?: string;
 }
 
 export interface IFormRegisterVacancy extends IFormCreateVacancy {
   empresaId: number;
 }
 
+// ╔══════════════════════════════════════════════╗
+// ║         MAPEOS ENTRE FRONT Y API             ║
+// ╚══════════════════════════════════════════════╝
 // ✅ API → FRONT
 export const mapApiVacancyToVacancy = (
   apiVacancy: Partial<IApiVacancy>
@@ -46,12 +61,15 @@ export const mapApiVacancyToVacancy = (
   id: apiVacancy.id?.toString() ?? crypto.randomUUID(),
   title: apiVacancy.titulo ?? "Sin título",
   area: apiVacancy.area ?? "No especificado",
-  modality: apiVacancy.area ?? "No especificado",
+  modality: apiVacancy.modalidad ?? "PRESENCIAL",
   company: apiVacancy.empresa?.usuario?.nombre ?? "Sin empresa",
   location: "Colombia",
   workday: "Práctica",
-  skills: apiVacancy.requisitos
-    ? apiVacancy.requisitos.split(",").map((s) => s.trim())
+  technicalSkills: apiVacancy.habilidadesTecnicas
+    ? apiVacancy.habilidadesTecnicas.split(",").map((s) => s.trim())
+    : [],
+  softSkills: apiVacancy.habilidadesBlandas
+    ? apiVacancy.habilidadesBlandas.split(",").map((s) => s.trim())
     : [],
   description: apiVacancy.descripcion,
   status: mapApiStatusToFront(apiVacancy.estado),
@@ -65,8 +83,10 @@ export const mapApiVacancies = (data: Partial<IApiVacancy>[] = []): Vacancy[] =>
 export const mapFormToApiVacancy = (form: IFormCreateVacancy) => ({
   titulo: form.titulo,
   descripcion: form.descripcion,
-  area: form.area, // 🔁 "modalidad" del form → "area" del back
-  requisitos: form.requisitos,
+  area: form.area,
+  modalidad: form.modalidad,
+  habilidadesBlandas: form.habilidadesBlandas,
+  habilidadesTecnicas: form.habilidadesTecnicas,
 });
 
 // ✅ FRONT FORM → API BODY (director/admin registra vacante aprobada)
@@ -74,7 +94,9 @@ export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>)
   titulo: form?.titulo ?? "",
   descripcion: form?.descripcion ?? "",
   area: form?.area ?? "",
-  requisitos: form?.requisitos ?? "",
+  modalidad: form?.modalidad ?? "",
+  habilidadesBlandas: form?.habilidadesBlandas ?? "",
+  habilidadesTecnicas: form?.habilidadesTecnicas ?? "",
   empresaId: form?.empresaId ?? 0,
 });
 
@@ -89,15 +111,17 @@ export type VacancyFilters = Partial<
     | "status"
   >
 > & {
-  skills?: string; 
+  technicalSkills?: string;
+  softSkills?: string;
 };
 
-/** FRONT → BACK */
+/** FRONT → BACK (filtros de búsqueda) */
 export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
   const mapped: Record<string, string> = {};
 
   if (filters.title) mapped.titulo = filters.title;
-  if (filters.skills) mapped.requisitos = filters.skills as string;
+  if (filters.technicalSkills) mapped.habilidadesTecnicas = filters.technicalSkills;
+  if (filters.softSkills) mapped.habilidadesBlandas = filters.softSkills;
   if (filters.company) mapped.empresa = filters.company;
   if (filters.area) mapped.area = filters.area;
   if (filters.modality) mapped.modalidad = filters.modality;
@@ -105,9 +129,13 @@ export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
   if (filters.workday) mapped.tipoJornada = filters.workday;
   if (filters.status)
     mapped.estado = mapFrontStatusToApi(filters.status);
- 
+
   return mapped;
 };
+
+// ╔══════════════════════════════════════════════╗
+// ║              ESTADOS VACANTES                ║
+// ╚══════════════════════════════════════════════╝
 
 export const mapFrontStatusToApi = (status: Vacancy["status"]): IApiVacancy["estado"] => {
   switch (status) {
@@ -139,6 +167,7 @@ export const mapApiStatusToFront = (estado?: IApiVacancy["estado"]): Vacancy["st
   }
 };
 
+// ✅ FRONT → FORM (editar vacante o registrar)
 export const mapVacancyToFormRegisterVacancy = (
   vacancy: Vacancy,
   empresaId: number
@@ -146,8 +175,8 @@ export const mapVacancyToFormRegisterVacancy = (
   titulo: vacancy.title,
   area: vacancy.area,
   modalidad: vacancy.modality,
-  tipoJornada: vacancy.workday,
   descripcion: vacancy.description ?? "",
-  requisitos: vacancy.skills.join(","),
+  habilidadesBlandas: vacancy.softSkills.join(","),
+  habilidadesTecnicas: vacancy.technicalSkills.join(","),
   empresaId,
 });

@@ -22,8 +22,8 @@ export const GestionVacantes = () => {
             filterType: "text",
         },
         {
-            key: "skills",
-            title: "Habilidades",
+            key: "technicalSkills",
+            title: "Habilidades Técnicas",
             filterType: "text",
             render: (skills) => {
                 if (!Array.isArray(skills) || skills.length === 0) return "—";
@@ -88,8 +88,8 @@ export const GestionVacantes = () => {
         { key: "company", title: "Empresa" },
         { key: "title", title: "Título" },
         {
-            key: "skills",
-            title: "Habilidades",
+            key: "technicalSkills",
+            title: "Habilidades Técnicas",
             render: (skills) => {
                 if (!Array.isArray(skills) || skills.length === 0) return "—";
 

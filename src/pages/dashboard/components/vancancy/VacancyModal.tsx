@@ -21,22 +21,28 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 
-import { Briefcase, FileText, Building2, Clock, ClipboardList, Globe } from "lucide-react";
+import { Briefcase, FileText, Building2, ClipboardList, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { hideLoader, showLoader } from "@/store/slices/uiSlice";
 import { useVacancies } from "@/hooks/useVacancies";
-import type { IFormRegisterVacancy } from "@/models/IVacancy";
+import type { IFormRegisterVacancy, IModality } from "@/models/IVacancy";
+
+// 💬 Componente para mostrar errores
+const FieldError = ({ error }: { error?: string }) =>
+  error ? <p className="text-sm text-red-500">{error}</p> : null;
 
 const vacancySchema = z.object({
-    empresaId: z.string().min(1, "Selecciona una empresa"),
+    empresaId: z.string().optional(), // solo requerido si lo crea un admin/director
     titulo: z.string().min(3, "El título es obligatorio"),
     area: z.string().min(3, "El área es obligatoria"),
-    modalidad: z.string().min(3, "La modalidad es obligatoria"),
-    tipoJornada: z.string().min(3, "El tipo de jornada es obligatoria"),
+    modalidad: z
+        .enum(["PRESENCIAL", "REMOTO", "HIBRIDO"])
+        .refine((val) => !!val, { message: "Selecciona una modalidad" }),
     descripcion: z.string().min(10, "Agrega una descripción más detallada"),
-    requisitos: z.string().min(3, "Indica al menos un requisito"),
+    habilidadesBlandas: z.string().min(3, "Indica al menos una habilidad blanda"),
+    habilidadesTecnicas: z.string().min(3, "Indica al menos una habilidad técnica"),
 });
 
 type VacancyFormSchema = z.infer<typeof vacancySchema>;
@@ -49,19 +55,21 @@ interface VacancyModalProps {
 export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
     const dispatch = useAppDispatch();
     const { loading } = useAppSelector((state) => state.ui);
+    const { user } = useAppSelector((state) => state.auth);
     const { fetchListCompanies, companiesList } = useVacancies();
     const [open, setOpen] = useState(false);
 
     const form = useForm<VacancyFormSchema>({
         resolver: zodResolver(vacancySchema),
         defaultValues: {
-            empresaId: String(vacancy?.empresaId) || "",
+            empresaId: vacancy ? String(vacancy.empresaId) : "",
             titulo: vacancy?.titulo || "",
             area: vacancy?.area || "",
-            tipoJornada: vacancy?.tipoJornada || "",
+            modalidad: vacancy?.modalidad || "PRESENCIAL",
             descripcion: vacancy?.descripcion || "",
-            requisitos: vacancy?.requisitos || "",
-        },
+            habilidadesBlandas: vacancy?.habilidadesBlandas || "",
+            habilidadesTecnicas: vacancy?.habilidadesTecnicas || "",
+        }
     });
 
     useEffect(() => {
@@ -72,7 +80,16 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
     const handleSubmit = async (values: VacancyFormSchema) => {
         dispatch(showLoader());
         try {
-            await onSubmit({ ...values, empresaId: Number(values.empresaId) }, vacancy?.empresaId ? String(vacancy.empresaId) : undefined);
+            const payload: IFormRegisterVacancy = {
+                ...values,
+                empresaId:
+                    user?.role === "EMPRESA"
+                        ? Number(user.id) // fuerza número
+                        : Number(values.empresaId), // asegura número también
+            };
+
+            await onSubmit(payload, vacancy?.empresaId ? String(vacancy.empresaId) : undefined);
+
             toast.success(vacancy ? "Vacante actualizada correctamente" : "Vacante creada correctamente");
             form.reset();
             setOpen(false);
@@ -86,15 +103,9 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
     const isEditMode = !!vacancy;
 
     const modalidades = [
-        { label: "Presencial", value: "Presencial" },
-        { label: "Remoto", value: "Remoto" },
-        { label: "Híbrido", value: "Híbrido" },
-    ];
-
-    const jornadas = [
-        { label: "Tiempo completo", value: "Tiempo completo" },
-        { label: "Medio tiempo", value: "Medio tiempo" },
-        { label: "Prácticas", value: "Prácticas" },
+        { label: "Presencial", value: "PRESENCIAL" },
+        { label: "Remoto", value: "REMOTO" },
+        { label: "Híbrido", value: "HIBRIDO" },
     ];
 
     const handleOpenChange = (isOpen: boolean) => {
@@ -118,28 +129,31 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
 
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                     {/* Empresa */}
-                    <div className="grid gap-3">
-                        <Label>Empresa</Label>
-                        <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-gray-500" />
-                            <Select
-                                key={form.watch("empresaId")} 
-                                value={form.watch("empresaId")}
-                                onValueChange={(val) => form.setValue("empresaId", val)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una empresa" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {companiesList.map((c) => (
-                                        <SelectItem key={c.id} value={String(c.id)}>
-                                            {c.nombre}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                    {user?.role !== "EMPRESA" && (
+                        <div className="grid gap-3">
+                            <Label>Empresa</Label>
+                            <div className="flex items-center gap-2">
+                                <Building2 className="w-4 h-4 text-gray-500" />
+                                <Select
+                                    key={form.watch("empresaId")}
+                                    value={form.watch("empresaId")}
+                                    onValueChange={(val) => form.setValue("empresaId", val)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona una empresa" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {companiesList.map((c) => (
+                                            <SelectItem key={c.id} value={String(c.id)}>
+                                                {c.nombre}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <FieldError error={form.formState.errors.empresaId?.message} />
                         </div>
-                    </div>
+                    )}
 
                     {/* Título */}
                     <div className="grid gap-3">
@@ -148,6 +162,7 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                             <FileText className="w-4 h-4 text-gray-500" />
                             <Input {...form.register("titulo")} placeholder="Ej: Desarrollador Frontend" />
                         </div>
+                        <FieldError error={form.formState.errors.titulo?.message} />
                     </div>
 
                     {/* Area */}
@@ -157,6 +172,7 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                             <Globe className="w-4 h-4 text-gray-500" />
                             <Input {...form.register("area")} placeholder="Ej: Desarrollador, DevOps, Frontend" />
                         </div>
+                        <FieldError error={form.formState.errors.area?.message} />
                     </div>
 
                     {/* Modalidad */}
@@ -165,7 +181,7 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4 text-gray-500" />
                             <Select
-                                onValueChange={(val) => form.setValue("modalidad", val)}
+                                onValueChange={(val) => form.setValue("modalidad", val as IModality)}
                                 value={form.watch("modalidad")}
                             >
                                 <SelectTrigger>
@@ -180,29 +196,7 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                                 </SelectContent>
                             </Select>
                         </div>
-                    </div>
-
-                    {/* Tipo de jornada */}
-                    <div className="grid gap-3">
-                        <Label>Tipo de jornada</Label>
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-500" />
-                            <Select
-                                onValueChange={(val) => form.setValue("tipoJornada", val)}
-                                value={form.watch("tipoJornada")}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona tipo de jornada" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {jornadas.map((item) => (
-                                        <SelectItem key={item.value} value={item.value}>
-                                            {item.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        <FieldError error={form.formState.errors.modalidad?.message} />
                     </div>
 
                     {/* Descripción */}
@@ -212,18 +206,33 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
                             {...form.register("descripcion")}
                             placeholder="Describe las responsabilidades o tareas principales..."
                         />
+                        <FieldError error={form.formState.errors.descripcion?.message} />
                     </div>
 
-                    {/* Requisitos */}
+                    {/* Habilidades técnicas */}
                     <div className="grid gap-3">
-                        <Label>Requisitos</Label>
+                        <Label>Habilidades técnicas</Label>
                         <div className="flex items-start gap-2">
                             <ClipboardList className="w-4 h-4 text-gray-500 mt-1" />
                             <Textarea
-                                {...form.register("requisitos")}
+                                {...form.register("habilidadesTecnicas")}
                                 placeholder="Ej: React, Node.js, SQL..."
                             />
                         </div>
+                        <FieldError error={form.formState.errors.habilidadesTecnicas?.message} />
+                    </div>
+
+                    {/* Habilidades blandas */}
+                    <div className="grid gap-3">
+                        <Label>Habilidades blandas</Label>
+                        <div className="flex items-start gap-2">
+                            <ClipboardList className="w-4 h-4 text-gray-500 mt-1" />
+                            <Textarea
+                                {...form.register("habilidadesBlandas")}
+                                placeholder="Ej: Comunicación, trabajo en equipo, adaptabilidad..."
+                            />
+                        </div>
+                        <FieldError error={form.formState.errors.habilidadesBlandas?.message} />
                     </div>
 
                     <div className="pt-2 flex justify-end">
