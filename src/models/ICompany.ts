@@ -34,6 +34,7 @@ export interface ICompany {
   direccion: string;
   sector: string;
   descripcion: string;
+  isEnabled?: boolean
 }
 
 export interface CompanyOption {
