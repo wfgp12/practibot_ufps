@@ -11,7 +11,7 @@ import { VacancyModal } from "./components/vancancy/VacancyModal";
 
 import { useCompany } from "@/hooks/useCompany";
 import { useVacancies } from "@/hooks/useVacancies";
-import { useAgreements } from "@/hooks/useAgreement";
+import { useAgreements } from "@/hooks/useAgreements";
 
 import type { Vacancy } from "@/models/IVacancy";
 import type { Agreement } from "@/models/IAgreement";
@@ -21,7 +21,7 @@ export const CompanyDashboard = () => {
   const navigate = useNavigate();
 
   const { companyVacancies, fetchCompanyVacancies, addVacancy } = useVacancies();
-  const { agreements, loading: loadingAgreements } = useAgreements(Number(company?.id));
+  const { agreements, loading: loadingAgreements } = useAgreements(company?.id ? Number(company.id) : undefined);
 
 
   const columnasVacantes: Column<Vacancy>[] = [
@@ -120,23 +120,27 @@ export const CompanyDashboard = () => {
     {
       key: "startDate",
       title: "Inicio",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString("es-CO") : "—",
+      render: (date) => {
+        const safeDate = date as Date | string | null;
+        return safeDate ? new Date(safeDate).toLocaleDateString("es-CO") : "—";
+      },
     },
     {
       key: "endDate",
       title: "Fin",
-      render: (date) =>
-        date ? new Date(date).toLocaleDateString("es-CO") : "—",
+      render: (date) => {
+        const safeDate = date as Date | string | null;
+        return safeDate ? new Date(safeDate).toLocaleDateString("es-CO") : "—";
+      },
     },
     {
       key: "id",
       title: "Acciones",
       align: "center",
-      render: () => (
+      render: (_v, agreement) => (
         <Button
           variant="outline"
-          onClick={() => navigate(`/dashboard/agreement`)}
+          onClick={() => navigate(`/dashboard/agreement/${agreement.id}`)}
           className="border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white"
         >
           Ver detalle

@@ -1,31 +1,36 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import type { Agreement } from "@/models/IAgreement";
-import { mapAgreementFromApi } from "@/models/IAgreement";
+import { agreementApi } from "@/api/agreementApi";
+import { useAppSelector } from "@/store/hooks";
 
-export const useAgreements = (companyId?: number) => {
-  const [agreements, setAgreements] = useState<Agreement[]>([]);
+export const useAgreement = (id: number | null) => {
+  const user = useAppSelector((state) => state.auth.user);
+  const [agreement, setAgreement] = useState<Agreement | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAgreements = async () => {
-    if (!companyId) return;
+  const fetchAgreement = async () => {
+    if (!id || !user) return;
     setLoading(true);
+    setError(null);
+
     try {
-      const res = await axios.get(`/api/convenios/empresa/${companyId}`);
-      const data = Array.isArray(res.data) ? res.data : [res.data];
-      setAgreements(data.map(mapAgreementFromApi));
+      const data = await agreementApi.getAgreementById(id);
+        console.log('data', data) 
+        setAgreement(data);
     } catch (err) {
+        console.log('cuela error gonorea', err)
       console.error(err);
-      setError("Error al cargar los convenios");
+      setError("Error al cargar el convenio");
+      setAgreement(null);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAgreements();
-  }, [companyId]);
+    fetchAgreement();
+  }, [id, user?.id]);
 
-  return { agreements, loading, error, fetchAgreements };
+  return { agreement, loading, error, fetchAgreement };
 };

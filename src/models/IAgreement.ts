@@ -1,3 +1,5 @@
+import { mapCompanyFromApi, type IApiCompany, type ICompany } from "./ICompany";
+
 export const AGREEMENT_TYPES = ["MARCO", "ESPECIFICO"] as const;
 export const AGREEMENT_STATUSES = ["EN_REVISION", "APROBADO", "RECHAZADO", "VENCIDO"] as const;
 
@@ -19,6 +21,7 @@ export interface AgreementApi {
   version: number;
   creadoEn: string;
   actualizadoEn: string;
+  empresa?: IApiCompany | null;
 }
 
 export interface Agreement {
@@ -36,6 +39,7 @@ export interface Agreement {
   version: number;
   createdAt: Date;
   updatedAt: Date;
+  company?: ICompany | null;
 }
 
 const STATUS_MAP = {
@@ -65,6 +69,7 @@ export const mapAgreementFromApi = (api: AgreementApi): Agreement => ({
   version: api.version,
   createdAt: new Date(api.creadoEn),
   updatedAt: new Date(api.actualizadoEn),
+  company: api.empresa ? mapCompanyFromApi(api.empresa) : undefined,
 });
 
 export const mapAgreementToApi = (agreement: Agreement): AgreementApi => ({

@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge, SectionComponent } from "@/components";
 import { useNavigate, useParams } from "react-router";
-import { useCompany } from "@/hooks/useCompany";
 import type { Agreement } from "@/models/IAgreement";
 import axios from "axios";
 import { toast } from "sonner";
+import { useAgreement } from "@/hooks/useAgreement";
 
 interface Comment {
     id: string;
@@ -17,49 +17,12 @@ interface Comment {
 
 export const AgreementRequest: React.FC = () => {
     const navigate = useNavigate();
-    const { company } = useCompany();
     const { id } = useParams();
 
-    const [agreement, setAgreement] = useState<Agreement | null>(null);
+    const { agreement, loading, error, fetchAgreement } = useAgreement(id ? Number(id) : null);
+
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
-    const [loading, setLoading] = useState(true);
-
-    // Cargar convenio actual de la empresa
-    useEffect(() => {
-        const loadAgreement = async () => {
-            setLoading(true);
-            try {
-                if (id) {
-                    // Simula obtener convenio por ID
-                    const mockAgreement: Agreement = {
-                        id: Number(id),
-                        companyId: Number(company?.id) || 1,
-                        directorId: 2,
-                        name: `Convenio N°${id}`,
-                        description: "Convenio para prácticas empresariales.",
-                        type: "Específico",
-                        status: "En revisión",
-                        startDate: new Date("2025-01-01"),
-                        endDate: new Date("2025-12-31"),
-                        fileUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-                        notes: "",
-                        version: 1,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                    };
-                    setAgreement(mockAgreement);
-                } else {
-                    // Sin ID → aún no existe convenio
-                    setAgreement(null);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (company?.id) loadAgreement();
-    }, [company?.id, id]);
 
     // Enviar comentario (chat)
     const handleSendComment = () => {
@@ -83,11 +46,20 @@ export const AgreementRequest: React.FC = () => {
         );
     }
 
-    const isReadOnly = agreement && (agreement.status === "Aprobado" || agreement.status === "Vencido" || agreement.status === "Rechazado");
+    if (error) {
+        return (
+            <SectionComponent classNameContainer="py-10" classNameContent="max-w-5xl">
+                <p className="text-center text-red-600">{error}</p>
+            </SectionComponent>
+        );
+    }
+
+    const company = agreement?.company;
+    const isReadOnly = agreement && ["Aprobado", "Vencido", "Rechazado"].includes(agreement.status);
 
     return (
         <SectionComponent classNameContainer="py-5" classNameContent="max-w-6xl">
-            <div className="p-4 space-y-6">
+            <div className="p-4 space-y-6 w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center border-b pb-2">
                     <div>
@@ -140,7 +112,7 @@ export const AgreementRequest: React.FC = () => {
                             !isReadOnly && (
                                 <AgreementActions
                                     agreement={agreement}
-                                    setAgreement={setAgreement}
+                                    onUpdate={fetchAgreement}
                                 />
                             )
                         ) : (
@@ -206,18 +178,16 @@ export const AgreementRequest: React.FC = () => {
 // ---- Subcomponente de acciones (descargar / subir / enviar) ----
 const AgreementActions = ({
     agreement,
-    setAgreement,
+    onUpdate,
 }: {
     agreement: Agreement;
-    setAgreement: React.Dispatch<React.SetStateAction<Agreement | null>>;
+    onUpdate: () => void
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDownload = () => {
         const link = document.createElement("a");
-        link.href =
-            agreement.fileUrl ||
-            "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+        link.href = agreement.fileUrl || "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
         link.download = "Convenio_Practicas.pdf";
         link.click();
     };
@@ -232,13 +202,12 @@ const AgreementActions = ({
             const formData = new FormData();
             formData.append("file", file);
 
-            const res = await axios.post(`/api/convenios/${agreement.id}/subir-firmado`, formData);
-
-            setAgreement((prev) =>
-                prev ? { ...prev, fileUrl: res.data.archivoUrl } : null
-            );
+            await axios.post(`/api/convenios/${agreement.id}/subir-firmado`, formData);
 
             toast.success("Versión firmada subida correctamente. Lista para revisión final.");
+
+            // recarga el convenio con datos actualizados
+            onUpdate();
         } catch (err) {
             console.error(err);
             toast.error("Error al subir la versión firmada.");
@@ -248,10 +217,11 @@ const AgreementActions = ({
     const handleSendForReview = async () => {
         try {
             await axios.post(`/api/convenios/${agreement.id}/enviar-revision-final`);
-            setAgreement((prev) =>
-                prev ? { ...prev, status: "En revisión" } : null
-            );
+
             toast.success("Convenio enviado para revisión final.");
+
+            // recarga el convenio con datos actualizados
+            onUpdate();
         } catch (err) {
             console.error(err);
             toast.error("No se pudo enviar el convenio para revisión final.");
