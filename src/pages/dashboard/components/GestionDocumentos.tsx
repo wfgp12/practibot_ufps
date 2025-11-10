@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useDocuments } from "@/hooks/useDocuments";
+import { toast } from "sonner";
 
 type FormValues = {
     categoria: string;
@@ -15,7 +16,13 @@ type FormValues = {
 };
 
 export const GestionDocumentos = () => {
-    const { documents, addDocument, removeDocument } = useDocuments();
+    const {
+        documents,
+        uploadDocument,
+        deleteDocument,
+        loading,
+        fetchDocuments,
+    } = useDocuments();
 
     const {
         register,
@@ -26,22 +33,37 @@ export const GestionDocumentos = () => {
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         try {
-            const file = data.archivo[0];
-            if (!file) return;
+            const file = data.archivo?.[0];
+            if (!file) {
+                toast.error("Debes seleccionar un archivo");
+                return;
+            }
 
-            // Aquí luego conectas Cloudinary o S3
-            addDocument({
-                title: data.titulo,
-                category: data.categoria,
-                description: data.descripcion,
-                fileName: file.name,
-            });
+            const formData = new FormData();
+            formData.append("titulo", data.titulo);
+            formData.append("descripcion", data.descripcion);
+            formData.append("categoria", data.categoria.toUpperCase()); // coincide con el enum del backend
+            formData.append("archivo", file);
 
+            await uploadDocument(formData);
+            toast.success("Documento subido correctamente 🎉");
             reset();
+            fetchDocuments(); // refresca el listado
         } catch (error) {
             console.error("Error al subir documento:", error);
+            toast.error("Error al subir el documento");
         }
     };
+
+    const handleDelete = async (id: number) => {
+        try {
+            await deleteDocument(id);
+            toast.success("Documento eliminado correctamente");
+        } catch {
+            toast.error("Error al eliminar el documento");
+        }
+    };
+
     return (
         <Card className="w-full">
             <CardHeader>
@@ -70,6 +92,7 @@ export const GestionDocumentos = () => {
                                     <p className="text-sm text-red-500">{errors.titulo.message}</p>
                                 )}
                             </div>
+
                             <div className="space-y-2">
                                 <label htmlFor="category" className="text-sm font-medium">
                                     Categoría
@@ -78,17 +101,18 @@ export const GestionDocumentos = () => {
                                     id="category"
                                     className="w-full border rounded-md p-2"
                                     {...register("categoria", { required: "Selecciona una categoría" })}
-                                    defaultValue="Lineamientos generales"
+                                    defaultValue="GENERAL"
                                 >
-                                    <option>Lineamientos generales</option>
-                                    <option>Formatos de postulación</option>
-                                    <option>Documentos ARL</option>
-                                    <option>Otros</option>
+                                    <option value="GENERAL">General</option>
+                                    <option value="CONVENIO_PLANTILLA">Convenio</option>
+                                    <option value="ESTUDIANTE">Estudiante</option>
+                                    <option value="EMPRESA">Empresa</option>
                                 </select>
                                 {errors.categoria && (
                                     <p className="text-sm text-red-500">{errors.categoria.message}</p>
                                 )}
                             </div>
+
                             <div className="space-y-2">
                                 <label htmlFor="description" className="text-sm font-medium">
                                     Descripción
@@ -99,6 +123,7 @@ export const GestionDocumentos = () => {
                                     {...register("descripcion")}
                                 />
                             </div>
+
                             <div className="space-y-2">
                                 <label htmlFor="file" className="text-sm font-medium">
                                     Archivo
@@ -113,7 +138,12 @@ export const GestionDocumentos = () => {
                                     <p className="text-sm text-red-500">{errors.archivo.message}</p>
                                 )}
                             </div>
-                            <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700">
+
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="bg-red-600 hover:bg-red-700"
+                            >
                                 {isSubmitting ? "Subiendo..." : "Subir documento"}
                             </Button>
                         </form>
@@ -121,7 +151,9 @@ export const GestionDocumentos = () => {
 
                     {/* TAB DE LISTADO */}
                     <TabsContent value="list">
-                        {documents.length === 0 ? (
+                        {loading ? (
+                            <p className="text-gray-500">Cargando documentos...</p>
+                        ) : documents.length === 0 ? (
                             <p className="text-gray-500">No hay documentos subidos.</p>
                         ) : (
                             <div className="space-y-2">
@@ -133,12 +165,20 @@ export const GestionDocumentos = () => {
                                         <div>
                                             <h5 className="font-semibold">{doc.title}</h5>
                                             <p className="text-sm text-gray-600">
-                                                {doc.category} • {doc.fileName}
+                                                {doc.category} •{" "}
+                                                <a
+                                                    href={doc.fileUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    Ver archivo
+                                                </a>
                                             </p>
                                         </div>
                                         <Button
                                             variant="destructive"
-                                            onClick={() => removeDocument(doc.id)}
+                                            onClick={() => handleDelete(doc.id)}
                                         >
                                             Eliminar
                                         </Button>

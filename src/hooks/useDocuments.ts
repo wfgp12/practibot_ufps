@@ -1,30 +1,83 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { documentApi } from "@/api/documentApi";
+import type { Document } from "@/models/IDocument";
 
-export interface IDocument {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  fileUrl?: string; // futura URL del documento (Cloudinary, S3)
-  fileName: string;
-  uploadedAt: string;
+interface DocumentFilters {
+  category?: string;
+  directorId?: number;
+  agreementId?: number;
+  title?: string;
 }
 
-export const useDocuments = () => {
-  const [documents, setDocuments] = useState<IDocument[]>([]);
+export const useDocuments = (initialFilters?: DocumentFilters) => {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addDocument = (doc: Omit<IDocument, "id" | "uploadedAt">) => {
-    const newDoc: IDocument = {
-      id: crypto.randomUUID(),
-      uploadedAt: new Date().toISOString(),
-      ...doc,
-    };
-    setDocuments((prev) => [...prev, newDoc]);
+  const handleError = (err: unknown): string => {
+    if (err instanceof Error) return err.message;
+    if (typeof err === "string") return err;
+    return "Error desconocido al procesar la solicitud";
   };
 
-  const removeDocument = (id: string) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
-  };
+  const fetchDocuments = useCallback(
+    async (filters: DocumentFilters = initialFilters || {}) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await documentApi.listDocuments(filters);
+        setDocuments(data);
+      } catch (err: unknown) {
+        const message = handleError(err);
+        console.error("Error fetching documents:", message);
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [initialFilters]
+  );
 
-  return { documents, addDocument, removeDocument };
+  const uploadDocument = useCallback(async (formData: FormData) => {
+    try {
+      const newDoc = await documentApi.uploadDocument(formData);
+      setDocuments((prev) => [newDoc, ...prev]);
+      return newDoc;
+    } catch (err: unknown) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
+  const updateDocument = useCallback(async (id: number, formData: FormData) => {
+    try {
+      const updated = await documentApi.updateDocument(id, formData);
+      setDocuments((prev) => prev.map((d) => (d.id === id ? updated : d)));
+      return updated;
+    } catch (err: unknown) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
+  const deleteDocument = useCallback(async (id: number) => {
+    try {
+      await documentApi.deleteDocument(id);
+      setDocuments((prev) => prev.filter((d) => d.id !== id));
+    } catch (err: unknown) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  return {
+    documents,
+    loading,
+    error,
+    fetchDocuments,
+    uploadDocument,
+    updateDocument,
+    deleteDocument,
+  };
 };
