@@ -1,11 +1,13 @@
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge, SectionComponent } from "@/components";
+import { Badge, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, SectionComponent } from "@/components";
 import { useNavigate, useParams } from "react-router";
 import type { Agreement } from "@/models/IAgreement";
 import { toast } from "sonner";
 import { useAgreement } from "@/hooks/useAgreement";
+import { useAppSelector } from "@/store/hooks";
+import { useForm } from "react-hook-form";
 
 interface Comment {
     id: string;
@@ -15,6 +17,8 @@ interface Comment {
 }
 
 export const AgreementRequest: React.FC = () => {
+    const user = useAppSelector((state) => state.auth.user);
+    const role = user?.role;
     const navigate = useNavigate();
     const { id } = useParams();
 
@@ -115,13 +119,24 @@ export const AgreementRequest: React.FC = () => {
                         {/* Acciones */}
                         {agreement ? (
                             !isReadOnly && (
-                                <AgreementActions
-                                    agreement={agreement}
-                                    onUpdate={fetchAgreement}
-                                    templateUrl={templateUrl}
-                                    uploadSignedAgreement={uploadSignedAgreement}
-                                    sendForFinalReview={sendForFinalReview}
-                                />
+                                <>
+                                    {role === "EMPRESA" && (
+                                        <AgreementActionsEmpresa
+                                            agreement={agreement}
+                                            onUpdate={fetchAgreement}
+                                            templateUrl={templateUrl}
+                                            uploadSignedAgreement={uploadSignedAgreement}
+                                            sendForFinalReview={sendForFinalReview}
+                                        />
+                                    )}
+
+                                    {(role === "DIRECTOR" || role === "ADMIN") && (
+                                        <AgreementActionsDirector
+                                            agreement={agreement}
+                                            onUpdate={fetchAgreement}
+                                        />
+                                    )}
+                                </>
                             )
                         ) : (
                             <Button
@@ -192,8 +207,7 @@ export const AgreementRequest: React.FC = () => {
     );
 };
 
-// ---- Subcomponente de acciones (descargar / subir / enviar) ----
-const AgreementActions = ({
+const AgreementActionsEmpresa  = ({
     agreement,
     onUpdate,
     templateUrl,
@@ -261,8 +275,8 @@ const AgreementActions = ({
 
             <Button
                 className={`mt-2 ${canSendForReview
-                        ? "bg-zinc-500 hover:bg-zinc-600"
-                        : "bg-gray-300 cursor-not-allowed"
+                    ? "bg-zinc-500 hover:bg-zinc-600"
+                    : "bg-gray-300 cursor-not-allowed"
                     } text-white`}
                 disabled={!canSendForReview}
                 onClick={handleSendForReview}
@@ -271,4 +285,153 @@ const AgreementActions = ({
             </Button>
         </div>
     );
+};
+
+
+interface ApproveFormValues {
+  fechaInicio: string;
+  fechaFin: string;
+  observaciones?: string;
+  file: FileList;
+}
+
+export const AgreementActionsDirector = ({
+  agreement,
+  onUpdate,
+}: {
+  agreement: Agreement;
+  onUpdate: () => void;
+}) => {
+  const { approveAgreement, rejectAgreement } = useAgreement(agreement.id);
+  const [open, setOpen] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, reset, watch } = useForm<ApproveFormValues>();
+  const file = watch("file")?.[0];
+
+  const onSubmit = async (values: ApproveFormValues) => {
+    if (!values.file?.length) {
+      toast.error("Debes subir el convenio firmado final");
+      return;
+    }
+    setLoading(true);
+    try {
+      await approveAgreement(values.file[0], {
+        fechaInicio: values.fechaInicio,
+        fechaFin: values.fechaFin,
+        observaciones: values.observaciones,
+      });
+      toast.success("Convenio aprobado correctamente ✅");
+      reset();
+      onUpdate();
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al aprobar el convenio");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!confirm("¿Seguro que quieres rechazar este convenio?")) return;
+    setRejecting(true);
+    try {
+      await rejectAgreement();
+      toast.warning("Convenio rechazado ❌");
+      onUpdate();
+    } catch {
+      toast.error("Error al rechazar el convenio");
+    } finally {
+      setRejecting(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 mt-3 border-t pt-4">
+      <h3 className="font-semibold text-gray-700">Revisión del convenio</h3>
+
+      <div className="flex gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
+              Aprobar convenio
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Aprobación del convenio</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Archivo firmado
+                </label>
+                <Input
+                  type="file"
+                  accept="application/pdf"
+                  {...register("file")}
+                />
+                {file && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de inicio
+                  </label>
+                  <Input type="date" {...register("fechaInicio", { required: true })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Fecha de fin
+                  </label>
+                  <Input type="date" {...register("fechaFin", { required: true })} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Observaciones (opcional)
+                </label>
+                <Input
+                  placeholder="Notas o comentarios..."
+                  {...register("observaciones")}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {loading ? "Aprobando..." : "Confirmar aprobación"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Button
+          onClick={handleReject}
+          disabled={rejecting}
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          {rejecting ? "Rechazando..." : "Rechazar convenio"}
+        </Button>
+      </div>
+    </div>
+  );
 };

@@ -87,6 +87,37 @@ export const useAgreement = (id: number | null) => {
     }
   };
 
+  const approveAgreement = async (
+    file: File,
+    details: { fechaInicio?: string; fechaFin?: string; observaciones?: string }
+  ) => {
+    if (!agreement) return;
+    setLoading(true);
+    try {
+      const updated = await agreementApi.approveAgreement(agreement.id, file, details);
+      setAgreement(updated);
+      return updated;
+    } catch {
+      setError("Error al aprobar el convenio");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rejectAgreement = async (observaciones?: string) => {
+    if (!agreement) return;
+    setLoading(true);
+    try {
+      const updated = await agreementApi.rejectAgreement(agreement.id, observaciones);
+      setAgreement(updated);
+      return updated;
+    } catch {
+      setError("Error al rechazar el convenio");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (id) fetchAgreement();
     else fetchTemplate();
@@ -101,5 +132,7 @@ export const useAgreement = (id: number | null) => {
     createAgreement,
     uploadSignedAgreement,
     sendForFinalReview,
+    approveAgreement,
+    rejectAgreement,
   };
 };
