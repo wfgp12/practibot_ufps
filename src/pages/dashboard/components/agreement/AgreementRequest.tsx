@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Badge, SectionComponent } from "@/components";
 import { useNavigate, useParams } from "react-router";
 import type { Agreement } from "@/models/IAgreement";
-import axios from "axios";
 import { toast } from "sonner";
 import { useAgreement } from "@/hooks/useAgreement";
 
@@ -19,7 +18,7 @@ export const AgreementRequest: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const { agreement, loading, error, fetchAgreement } = useAgreement(id ? Number(id) : null);
+    const { agreement, templateUrl, loading, error, fetchAgreement, createAgreement, uploadSignedAgreement, sendForFinalReview } = useAgreement(id ? Number(id) : null);
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
@@ -98,29 +97,47 @@ export const AgreementRequest: React.FC = () => {
                 <div className="grid grid-cols-12 gap-6">
                     {/* Columna izquierda: PDF */}
                     <div className="col-span-7 border rounded p-4 flex flex-col gap-4">
-                        <iframe
-                            src={
-                                agreement?.fileUrl ||
-                                "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-                            }
-                            title="Convenio PDF"
-                            className="flex-1 w-full h-[600px] border rounded"
-                        ></iframe>
-
+                        {loading ? (
+                            <div className="animate-pulse space-y-4">
+                                <div className="h-6 bg-gray-300 rounded w-1/3"></div>
+                                <div className="h-[600px] bg-gray-200 rounded"></div>
+                            </div>
+                        ) : (
+                            <iframe
+                                src={
+                                    agreement?.fileUrl ||
+                                    templateUrl || ""
+                                }
+                                title="Convenio PDF"
+                                className="flex-1 w-full h-[600px] border rounded"
+                            ></iframe>
+                        )}
                         {/* Acciones */}
                         {agreement ? (
                             !isReadOnly && (
                                 <AgreementActions
                                     agreement={agreement}
                                     onUpdate={fetchAgreement}
+                                    templateUrl={templateUrl}
+                                    uploadSignedAgreement={uploadSignedAgreement}
+                                    sendForFinalReview={sendForFinalReview}
                                 />
                             )
                         ) : (
                             <Button
-                                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => {
-                                    toast.success("Simulación: convenio iniciado correctamente.");
-                                    navigate("/dashboard/agreement/123"); // simula redirección
+                                className="mt-2 bg-zinc-500 hover:bg-zinc-600 text-white"
+                                disabled={loading}
+                                onClick={async () => {
+                                    try {
+                                        const newAgreement = await createAgreement();
+                                        if (!newAgreement) throw new Error("No se creó el convenio");
+
+                                        toast.success("convenio iniciado correctamente.");
+                                        navigate(`/dashboard/agreement/${newAgreement.id}`);
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.error("Error al iniciar el convenio");
+                                    }
                                 }}
                             >
                                 Iniciar proceso de convenio
@@ -179,18 +196,17 @@ export const AgreementRequest: React.FC = () => {
 const AgreementActions = ({
     agreement,
     onUpdate,
+    templateUrl,
+    uploadSignedAgreement,
+    sendForFinalReview,
 }: {
     agreement: Agreement;
-    onUpdate: () => void
+    onUpdate: () => void,
+    templateUrl?: string | null;
+    uploadSignedAgreement: (file: File) => Promise<Agreement | undefined>;
+    sendForFinalReview: () => Promise<Agreement | undefined>;
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleDownload = () => {
-        const link = document.createElement("a");
-        link.href = agreement.fileUrl || "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-        link.download = "Convenio_Practicas.pdf";
-        link.click();
-    };
 
     const handleUploadClick = () => fileInputRef.current?.click();
 
@@ -199,40 +215,41 @@ const AgreementActions = ({
         if (!file) return;
 
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            await axios.post(`/api/convenios/${agreement.id}/subir-firmado`, formData);
-
+            await uploadSignedAgreement(file);
             toast.success("Versión firmada subida correctamente. Lista para revisión final.");
-
-            // recarga el convenio con datos actualizados
             onUpdate();
-        } catch (err) {
-            console.error(err);
+        } catch {
             toast.error("Error al subir la versión firmada.");
         }
     };
 
     const handleSendForReview = async () => {
         try {
-            await axios.post(`/api/convenios/${agreement.id}/enviar-revision-final`);
-
+            await sendForFinalReview();
             toast.success("Convenio enviado para revisión final.");
-
-            // recarga el convenio con datos actualizados
             onUpdate();
-        } catch (err) {
-            console.error(err);
+        } catch {
             toast.error("No se pudo enviar el convenio para revisión final.");
         }
     };
 
+    const canSendForReview =
+        !!agreement.fileUrl &&
+        ["Pendiente de revisión"].includes(agreement.status);
+
     return (
         <div className="flex flex-col gap-3">
             <div className="flex gap-2 flex-wrap">
-                <Button onClick={handleDownload}>Descargar</Button>
-                <Button onClick={handleUploadClick}>Subir versión firmada</Button>
+                <a
+                    href={agreement?.fileUrl || templateUrl || ""}
+                    download={agreement ? `Convenio_${agreement.id}.pdf` : "Plantilla_Convenio.pdf"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+                >
+                    Descargar
+                </a>
+                <Button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors" onClick={handleUploadClick}>Subir versión firmada</Button>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -242,14 +259,16 @@ const AgreementActions = ({
                 />
             </div>
 
-            {agreement.fileUrl && (
-                <Button
-                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={handleSendForReview}
-                >
-                    Enviar para revisión final
-                </Button>
-            )}
+            <Button
+                className={`mt-2 ${canSendForReview
+                        ? "bg-zinc-500 hover:bg-zinc-600"
+                        : "bg-gray-300 cursor-not-allowed"
+                    } text-white`}
+                disabled={!canSendForReview}
+                onClick={handleSendForReview}
+            >
+                Enviar para revisión final
+            </Button>
         </div>
     );
 };

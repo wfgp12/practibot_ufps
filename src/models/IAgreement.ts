@@ -1,7 +1,14 @@
 import { mapCompanyFromApi, type IApiCompany, type ICompany } from "./ICompany";
 
 export const AGREEMENT_TYPES = ["MARCO", "ESPECIFICO"] as const;
-export const AGREEMENT_STATUSES = ["EN_REVISION", "APROBADO", "RECHAZADO", "VENCIDO"] as const;
+export const AGREEMENT_STATUSES = [
+  "PENDIENTE_FIRMA",
+  "PENDIENTE_REVISION",
+  "EN_REVISION",
+  "APROBADO",
+  "RECHAZADO",
+  "VENCIDO",
+] as const;
 
 export type AgreementApiType = (typeof AGREEMENT_TYPES)[number];
 export type AgreementApiStatus = (typeof AGREEMENT_STATUSES)[number];
@@ -33,7 +40,13 @@ export interface Agreement {
   type: "Marco" | "Específico";
   startDate?: Date | null;
   endDate?: Date | null;
-  status: "En revisión" | "Aprobado" | "Rechazado" | "Vencido";
+  status:
+    | "Pendiente de firma"
+    | "Pendiente de revisión"
+    | "En revisión"
+    | "Aprobado"
+    | "Rechazado"
+    | "Vencido";
   fileUrl?: string;
   notes?: string;
   version: number;
@@ -43,6 +56,8 @@ export interface Agreement {
 }
 
 const STATUS_MAP = {
+  PENDIENTE_FIRMA: "Pendiente de firma",
+  PENDIENTE_REVISION: "Pendiente de revisión",
   EN_REVISION: "En revisión",
   APROBADO: "Aprobado",
   RECHAZADO: "Rechazado",

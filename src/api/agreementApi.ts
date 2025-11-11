@@ -22,5 +22,23 @@ export const agreementApi = {
     getAgreementById: async (id: number): Promise<Agreement> => {
         const { data } = await axiosClient.get<{ data: AgreementApi }>(`/convenios/${id}`);
         return mapAgreementFromApi(data.data);
-    }
+    },
+    uploadSignedAgreement: async (id: number, file: File): Promise<Agreement> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const { data } = await axiosClient.post<{ data: AgreementApi }>(
+      `/convenios/${id}/subir-firmado`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return mapAgreementFromApi(data.data);
+  },
+  sendForFinalReview: async (id: number): Promise<Agreement> => {
+    const { data } = await axiosClient.post<{ data: AgreementApi }>(
+      `/convenios/${id}/enviar-revision`
+    );
+    return mapAgreementFromApi(data.data);
+  },
 }

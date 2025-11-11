@@ -43,4 +43,8 @@ export const documentApi = {
   deleteDocument: async (id: number): Promise<void> => {
     await axiosClient.delete(`/documentos/${id}`);
   },
+  getAgreementTemplate: async (): Promise<Document> => {
+    const { data } = await axiosClient.get<{ data: DocumentApi }>("/documentos/convenio");
+    return mapDocumentFromApi(data.data);
+  },
 };
