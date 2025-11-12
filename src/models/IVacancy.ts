@@ -14,46 +14,50 @@ export interface Vacancy {
   technicalSkills: string[]
   softSkills: string[]
   description?: string
-  status: "Open" | "Closed" | "Pending" | "Rejected";
+  status: "Open" | "Closed" | "Pending" | "Rejected"
+  convenio?: string
+  director?: string
 }
 
 // ╔══════════════════════════════════════════════╗
 // ║                MODELOS API                   ║
 // ╚══════════════════════════════════════════════╝
+export type IModality = "PRESENCIAL" | "REMOTO" | "HIBRIDO"
+export type IVacancyStatus = "PENDIENTE" | "APROBADA" | "INACTIVA" | "RECHAZADA"
 
-export type IModality = "PRESENCIAL" | "REMOTO" | "HIBRIDO";
-export type IVacancyStatus = "PENDIENTE" | "APROBADA" | "INACTIVA" | "RECHAZADA";
 export interface IApiVacancy {
-  id: number;
-  titulo: string;
-  area: string;
-  descripcion: string;
-  modalidad: IModality;
-  habilidadesBlandas?: string;
-  habilidadesTecnicas?: string;
-  estado: IVacancyStatus;
-  empresa: IApiCompany;
-  empresaId: number;
-  directorValidaId?: number;
-  creadaEn: string;
+  id: number
+  titulo: string
+  area: string
+  descripcion: string
+  modalidad: IModality
+  habilidadesBlandas?: string[]
+  habilidadesTecnicas?: string[]
+  estado: IVacancyStatus
+  empresa: IApiCompany
+  empresaId: number
+  directorValida?: { id: number; usuario: { nombre: string } }
+  convenio?: { id: number; nombre: string }
+  creadaEn: string
 }
 
 export interface IFormCreateVacancy {
-  titulo: string;
-  modalidad: IModality;
-  area?: string;
-  descripcion: string;
-  habilidadesBlandas?: string;
-  habilidadesTecnicas?: string;
+  titulo: string
+  modalidad: IModality
+  area?: string
+  descripcion: string
+  habilidadesBlandas?: string[] | string
+  habilidadesTecnicas?: string[] | string
 }
 
 export interface IFormRegisterVacancy extends IFormCreateVacancy {
-  empresaId: number;
+  empresaId: number
 }
 
 // ╔══════════════════════════════════════════════╗
 // ║         MAPEOS ENTRE FRONT Y API             ║
 // ╚══════════════════════════════════════════════╝
+
 // ✅ API → FRONT
 export const mapApiVacancyToVacancy = (
   apiVacancy: Partial<IApiVacancy>
@@ -65,19 +69,17 @@ export const mapApiVacancyToVacancy = (
   company: apiVacancy.empresa?.usuario?.nombre ?? "Sin empresa",
   location: "Colombia",
   workday: "Práctica",
-  technicalSkills: apiVacancy.habilidadesTecnicas
-    ? apiVacancy.habilidadesTecnicas.split(",").map((s) => s.trim())
-    : [],
-  softSkills: apiVacancy.habilidadesBlandas
-    ? apiVacancy.habilidadesBlandas.split(",").map((s) => s.trim())
-    : [],
+  technicalSkills: apiVacancy.habilidadesTecnicas ?? [],
+  softSkills: apiVacancy.habilidadesBlandas ?? [],
   description: apiVacancy.descripcion,
   status: mapApiStatusToFront(apiVacancy.estado),
-});
+  convenio: apiVacancy.convenio?.nombre,
+  director: apiVacancy.directorValida?.usuario?.nombre,
+})
 
 // ✅ Para listas
 export const mapApiVacancies = (data: Partial<IApiVacancy>[] = []): Vacancy[] =>
-  data.map(mapApiVacancyToVacancy);
+  data.map(mapApiVacancyToVacancy)
 
 // ✅ FRONT FORM → API BODY (empresa crea vacante)
 export const mapFormToApiVacancy = (form: IFormCreateVacancy) => ({
@@ -85,9 +87,13 @@ export const mapFormToApiVacancy = (form: IFormCreateVacancy) => ({
   descripcion: form.descripcion,
   area: form.area,
   modalidad: form.modalidad,
-  habilidadesBlandas: form.habilidadesBlandas,
-  habilidadesTecnicas: form.habilidadesTecnicas,
-});
+  habilidadesBlandas: Array.isArray(form.habilidadesBlandas)
+    ? form.habilidadesBlandas
+    : form.habilidadesBlandas?.split(",").map((s) => s.trim()) ?? [],
+  habilidadesTecnicas: Array.isArray(form.habilidadesTecnicas)
+    ? form.habilidadesTecnicas
+    : form.habilidadesTecnicas?.split(",").map((s) => s.trim()) ?? [],
+} as const)
 
 // ✅ FRONT FORM → API BODY (director/admin registra vacante aprobada)
 export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>) => ({
@@ -95,83 +101,77 @@ export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>)
   descripcion: form?.descripcion ?? "",
   area: form?.area ?? "",
   modalidad: form?.modalidad ?? "",
-  habilidadesBlandas: form?.habilidadesBlandas ?? "",
-  habilidadesTecnicas: form?.habilidadesTecnicas ?? "",
+  habilidadesBlandas: Array.isArray(form?.habilidadesBlandas)
+    ? form?.habilidadesBlandas
+    : form?.habilidadesBlandas?.split(",").map((s) => s.trim()) ?? [],
+  habilidadesTecnicas: Array.isArray(form?.habilidadesTecnicas)
+    ? form?.habilidadesTecnicas
+    : form?.habilidadesTecnicas?.split(",").map((s) => s.trim()) ?? [],
   empresaId: form?.empresaId ?? 0,
-});
+})
 
+// ╔══════════════════════════════════════════════╗
+// ║                FILTROS                       ║
+// ╚══════════════════════════════════════════════╝
 export type VacancyFilters = Partial<
-  Pick<Vacancy,
-    | "title"
-    | "company"
-    | "modality"
-    | "area"
-    | "location"
-    | "workday"
-    | "status"
-  >
+  Pick<Vacancy, "title" | "company" | "modality" | "area" | "location" | "workday" | "status">
 > & {
-  technicalSkills?: string;
-  softSkills?: string;
-};
+  technicalSkills?: string
+  softSkills?: string
+}
 
-/** FRONT → BACK (filtros de búsqueda) */
+// FRONT → BACK (filtros de búsqueda)
 export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
-  const mapped: Record<string, string> = {};
+  const mapped: Record<string, string> = {}
 
-  if (filters.title) mapped.titulo = filters.title;
-  if (filters.technicalSkills) mapped.habilidadesTecnicas = filters.technicalSkills;
-  if (filters.softSkills) mapped.habilidadesBlandas = filters.softSkills;
-  if (filters.company) mapped.empresa = filters.company;
-  if (filters.area) mapped.area = filters.area;
-  if (filters.modality) mapped.modalidad = filters.modality;
-  if (filters.location) mapped.ubicacion = filters.location;
-  if (filters.workday) mapped.tipoJornada = filters.workday;
-  if (filters.status)
-    mapped.estado = mapFrontStatusToApi(filters.status);
+  if (filters.title) mapped.titulo = filters.title
+  if (filters.technicalSkills) mapped.habilidadesTecnicas = filters.technicalSkills
+  if (filters.softSkills) mapped.habilidadesBlandas = filters.softSkills
+  if (filters.company) mapped.empresa = filters.company
+  if (filters.area) mapped.area = filters.area
+  if (filters.modality) mapped.modalidad = filters.modality
+  if (filters.location) mapped.ubicacion = filters.location
+  if (filters.workday) mapped.tipoJornada = filters.workday
+  if (filters.status) mapped.estado = mapFrontStatusToApi(filters.status)
 
-  return mapped;
-};
+  return mapped
+}
 
 // ╔══════════════════════════════════════════════╗
 // ║              ESTADOS VACANTES                ║
 // ╚══════════════════════════════════════════════╝
-
 export const mapFrontStatusToApi = (status: Vacancy["status"]): IApiVacancy["estado"] => {
   switch (status) {
     case "Open":
-      return "APROBADA";
+      return "APROBADA"
     case "Closed":
-      return "INACTIVA";
+      return "INACTIVA"
     case "Pending":
-      return "PENDIENTE";
+      return "PENDIENTE"
     case "Rejected":
-      return "RECHAZADA";
+      return "RECHAZADA"
     default:
-      return "APROBADA";
+      return "APROBADA"
   }
-};
+}
 
 export const mapApiStatusToFront = (estado?: IApiVacancy["estado"]): Vacancy["status"] => {
   switch (estado) {
     case "APROBADA":
-      return "Open";
+      return "Open"
     case "INACTIVA":
-      return "Closed";
+      return "Closed"
     case "PENDIENTE":
-      return "Pending";
+      return "Pending"
     case "RECHAZADA":
-      return "Rejected";
+      return "Rejected"
     default:
-      return "Open";
+      return "Open"
   }
-};
+}
 
 // ✅ FRONT → FORM (editar vacante o registrar)
-export const mapVacancyToFormRegisterVacancy = (
-  vacancy: Vacancy,
-  empresaId: number
-): IFormRegisterVacancy => ({
+export const mapVacancyToFormRegisterVacancy = (vacancy: Vacancy, empresaId: number): IFormRegisterVacancy => ({
   titulo: vacancy.title,
   area: vacancy.area,
   modalidad: vacancy.modality,
@@ -179,4 +179,4 @@ export const mapVacancyToFormRegisterVacancy = (
   habilidadesBlandas: vacancy.softSkills.join(","),
   habilidadesTecnicas: vacancy.technicalSkills.join(","),
   empresaId,
-});
+})
