@@ -1,6 +1,6 @@
 import { mapCompanyFromApi, type IApiCompany, type ICompany } from "./ICompany";
 
-export const AGREEMENT_TYPES = ["MARCO", "ESPECIFICO"] as const;
+export const AGREEMENT_TYPES = ["MACRO", "ESPECIFICO"] as const;
 export const AGREEMENT_STATUSES = [
   "PENDIENTE_FIRMA",
   "PENDIENTE_REVISION",
@@ -37,16 +37,16 @@ export interface Agreement {
   directorId: number;
   name: string;
   description?: string;
-  type: "Marco" | "Específico";
+  type: "Macro" | "Específico";
   startDate?: Date | null;
   endDate?: Date | null;
   status:
-    | "Pendiente de firma"
-    | "Pendiente de revisión"
-    | "En revisión"
-    | "Aprobado"
-    | "Rechazado"
-    | "Vencido";
+  | "Pendiente de firma"
+  | "Pendiente de revisión"
+  | "En revisión"
+  | "Aprobado"
+  | "Rechazado"
+  | "Vencido";
   fileUrl?: string;
   notes?: string;
   version: number;
@@ -75,7 +75,7 @@ export const mapAgreementFromApi = (api: AgreementApi): Agreement => ({
   directorId: api.directorId,
   name: api.nombre,
   description: api.descripcion || undefined,
-  type: api.tipo === "MARCO" ? "Marco" : "Específico",
+  type: api.tipo === "MACRO" ? "Macro" : "Específico",
   startDate: api.fechaInicio ? new Date(api.fechaInicio) : null,
   endDate: api.fechaFin ? new Date(api.fechaFin) : null,
   status: STATUS_MAP[api.estado] ?? "En revisión",
@@ -93,7 +93,7 @@ export const mapAgreementToApi = (agreement: Agreement): AgreementApi => ({
   directorId: agreement.directorId,
   nombre: agreement.name,
   descripcion: agreement.description,
-  tipo: agreement.type === "Marco" ? "MARCO" : "ESPECIFICO",
+  tipo: agreement.type === "Macro" ? "MACRO" : "ESPECIFICO",
   fechaInicio: agreement.startDate?.toISOString(),
   fechaFin: agreement.endDate?.toISOString(),
   estado: REVERSE_STATUS_MAP[agreement.status] ?? "EN_REVISION",
@@ -103,3 +103,46 @@ export const mapAgreementToApi = (agreement: Agreement): AgreementApi => ({
   creadoEn: agreement.createdAt.toISOString(),
   actualizadoEn: agreement.updatedAt.toISOString(),
 });
+
+const FILTER_KEY_MAP = {
+  name: "nombre",
+  status: "estado",
+  type: "tipo",
+  startDate: "fechaInicio",
+  endDate: "fechaFin",
+} as const;
+
+const FILTER_VALUE_MAPS = {
+  status: REVERSE_STATUS_MAP,
+  type: {
+    Macro: "MACRO",
+    Específico: "ESPECIFICO",
+  } as const,
+} as const;
+
+type FrontFilterKey = keyof typeof FILTER_KEY_MAP;
+type ApiFilterKey = (typeof FILTER_KEY_MAP)[FrontFilterKey];
+type FilterValueMapKey = keyof typeof FILTER_VALUE_MAPS;
+
+/**
+ * Transforma los filtros del front al formato que espera el backend
+ */
+export const mapAgreementFiltersToApi = (
+  filters: Partial<Record<FrontFilterKey, string>>
+): Partial<Record<ApiFilterKey, string>> => {
+  const mapped: Partial<Record<ApiFilterKey, string>> = {};
+
+  for (const [key, value] of Object.entries(filters) as [FrontFilterKey, string][]) {
+    if (!value || value === "All" || value === "Todos") continue; // 👈 se ignora el filtro vacío o "Todos"
+
+    const apiKey = FILTER_KEY_MAP[key];
+    const valueMap = FILTER_VALUE_MAPS[key as FilterValueMapKey];
+
+    mapped[apiKey] =
+      valueMap && value in valueMap
+        ? valueMap[value as keyof typeof valueMap]
+        : value;
+  }
+
+  return mapped;
+};

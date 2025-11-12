@@ -69,7 +69,7 @@ export const AgreementRequest: React.FC = () => {
                         <h1 className="text-xl font-semibold">Solicitud y seguimiento de convenio</h1>
                         <p className="text-sm text-gray-500">{company?.nombre}</p>
                     </div>
-                    <Button variant="outline" onClick={() => navigate("/dashboard")}>
+                    <Button className="bg-"  variant="outline" onClick={() => navigate(-1)}>
                         Volver al panel
                     </Button>
                 </div>

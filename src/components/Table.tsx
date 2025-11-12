@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 export interface Column<T extends object> {
   /** Propiedad del objeto que se mostrará */
@@ -29,6 +29,7 @@ interface TableProps<T extends { id?: string | number }> {
   page?: number;
   pageSize?: number;
   className?: string;
+  loading?: boolean;
   onChange?: (params: {
     filters: Record<string, string>;
     page: number;
@@ -36,10 +37,6 @@ interface TableProps<T extends { id?: string | number }> {
   }) => void;
 }
 
-/**
- * Componente de tabla genérico similar al Table de Ant Design.
- * Totalmente tipado y sin usar `any`.
- */
 export function Table<T extends { id?: string | number }>({
   columns,
   data,
@@ -47,6 +44,7 @@ export function Table<T extends { id?: string | number }>({
   page: initialPage = 1,
   pageSize = 10,
   className,
+  loading = false,
   onChange,
 }: TableProps<T>) {
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -127,7 +125,19 @@ export function Table<T extends { id?: string | number }>({
             ))}
           </tr>
         </thead>
-        <tbody>
+        {loading && (
+          <tbody>
+            <tr>
+              <td colSpan={columns.length}>
+                <div className="flex justify-center items-center py-10">
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        )}
+        {!loading && (
+          <tbody>
           {data.length > 0 ? (
             data.map((row, rowIndex) => (
               <tr
@@ -168,6 +178,7 @@ export function Table<T extends { id?: string | number }>({
             </tr>
           )}
         </tbody>
+        )}
       </table>
 
       {total > 0 && (

@@ -1,33 +1,87 @@
 import { mapAgreementFromApi, type Agreement, type AgreementApi } from "@/models/IAgreement";
 import axiosClient from "./axiosClient";
+import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 
 
 export const agreementApi = {
-    createAgreement: async (): Promise<Agreement> => {
-        const { data } = await axiosClient.post<{ data: AgreementApi }>("/convenios/iniciar");
-        return mapAgreementFromApi(data.data);
-    },
-    listMyAgreements: async (): Promise<Agreement[]> => {
-        const { data } = await axiosClient.get<{ data: AgreementApi[] }>("/convenios/me");
-        return data.data.map(mapAgreementFromApi);
-    },
-    listAllAgreements: async (): Promise<Agreement[]> => {
-        const { data } = await axiosClient.get<{ convenios: AgreementApi[] }>("/convenios");
-        return data.convenios.map(mapAgreementFromApi);
-    },
-    listAgreementsByCompanyId: async (empresaId: number): Promise<Agreement[]> => {
-        const { data } = await axiosClient.get<{ data: AgreementApi[] }>(`/convenios/empresa/${empresaId}`);
-        return data.data.map(mapAgreementFromApi);
-    },
-    getAgreementById: async (id: number): Promise<Agreement> => {
-        const { data } = await axiosClient.get<{ data: AgreementApi }>(`/convenios/${id}`);
-        return mapAgreementFromApi(data.data);
-    },
-    uploadSignedAgreement: async (id: number, file: File): Promise<Agreement> => {
+  createByDirector: async (payload: {
+    empresaId: number;
+    nombre: string;
+    descripcion?: string;
+    tipo: string;
+    observaciones?: string;
+    file?: File;
+    fechaInicio: string;
+    fechaFin: string;
+    estado: "EN_REVISION" | "APROBADO" | "RECHAZADO";
+  }): Promise<Agreement> => {
+    const formData = new FormData();
+    formData.append("empresaId", payload.empresaId.toString());
+    formData.append("nombre", payload.nombre);
+    formData.append("tipo", payload.tipo);
+    formData.append("fechaInicio", payload.fechaInicio);
+    formData.append("fechaFin", payload.fechaFin);
+    formData.append("estado", payload.estado);
+
+    if (payload.descripcion) formData.append("descripcion", payload.descripcion);
+    if (payload.observaciones) formData.append("observaciones", payload.observaciones);
+    if (payload.file) formData.append("file", payload.file);
+
+    const { data } = await axiosClient.post<IApiResponse<AgreementApi>>(
+      "/convenios/crear",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return mapAgreementFromApi(data.data);
+  },
+  createAgreement: async (): Promise<Agreement> => {
+    const { data } = await axiosClient.post<IApiResponse<AgreementApi>>("/convenios/iniciar");
+    return mapAgreementFromApi(data.data);
+  },
+  listMyAgreements: async (
+    page = 1,
+    pageSize = 10,
+    filters: Record<string, unknown> = {}
+  ): Promise<IApiPaginatedResponse<Agreement>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<AgreementApi>>("/convenios/me", { params: { page, pageSize, ...filters } });
+    return {
+      ...data,
+      data: data.data.map(mapAgreementFromApi),
+    };
+  },
+  listAllAgreements: async (
+    page = 1,
+    pageSize = 10,
+    filters: Record<string, unknown> = {}
+  ): Promise<IApiPaginatedResponse<Agreement>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<AgreementApi>>("/convenios", { params: { page, pageSize, ...filters } });
+    return {
+      ...data,
+      data: data.data.map(mapAgreementFromApi),
+    };
+  },
+  listAgreementsByCompanyId: async (
+    empresaId: number,
+    page = 1,
+    pageSize = 10,
+    filters: Record<string, unknown> = {}
+  ): Promise<IApiPaginatedResponse<Agreement>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<AgreementApi>>(`/convenios/empresa/${empresaId}`, { params: { page, pageSize, ...filters } });
+    return {
+      ...data,
+      data: data.data.map(mapAgreementFromApi),
+    };
+  },
+  getAgreementById: async (id: number): Promise<Agreement> => {
+    const { data } = await axiosClient.get<IApiResponse<AgreementApi>>(`/convenios/${id}`);
+    return mapAgreementFromApi(data.data);
+  },
+  uploadSignedAgreement: async (id: number, file: File): Promise<Agreement> => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const { data } = await axiosClient.post<{ data: AgreementApi }>(
+    const { data } = await axiosClient.post<IApiResponse<AgreementApi>>(
       `/convenios/${id}/subir-firmado`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }

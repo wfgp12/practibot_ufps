@@ -10,6 +10,7 @@ import { useAgreements } from "@/hooks/useAgreements";
 
 import type { ICompany, IRegisterCompanyData } from "@/models/ICompany";
 import { useAppSelector } from "@/store/hooks";
+import { AgreementModal } from "../agreement/AgreementModal";
 
 export const CompanyDetail = () => {
     const navigate = useNavigate();
@@ -25,7 +26,17 @@ export const CompanyDetail = () => {
     } = useCompanies();
     const [company, setCompany] = useState<ICompany | null>(null);
 
-    const { agreements, loading: loadingAgreements, error: errorAgreements } = useAgreements(id ? Number(id) : undefined);
+    const {
+        agreements,
+        total,
+        page,
+        pageSize,
+        loading: loadingAgreements,
+        setPage,
+        setPageSize,
+        setFilters,
+        fetchAgreements
+    } = useAgreements(id ? Number(id) : undefined);
 
     const isOwner = company?.userId === user?.id;
     const userRole = user?.role || "guest";
@@ -162,17 +173,21 @@ export const CompanyDetail = () => {
             </SectionComponent>
             {/* Sección de convenios asociados a la empresa */}
             <SectionComponent classNameContainer="pt-2" classNameContent="max-w-4xl">
-                <div className="flex flex-col w-full border-b-4 border-red-600 pb-2 mb-4">
+                <div className="flex items-center w-full justify-between border-b-4 border-red-600 pb-2 mb-4">
                     <h2 className="text-xl text-gray-500 font-bold">Convenios</h2>
-
+                    {(userRole === "DIRECTOR" || userRole === "ADMIN") && (
+                        <AgreementModal empresaId={Number(company.id)} onCreated={fetchAgreements} />
+                    )}
                 </div>
                 <Card className="w-full border border-border/60 shadow-sm">
                     <CardContent>
-                        {loadingAgreements ? (
+                        {/* {loadingAgreements && (
                             <p className="text-center text-gray-500 py-6">Cargando convenios...</p>
-                        ) : errorAgreements ? (
+                        )}
+                        {errorAgreements && (
                             <p className="text-center text-red-500 py-6">{errorAgreements}</p>
-                        ) : agreements.length === 0 ? (
+                        )} */}
+                        {agreements.length === 0 ? (
                             <div className="flex items-center justify-between border border-dashed border-amber-400/70 bg-amber-50/60 px-6 py-4 rounded-md">
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center justify-center rounded-full bg-amber-100 p-2">
@@ -191,10 +206,16 @@ export const CompanyDetail = () => {
                         ) : (
                             <Table
                                 columns={[
-                                    { key: "name", title: "Convenio" },
+                                    { key: "name", title: "Convenio", filterType: "text" },
                                     {
                                         key: "status",
                                         title: "Estado",
+                                        filterType: "select",
+                                        filterOptions: [
+                                            { label: "Aprobado", value: "APROBADO" },
+                                            { label: "En revisión", value: "EN_REVISION" },
+                                            { label: "Rechazado", value: "RECHAZADO" },
+                                        ],
                                         render: (estado) => (
                                             <Badge
                                                 variant="outline"
@@ -244,9 +265,15 @@ export const CompanyDetail = () => {
                                     },
                                 ]}
                                 data={agreements}
-                                total={agreements.length}
-                                page={1}
-                                pageSize={10}
+                                total={total}
+                                page={page}
+                                pageSize={pageSize}
+                                loading={loadingAgreements}
+                                onChange={({ filters, page, pageSize }) => {
+                                    setFilters(filters);
+                                    setPage(page);
+                                    setPageSize(pageSize);
+                                }}
                             />
                         )}
                     </CardContent>
