@@ -118,6 +118,22 @@ export const useAgreement = (id: number | null) => {
     }
   };
 
+  const uploadNewVersion = async (file: File) => {
+    if (!agreement) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const updated = await agreementApi.uploadNewVersion(agreement.id, file);
+      setAgreement(updated);
+      return updated;
+    } catch (err) {
+      console.error(err);
+      setError("Error al subir la nueva versión del convenio");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (id) fetchAgreement();
     else fetchTemplate();
@@ -134,5 +150,6 @@ export const useAgreement = (id: number | null) => {
     sendForFinalReview,
     approveAgreement,
     rejectAgreement,
+    uploadNewVersion,
   };
 };

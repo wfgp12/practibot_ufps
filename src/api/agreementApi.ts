@@ -121,4 +121,16 @@ export const agreementApi = {
     );
     return mapAgreementFromApi(data.data);
   },
+  uploadNewVersion: async (id: number, file: File): Promise<Agreement> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const { data } = await axiosClient.post<IApiResponse<AgreementApi>>(
+      `/convenios/${id}/nueva-version`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return mapAgreementFromApi(data.data);
+  },
 }
