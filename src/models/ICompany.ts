@@ -10,6 +10,7 @@ export interface IApiCompany {
   sector?: string;
   descripcion?: string;
   usuario: Partial<IApiUser>;
+  habilitada?: boolean;
 }
 
 export interface IRegisterCompanyData {
@@ -55,4 +56,5 @@ export const mapCompanyFromApi = (apiCompany: IApiCompany): ICompany => ({
   direccion: apiCompany.direccion || "",
   sector: apiCompany.sector || "",
   descripcion: apiCompany.descripcion || "",
+  isEnabled: apiCompany.habilitada || false,
 });

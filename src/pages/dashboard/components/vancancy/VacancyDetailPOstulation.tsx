@@ -1,4 +1,4 @@
-import { Button, Table } from "@/components"; // ajusta según donde tengas tu Table
+import { Table } from "@/components"; // ajusta según donde tengas tu Table
 import { Card, CardContent, SectionComponent, Badge } from "@/components";
 import { useEffect, useState, useCallback } from "react";
 import { PostulationApi, type Postulation } from "@/api/postulationApi";
@@ -20,12 +20,12 @@ export const VacancyDetailPostulations = ({ vacancyId, userRole }: { vacancyId: 
     }, [vacancyId]);
 
     useEffect(() => {
-        if (userRole === "DIRECTOR" || userRole === "ADMIN") {
+        if (userRole === "DIRECTOR" || userRole === "ADMIN" || userRole === "EMPRESA") {
             fetchPostulations();
         }
     }, [userRole, fetchPostulations]);
 
-    if (userRole !== "DIRECTOR" && userRole !== "ADMIN") return null;
+    if (userRole !== "DIRECTOR" && userRole !== "ADMIN" && userRole !== "EMPRESA") return null;
 
     return (
         <SectionComponent classNameContainer="pt-2" classNameContent="max-w-4xl">
@@ -45,25 +45,19 @@ export const VacancyDetailPostulations = ({ vacancyId, userRole }: { vacancyId: 
                                 {
                                     key: "estudianteId",
                                     title: "Código",
-                                    filterType: "text",
+                                    // filterType: "text",
                                     render: (_, p) => p.estudiante?.codigo || "—",
                                 },
                                 {
                                     key: "estudianteId",
                                     title: "Estudiante",
-                                    filterType: "text",
+                                    // filterType: "text",
                                     render: (_, p) => p.estudiante?.usuario?.nombre || "—",
-                                },
-                                {
-                                    key: "vacante",
-                                    title: "Empresa",
-                                    filterType: "text",
-                                    render: (_, p) => p.vacante?.empresa?.usuario?.nombre || "—",
                                 },
                                 {
                                     key: "estado",
                                     title: "Estado",
-                                    filterType: "select",
+                                    // filterType: "select",
                                     filterOptions: [
                                         { label: "En revisión", value: "EN_REVISION" },
                                         { label: "Aceptada", value: "ACEPTADA" },
@@ -95,27 +89,27 @@ export const VacancyDetailPostulations = ({ vacancyId, userRole }: { vacancyId: 
                                     title: "Fecha",
                                     render: (_, p) => (p.fechaPostula ? new Date(p.fechaPostula).toLocaleDateString("es-CO") : "—"),
                                 },
-                                {
-                                    key: "id",
-                                    title: "Acciones",
-                                    align: "center",
-                                    render: (_, postulation) => (
-                                        <Button
-                                            variant="outline"
-                                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                                            onClick={async () => {
-                                                try {
-                                                    await PostulationApi.cancel(postulation.id);
-                                                    fetchPostulations();
-                                                } catch (error) {
-                                                    console.error(error);
-                                                }
-                                            }}
-                                        >
-                                            Cancelar
-                                        </Button>
-                                    ),
-                                },
+                                // {
+                                //     key: "id",
+                                //     title: "Acciones",
+                                //     align: "center",
+                                //     render: (_, postulation) => (
+                                //         <Button
+                                //             variant="outline"
+                                //             className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                                //             onClick={async () => {
+                                //                 try {
+                                //                     await PostulationApi.cancel(postulation.id);
+                                //                     fetchPostulations();
+                                //                 } catch (error) {
+                                //                     console.error(error);
+                                //                 }
+                                //             }}
+                                //         >
+                                //             Cancelar
+                                //         </Button>
+                                //     ),
+                                // },
                             ]}
                             data={postulations}
                             total={postulations.length}

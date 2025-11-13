@@ -251,7 +251,7 @@ export const VacancyDetail = () => {
                     )}
                 </Card>
             </SectionComponent>
-            {(userRole === "DIRECTOR" || userRole === "ADMIN") && (
+            {(userRole === "DIRECTOR" || userRole === "ADMIN" || userRole === "EMPRESA") && (
                 <VacancyDetailPostulations vacancyId={Number(vacancy.id)} userRole={userRole} />
             )}
         </>
