@@ -28,6 +28,9 @@ export interface IApiPractica {
 export interface IApiStudent {
   id: number;
   usuarioId: number;
+  codigo: string;
+  cedula: string;
+  telefono: string;
   perfilCompleto: boolean;
   activo: boolean;
   descripcion?: string;
@@ -51,6 +54,9 @@ export interface IApiStudent {
 export interface IStudent {
   id: number;
   name: string;
+  code: string;
+  document: string;
+  phone: string;
   email: string;
   profileComplete: boolean;
   active: boolean;
@@ -68,6 +74,9 @@ export const mapApiStudentToStudent = (apiStudent: IApiStudent): IStudent => {
   return {
     id: apiStudent.id,
     name: apiStudent.usuario.nombre,
+    code: apiStudent.codigo,
+    document: apiStudent.cedula,
+    phone: apiStudent.telefono,
     email: apiStudent.usuario.email,
     profileComplete: apiStudent.perfilCompleto,
     active: apiStudent.activo,
@@ -86,6 +95,9 @@ export const mapStudentToApiPayload = (student: Partial<IStudent>) => {
   return {
     descripcion: student.description,
     area: student.area,
+    codigo: student.code,
+    cedula: student.document,
+    telefono: student.phone,
     habilidadesTecnicas: student.technicalSkills,
     habilidadesBlandas: student.softSkills,
     experiencia: student.experience,

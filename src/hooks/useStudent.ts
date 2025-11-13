@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { studentApi } from "../api/studentApi";
-import type { IStudent } from "@/models/IStudent";
+import { mapStudentToApiPayload, type IStudent } from "@/models/IStudent";
 
 export const useStudent = (id?: number | null) => {
   const [student, setStudent] = useState<IStudent | null>(null);
@@ -67,7 +67,8 @@ export const useStudent = (id?: number | null) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await studentApi.completeProfile(student.id, payload);
+      
+      const data = await studentApi.completeProfile(student.id, mapStudentToApiPayload(payload));
       setStudent(data);
       return data;
     } catch (err: unknown) {
