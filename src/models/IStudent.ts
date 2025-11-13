@@ -80,3 +80,22 @@ export const mapApiStudentToStudent = (apiStudent: IApiStudent): IStudent => {
     internships: apiStudent.practicas || [],
   };
 };
+
+/** Mapper inverso: convierte IStudent (frontend) a formato esperado por la API */
+export const mapStudentToApiPayload = (student: Partial<IStudent>) => {
+  return {
+    descripcion: student.description,
+    area: student.area,
+    habilidadesTecnicas: student.technicalSkills,
+    habilidadesBlandas: student.softSkills,
+    experiencia: student.experience,
+    perfilCompleto: student.profileComplete,
+    activo: student.active,
+    usuario: {
+      update: {
+        nombre: student.name,
+        email: student.email,
+      },
+    },
+  };
+};

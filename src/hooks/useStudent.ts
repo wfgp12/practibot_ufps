@@ -7,22 +7,38 @@ export const useStudent = (id?: number | null) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** Obtener estudiante por ID o "mi perfil" */
   const fetchStudent = async (): Promise<void> => {
+    if (id === null) return;
+
     setLoading(true);
     setError(null);
     try {
       let data: IStudent;
-      if (id) {
-        // Modo externo: obtiene estudiante por ID
+
+      if (typeof id === "number") {
         data = await studentApi.getStudentById(id);
       } else {
-        // Modo "mi perfil": obtiene estudiante autenticado por token
         data = await studentApi.getMyProfile();
       }
+
       setStudent(data);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createStudent = async (payload: { nombre: string; email: string }): Promise<IStudent | undefined> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await studentApi.createStudent(payload);
+      setStudent(data);
+      return data;
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -97,8 +113,8 @@ export const useStudent = (id?: number | null) => {
   };
 
   useEffect(() => {
-    fetchStudent();
+    if (id !== null) fetchStudent();
   }, [id]);
 
-  return { student, loading, error, fetchStudent, updateStudent, completeProfile, deactivate, reactivate };
+  return { student, loading, error, fetchStudent, createStudent, updateStudent, completeProfile, deactivate, reactivate };
 };

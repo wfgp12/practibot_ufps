@@ -1,20 +1,26 @@
+// src/hooks/useStudents.ts
 import { useState, useEffect } from "react";
 import { studentApi } from "../api/studentApi";
 import type { IStudent } from "@/models/IStudent";
 
-export const useStudent = (id: number | null) => {
-  const [student, setStudent] = useState<IStudent | null>(null);
+export const useStudents = (initialSkip = 0, initialTake = 10) => {
+  const [students, setStudents] = useState<IStudent[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(Math.floor(initialSkip / initialTake) + 1);
+  const [pageSize, setPageSize] = useState(initialTake);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** Obtener estudiante por ID */
-  const fetchStudent = async (): Promise<void> => {
-    if (!id) return;
+  /** Obtener estudiantes paginados */
+  const fetchStudents = async (skip = 0, take = pageSize): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
-      const data = await studentApi.getStudentById(id);
-      setStudent(data);
+      const data = await studentApi.getStudents(skip, take);
+      setStudents(data.data);
+      setTotal(data.total);
+      setPage(data.page);
+      setPageSize(data.pageSize);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
     } finally {
@@ -22,77 +28,65 @@ export const useStudent = (id: number | null) => {
     }
   };
 
-  /** Actualizar estudiante */
-  const updateStudent = async (payload: Partial<IStudent>): Promise<IStudent | undefined> => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await studentApi.updateStudent(id, payload);
-      setStudent(data);
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+  /** Cambiar página */
+  const setPageNumber = (newPage: number) => {
+    const skip = (newPage - 1) * pageSize;
+    fetchStudents(skip, pageSize);
   };
 
-  /** Completar perfil del estudiante */
-  const completeProfile = async (payload: Partial<IStudent>): Promise<IStudent | undefined> => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await studentApi.completeProfile(id, payload);
-      setStudent(data);
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+  /** Cambiar tamaño de página */
+  const setPageSizeNumber = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    fetchStudents(0, newPageSize); // reiniciar en primera página
   };
 
   /** Soft delete */
-  const deactivate = async (): Promise<IStudent | undefined> => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await studentApi.deactivateStudent(id);
-      setStudent(data);
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /** Reactivar */
-  const reactivate = async (): Promise<IStudent | undefined> => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await studentApi.reactivateStudent(id);
-      setStudent(data);
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const deactivate = async (id: number): Promise<IStudent | undefined> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await studentApi.deactivateStudent(id);
+        fetchStudents();
+        return data;
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    /** Reactivar */
+    const reactivate = async (id: number): Promise<IStudent | undefined> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await studentApi.reactivateStudent(id);
+        fetchStudents();
+        return data;
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    };
 
   useEffect(() => {
-    fetchStudent();
-  }, [id]);
+    fetchStudents(initialSkip, initialTake);
+  }, []);
 
-  return { student, loading, error, fetchStudent, updateStudent, completeProfile, deactivate, reactivate };
+  return {
+    students,
+    total,
+    page,
+    pageSize,
+    loading,
+    error,
+    deactivate,
+    reactivate,
+    fetchStudents,
+    setPageNumber,
+    setPageSizeNumber,
+  };
 };

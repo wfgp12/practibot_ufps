@@ -1,35 +1,55 @@
-import { Button } from "@/components"
-import { Table, type Column } from "@/components/Table"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Badge, Button } from "@/components";
+import { Table, type Column } from "@/components/Table";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useStudents } from "@/hooks/useStudents";
 import type { IStudent } from "@/models/IStudent";
+import { StudentModal } from "./student/StudentModal";
 
 export const GestionEstudiantes = () => {
+    const {
+        students,
+        total,
+        page,
+        pageSize,
+        loading,
+        error,
+        deactivate,
+        reactivate,
+        fetchStudents,
+        setPageNumber,
+    } = useStudents();
 
-    const { students } = useStudents();
 
-    const columnasConvenios: Column<IStudent>[] = [
-        { key: "code", title: "Código" },
-        { key: "firstName", title: "Nombre" },
-        { key: "lastName", title: "Apellido" },
-        { key: "institutionalEmail", title: "Email" },
+    const columns: Column<IStudent>[] = [
+        { key: "name", title: "Nombre" },
+        { key: "email", title: "Correo institucional" },
+        {
+            key: "active",
+            title: "Estado",
+            render: (active) => (
+                <Badge variant="outline" className={`${active ? "border-green-500 text-green-500" : "border-red-500 text-red-500"}`}>
+                    {active ? "Activo" : "Inactivo"}
+                </Badge>
+            ),
+        },
         {
             key: "id",
             title: "Acciones",
-            align: "center",
-            render: () => (
-                <div className="space-x-2">
+            render: (id, student) => (
+                <div className="flex  space-x-2">
                     <Button
                         variant="outline"
-                        className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+                        className={`${student.active ?"text-red-600 border-red-600 hover:bg-red-600": "text-zinc-600 border-zinc-600 hover:bg-zinc-600"} hover:text-white`}
+                        onClick={() => student.active ? deactivate(Number(id)) : reactivate(Number(id))}
                     >
-                        Editar
+                        {student.active ? "Desactivar" : "Activar"}
                     </Button>
-                    <Button variant="destructive">Desactivar</Button>
+                    <StudentModal student={student} onSuccess={() => fetchStudents()} />
                 </div>
             ),
         },
     ];
+
     return (
         <Card className="w-full">
             <CardHeader>
@@ -37,15 +57,24 @@ export const GestionEstudiantes = () => {
             </CardHeader>
             <CardContent>
                 <div className="flex justify-between items-center mb-4">
-                    <h5 className="text-lg font-medium">Estudiantes</h5>
-                    <Button className="bg-green-600 hover:bg-green-700">
-                        Agregar estudiante
-                    </Button>
+                    <h5 className="text-lg font-medium">Listado de estudiantes</h5>
+                    <StudentModal onSuccess={fetchStudents} />
                 </div>
 
-                <Table columns={columnasConvenios} data={students} />
+                <Table
+                    columns={columns}
+                    data={students}
+                    total={total}
+                    page={page}
+                    pageSize={pageSize}
+                    loading={loading}
+                    onChange={({ page }) => setPageNumber(page)}
+                />
 
+                {error && (
+                    <p className="text-red-600 text-center py-2">{error}</p>
+                )}
             </CardContent>
         </Card>
-    )
-}
+    );
+};

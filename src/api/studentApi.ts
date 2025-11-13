@@ -1,4 +1,4 @@
-import { mapApiStudentToStudent, type IApiStudent, type IStudent } from "@/models/IStudent";
+import { mapApiStudentToStudent, mapStudentToApiPayload, type IApiStudent, type IStudent } from "@/models/IStudent";
 import axiosClient from "./axiosClient";
 import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 
@@ -28,7 +28,11 @@ export const studentApi = {
   },
 
   updateStudent: async (id: number, payload: Partial<IStudent>): Promise<IStudent> => {
-    const response = await axiosClient.put<IApiResponse<IApiStudent>>(`/estudiantes/${id}`, payload);
+    const mappedPayload = mapStudentToApiPayload(payload);
+    const response = await axiosClient.put<IApiResponse<IApiStudent>>(
+      `/estudiantes/${id}`,
+      mappedPayload
+    );
     return mapApiStudentToStudent(response.data.data);
   },
 
