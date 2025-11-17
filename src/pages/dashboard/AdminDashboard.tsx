@@ -3,6 +3,7 @@ import { GestionConvenios } from "./components/GestionConvenios"
 import { GestionVacantes } from "./components/GestionVacantes"
 import { GestionDocumentos } from "./components/GestionDocumentos"
 import { GestionEstudiantes } from "./components/GestionEstudiantes"
+import { GestionEmpresas } from "./components/GestionEmpresas"
 // import { QuickReports } from "./components/QuickReports"
 
 export const AdminDashboard = () => {
@@ -10,6 +11,9 @@ export const AdminDashboard = () => {
 
     return (
         <>
+            <SectionComponent classNameContainer="pt-10 pb-5" classNameContent="max-w-6xl" id="empresas">
+                <GestionEmpresas />
+            </SectionComponent>
             <SectionComponent classNameContainer="pt-10 pb-5" classNameContent="max-w-6xl" id="convenios">
                 <GestionConvenios />
             </SectionComponent>

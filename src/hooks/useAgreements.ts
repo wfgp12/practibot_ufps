@@ -10,42 +10,75 @@ export const useAgreements = (companyId?: number) => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const [pendingAgreements, setPendingAgreements] = useState<Agreement[]>([]);
+  const [totalPending, setTotalPending] = useState(0);
+  const [pagePending, setPagePending] = useState(1);
+  const [pageSizePending, setPageSizePending] = useState(10);
+
   const [filters, setFilters] = useState<Record<string, unknown>>({});
+  const [pendingFilters, setPendingFilters] = useState<Record<string, unknown>>({});
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** 🔹 Cargar convenios según rol y filtros */
+  /** 🔹 Cargar convenios normales */
   const fetchAgreements = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      let response;
-
       const apiFilters = mapAgreementFiltersToApi(filters);
 
-      // Empresa autenticada
+      let resp;
+
       if (user?.role === "EMPRESA") {
-        response = await agreementApi.listMyAgreements(page, pageSize, apiFilters);
-      }
-      // Director/Admin viendo los convenios de una empresa
-      else if (companyId) {
-        response = await agreementApi.listAgreementsByCompanyId(companyId, page, pageSize, apiFilters);
-      }
-      // Director/Admin viendo todos los convenios
-      else {
-        response = await agreementApi.listAllAgreements(page, pageSize, filters);
+        resp = await agreementApi.listMyAgreements(page, pageSize, apiFilters);
+      } else if (companyId) {
+        resp = await agreementApi.listAgreementsByCompanyId(companyId, page, pageSize, apiFilters);
+      } else {
+        resp = await agreementApi.listAgreements(page, pageSize, apiFilters);
       }
 
-      setAgreements(response.data);
-      setTotal(response.total);
+      setAgreements(resp.data);
+      setTotal(resp.total);
+      setPage(resp.page);
+      setPageSize(resp.pageSize);
     } catch (err) {
       console.error(err);
-      setError("Error al cargar los convenios");
+      setError("Error al cargar convenios");
     } finally {
       setLoading(false);
     }
   }, [user?.role, companyId, page, pageSize, filters]);
+
+  /** 🔹 Cargar convenios pendientes (solo director/admin) */
+  const fetchPending = useCallback(async () => {
+    if (user?.role === "EMPRESA") return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const apiFilters = mapAgreementFiltersToApi(pendingFilters);
+
+      const resp = await agreementApi.listPendingAgreements(
+        pagePending,
+        pageSizePending,
+        apiFilters
+      );
+
+      setPendingAgreements(resp.data);
+      setTotalPending(resp.total);
+      setPagePending(resp.page);
+      setPageSizePending(resp.pageSize);
+    } catch (err) {
+      console.error(err);
+      setError("Error al cargar convenios pendientes");
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.role, pagePending, pageSizePending, pendingFilters]);
 
   /** 🔹 Crear convenio (solo director/admin) */
   const createAgreementByDirector = async (
@@ -64,7 +97,7 @@ export const useAgreements = (companyId?: number) => {
     try {
       setLoading(true);
       const newAgreement = await agreementApi.createByDirector(formData);
-      setAgreements((prev) => [newAgreement, ...prev]); 
+      setAgreements((prev) => [newAgreement, ...prev]);
       return newAgreement;
     } catch (err) {
       console.error(err);
@@ -75,23 +108,35 @@ export const useAgreements = (companyId?: number) => {
     }
   };
 
-useEffect(() => {
-  fetchAgreements();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [page, pageSize, filters, companyId]);
+  useEffect(() => {
+    fetchAgreements();
+  }, [fetchAgreements]);
+
+  useEffect(() => {
+    fetchPending();
+  }, [fetchPending]);
 
   return {
     agreements,
     total,
     page,
     pageSize,
-    setPage,
-    setPageSize,
+    pendingAgreements,
+    totalPending,
+    pagePending,
+    pageSizePending,
     filters,
-    setFilters,
+    pendingFilters,
     loading,
     error,
+    setPage,
+    setPagePending,
+    setPageSize,
+    setPageSizePending,
+    setFilters,
+    setPendingFilters,
     fetchAgreements,
+    fetchPending,
     createAgreementByDirector,
   };
 };

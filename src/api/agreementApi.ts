@@ -50,12 +50,23 @@ export const agreementApi = {
       data: data.data.map(mapAgreementFromApi),
     };
   },
-  listAllAgreements: async (
+  listAgreements: async (
     page = 1,
     pageSize = 10,
     filters: Record<string, unknown> = {}
   ): Promise<IApiPaginatedResponse<Agreement>> => {
     const { data } = await axiosClient.get<IApiPaginatedResponse<AgreementApi>>("/convenios", { params: { page, pageSize, ...filters } });
+    return {
+      ...data,
+      data: data.data.map(mapAgreementFromApi),
+    };
+  },
+  listPendingAgreements: async (
+    page = 1,
+    pageSize = 10,
+    filters: Record<string, unknown> = {}
+  ): Promise<IApiPaginatedResponse<Agreement>> => {
+    const { data } = await axiosClient.get<IApiPaginatedResponse<AgreementApi>>("/convenios/pendientes", { params: { page, pageSize, ...filters } });
     return {
       ...data,
       data: data.data.map(mapAgreementFromApi),

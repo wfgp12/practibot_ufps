@@ -110,6 +110,7 @@ const FILTER_KEY_MAP = {
   type: "tipo",
   startDate: "fechaInicio",
   endDate: "fechaFin",
+  company: "empresa",
 } as const;
 
 const FILTER_VALUE_MAPS = {
@@ -132,16 +133,24 @@ export const mapAgreementFiltersToApi = (
 ): Partial<Record<ApiFilterKey, string>> => {
   const mapped: Partial<Record<ApiFilterKey, string>> = {};
 
-  for (const [key, value] of Object.entries(filters) as [FrontFilterKey, string][]) {
-    if (!value || value === "All" || value === "Todos") continue; // 👈 se ignora el filtro vacío o "Todos"
+  for (const [key, rawValue] of Object.entries(filters) as [FrontFilterKey, string][]) {
+    if (!rawValue || rawValue === "All" || rawValue === "Todos") continue;
 
     const apiKey = FILTER_KEY_MAP[key];
     const valueMap = FILTER_VALUE_MAPS[key as FilterValueMapKey];
 
+    let finalValue = rawValue;
+
+    const isDateFormat = /^\d{4}-\d{2}-\d{2}$/.test(rawValue);
+
+    if (isDateFormat) {
+      finalValue = new Date(`${rawValue}T00:00:00`).toISOString(); 
+    }
+
     mapped[apiKey] =
-      valueMap && value in valueMap
-        ? valueMap[value as keyof typeof valueMap]
-        : value;
+      valueMap && rawValue in valueMap
+        ? valueMap[rawValue as keyof typeof valueMap]
+        : finalValue;
   }
 
   return mapped;

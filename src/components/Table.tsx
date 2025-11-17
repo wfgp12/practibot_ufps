@@ -17,7 +17,7 @@ export interface Column<T extends object> {
   /** Clase opcional */
   className?: string;
   /**tipo de filtro */
-  filterType?: "text" | "select";
+  filterType?: "text" | "select" | "date";
   /** Opciones si es un select */
   filterOptions?: { label: string; value: string }[];
 }
@@ -31,7 +31,7 @@ interface TableProps<T extends { id?: string | number }> {
   className?: string;
   loading?: boolean;
   onChange?: (params: {
-    filters: Record<string, string>;
+    filters: Partial<Record<keyof T, string>>;
     page: number;
     pageSize: number;
   }) => void;
@@ -47,7 +47,7 @@ export function Table<T extends { id?: string | number }>({
   loading = false,
   onChange,
 }: TableProps<T>) {
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [filters, setFilters] = useState<Partial<Record<keyof T, string | undefined>>>({});
   const [page, setPage] = useState(initialPage);
 
   /** Debounce para inputs de texto */
@@ -91,7 +91,7 @@ export function Table<T extends { id?: string | number }>({
                   {/* 🔹 Si la columna tiene filtro */}
                   {col.filterType === "text" && (
                     <Input
-                      value={filters[col.key as string] || ""}
+                      value={filters[col.key] || ""}
                       onChange={(e) =>
                         handleFilterChange(String(col.key), e.target.value)
                       }
@@ -102,7 +102,7 @@ export function Table<T extends { id?: string | number }>({
 
                   {col.filterType === "select" && (
                     <Select
-                      value={filters[col.key as string] || ""}
+                      value={filters[col.key] || ""}
                       onValueChange={(v) =>
                         handleFilterChange(String(col.key), v)
                       }
@@ -120,6 +120,21 @@ export function Table<T extends { id?: string | number }>({
                       </SelectContent>
                     </Select>
                   )}
+
+                  {col.filterType === "date" && (
+                    <input
+                      type="date"
+                      className="h-7 w-32 text-xs border rounded px-2"
+                      value={filters[col.key] ?? ""}
+                      onChange={(e) =>
+                       {
+                        console.log(e.target.value);
+                          handleFilterChange(String(col.key), e.target.value);
+                       }
+                      }
+                    />
+                  )}
+
                 </div>
               </th>
             ))}
@@ -138,46 +153,46 @@ export function Table<T extends { id?: string | number }>({
         )}
         {!loading && (
           <tbody>
-          {data.length > 0 ? (
-            data.map((row, rowIndex) => (
-              <tr
-                key={row.id ?? rowIndex}
-                className="border-t hover:bg-gray-50 transition-colors"
-              >
-                {columns.map((col) => {
-                  const rawValue = row[col.key];
-                  const value =
-                    typeof rawValue === "object" || typeof rawValue === "function"
-                      ? String(rawValue)
-                      : (rawValue as React.ReactNode);
+            {data.length > 0 ? (
+              data.map((row, rowIndex) => (
+                <tr
+                  key={row.id ?? rowIndex}
+                  className="border-t hover:bg-gray-50 transition-colors"
+                >
+                  {columns.map((col) => {
+                    const rawValue = row[col.key];
+                    const value =
+                      typeof rawValue === "object" || typeof rawValue === "function"
+                        ? String(rawValue)
+                        : (rawValue as React.ReactNode);
 
-                  return (
-                    <td
-                      key={String(col.key)}
-                      className={cn(
-                        "px-4 py-2",
-                        col.align === "center" && "text-center",
-                        col.align === "right" && "text-right",
-                        col.className
-                      )}
-                    >
-                      {col.render ? col.render(rawValue, row, rowIndex) : value}
-                    </td>
-                  );
-                })}
+                    return (
+                      <td
+                        key={String(col.key)}
+                        className={cn(
+                          "px-4 py-2",
+                          col.align === "center" && "text-center",
+                          col.align === "right" && "text-right",
+                          col.className
+                        )}
+                      >
+                        {col.render ? col.render(rawValue, row, rowIndex) : value}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center py-6 text-gray-500 italic"
+                >
+                  No hay datos disponibles
+                </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="text-center py-6 text-gray-500 italic"
-              >
-                No hay datos disponibles
-              </td>
-            </tr>
-          )}
-        </tbody>
+            )}
+          </tbody>
         )}
       </table>
 
