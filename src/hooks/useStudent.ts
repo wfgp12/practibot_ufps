@@ -29,7 +29,7 @@ export const useStudent = (id?: number | null) => {
     }
   };
 
-  const createStudent = async (payload: { nombre: string; email: string }): Promise<IStudent | undefined> => {
+  const createStudent = async (payload: { nombre: string; email: string, codigo: string, cedula: string }): Promise<IStudent | undefined> => {
     setLoading(true);
     setError(null);
     try {

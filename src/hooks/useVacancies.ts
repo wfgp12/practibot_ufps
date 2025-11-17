@@ -117,7 +117,7 @@ export const useVacancies = () => {
       .finally(() => setLoading(false));
   }, [fetchPendingVacancies]);
 
-  const registerVacancy = useCallback((formData: IFormRegisterVacancy) => {
+  const registerVacancy = useCallback(async(formData: IFormRegisterVacancy) => {
     setLoading(true);
     vacanciesApi.registerApproved(formData)
       .then(() => fetchVacancies())

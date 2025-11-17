@@ -13,13 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Mail, UserPen, UserPlus, Loader2 } from "lucide-react";
+import { Mail, UserPen, UserPlus, Loader2, IdCard, IdCardLanyard } from "lucide-react";
 import type { IStudent } from "@/models/IStudent";
 import { useStudent } from "@/hooks/useStudent";
 
 const studentSchema = z.object({
     name: z.string().min(2, "El nombre es obligatorio"),
     email: z.string().email("Correo inválido"),
+    code: z.string().min(2, "El código es obligatorio"),
+    document: z.string().min(2, "El documento es obligatorio"),
 });
 
 type StudentFormData = z.infer<typeof studentSchema>;
@@ -42,6 +44,8 @@ export const StudentModal = ({ student, onSuccess }: StudentModalProps) => {
         defaultValues: {
             name: student?.name || "",
             email: student?.email || "",
+            code: student?.code || "",
+            document: student?.document || "",
         },
     });
 
@@ -49,6 +53,8 @@ export const StudentModal = ({ student, onSuccess }: StudentModalProps) => {
         reset({
             name: student?.name || "",
             email: student?.email || "",
+            code: student?.code || "",
+            document: student?.document || "",
         });
     }, [student, reset]);
 
@@ -61,6 +67,8 @@ export const StudentModal = ({ student, onSuccess }: StudentModalProps) => {
                 await createStudent({
                     nombre: values.name,
                     email: values.email,
+                    codigo: values.code,
+                    cedula: values.document,
                 });
                 toast.success("🎉 Estudiante creado correctamente");
                 reset();
@@ -115,6 +123,34 @@ export const StudentModal = ({ student, onSuccess }: StudentModalProps) => {
                             <Input
                                 {...register("name")}
                                 placeholder="Nombre completo"
+                                className="pl-9 border-zinc-300 focus:border-red-600 focus:ring-red-600"
+                            />
+                        </div>
+                        {errors.name && (
+                            <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>
+                        )}
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-zinc-700">Código:</label>
+                        <div className="relative">
+                            <IdCardLanyard className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                            <Input
+                                {...register("code")}
+                                placeholder="Codigo del estudiante"
+                                className="pl-9 border-zinc-300 focus:border-red-600 focus:ring-red-600"
+                            />
+                        </div>
+                        {errors.code && (
+                            <p className="text-xs text-red-600 mt-1">{errors.code.message}</p>
+                        )}
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium text-zinc-700">Numero de documento:</label>
+                        <div className="relative">
+                            <IdCard className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                            <Input
+                                {...register("document")}
+                                placeholder="Numero de documento del estudiante"
                                 className="pl-9 border-zinc-300 focus:border-red-600 focus:ring-red-600"
                             />
                         </div>

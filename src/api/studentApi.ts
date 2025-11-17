@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 
 export const studentApi = {
-  createStudent: async (payload: { nombre: string; email: string }): Promise<IStudent> => {
+  createStudent: async (payload: { nombre: string; email: string, codigo: string, cedula: string }): Promise<IStudent> => {
     const response = await axiosClient.post<IApiResponse<IApiStudent>>("/estudiantes", payload);
     return mapApiStudentToStudent(response.data.data);
   },
