@@ -1,8 +1,17 @@
 import type { IApiUser } from "./IUser";
 
-/** 💠 Respuesta directa del backend */
+export interface IApiRepresentative {
+  id: number;
+  nombreCompleto: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  cargo: string;
+  telefono?: string;
+  email: string;
+}
+
 export interface IApiCompany {
-  id: string;
+  id: number;
   nit: string;
   telefono?: string;
   estado?: string;
@@ -10,6 +19,7 @@ export interface IApiCompany {
   sector?: string;
   descripcion?: string;
   usuario: Partial<IApiUser>;
+  representanteLegal?: IApiRepresentative;
   habilitada?: boolean;
 }
 
@@ -21,21 +31,31 @@ export interface IRegisterCompanyData {
   direccion?: string;
   sector?: string;
   descripcion?: string;
+  representanteLegal?: Omit<IApiRepresentative, "id">;
 }
 
-/** 💠 Modelo interno del front */
+export interface IRepresentative {
+  id: number;
+  nombre: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  cargo: string;
+  telefono: string;
+  correo: string;
+}
 export interface ICompany {
-  id: string;
+  id: number;
   nombre: string;
   correo: string;
-  userId: string;
+  userId: number;
   estado: string;
   nit: string;
   telefono: string;
   direccion: string;
   sector: string;
   descripcion: string;
-  isEnabled?: boolean
+  representanteLegal?: IRepresentative;
+  isEnabled?: boolean;
 }
 
 export interface CompanyOption {
@@ -43,18 +63,54 @@ export interface CompanyOption {
   nombre: string;
   email: string;
 }
+export const mapCompanyFromApi = (api: IApiCompany): ICompany => ({
+  id: api.id,
+  nombre: api.usuario?.nombre || "",
+  correo: api.usuario?.email || "",
+  userId: api.usuario?.id || 0,
+  nit: api.nit || "",
+  estado: api.estado || "PENDIENTE",
+  telefono: api.telefono || "",
+  direccion: api.direccion || "",
+  sector: api.sector || "",
+  descripcion: api.descripcion || "",
+  isEnabled: api.habilitada || false,
 
-/** 🧠 Mapper para transformar respuesta del backend */
-export const mapCompanyFromApi = (apiCompany: IApiCompany): ICompany => ({
-  id: apiCompany.id,
-  nombre: apiCompany.usuario?.nombre || "",
-  correo: apiCompany.usuario?.email || "",
-  userId: apiCompany.usuario?.id || "",
-  nit: apiCompany.nit || "",
-  estado: apiCompany.estado || "PENDIENTE",
-  telefono: apiCompany.telefono || "",
-  direccion: apiCompany.direccion || "",
-  sector: apiCompany.sector || "",
-  descripcion: apiCompany.descripcion || "",
-  isEnabled: apiCompany.habilitada || false,
+  representanteLegal: api.representanteLegal
+    ? {
+      id: api.representanteLegal.id,
+      nombre: api.representanteLegal.nombreCompleto,
+      tipoDocumento: api.representanteLegal.tipoDocumento,
+      numeroDocumento: api.representanteLegal.numeroDocumento,
+      cargo: api.representanteLegal.cargo,
+      telefono: api.representanteLegal.telefono || "",
+      correo: api.representanteLegal.email,
+    }
+    : undefined,
 });
+
+export const mapApiFromCompany = (company: ICompany): IApiCompany => {
+  return {
+    id: company.id,
+    usuario: {
+      nombre: company.nombre,
+      email: company.correo,
+      id: company.userId,
+    },
+    nit: company.nit,
+    estado: company.estado,
+    direccion: company.direccion,
+    sector: company.sector,
+    descripcion: company.descripcion,
+    representanteLegal: {
+      id: company.representanteLegal?.id || 0,
+      nombreCompleto: company.representanteLegal?.nombre || "",
+      tipoDocumento: company.representanteLegal?.tipoDocumento || "",
+      numeroDocumento: company.representanteLegal?.numeroDocumento || "",
+      cargo: company.representanteLegal?.cargo || "",
+      email: company.representanteLegal?.correo || "",
+      telefono: company.representanteLegal?.telefono,
+    },
+  }
+
+}

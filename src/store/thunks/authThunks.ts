@@ -36,13 +36,13 @@ export const loadUserThunk = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("token");
     if (!token) return rejectWithValue("No token found");
-
     try {
       dispatch(showLoader());
       const response = await authApi.loadUserFromToken();
       dispatch(loginSuccess({ user: response.user, token }));
       return response;
     } catch (error) {
+      localStorage.removeItem("token");
       if (error instanceof Error) return rejectWithValue(error.message);
       return rejectWithValue("Error desconocido");
     } finally {

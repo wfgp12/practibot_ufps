@@ -1,7 +1,7 @@
 export type Role = "guest" | "DIRECTOR" | "EMPRESA" | "ESTUDIANTE" | "ADMIN";
 
 export interface IUser {
-  id: string;
+  id: number;
   name: string;
   email: string;
   role: Role;
@@ -9,9 +9,8 @@ export interface IUser {
 
 // Interfaz opcional de cómo viene del backend
 export interface IApiUser {
-  id: string;
+  id: number;
   nombre?: string;   
-  name?: string;     
   email: string;
   rol?: string;   
 }
@@ -20,7 +19,7 @@ export interface IApiUser {
 export const mapUser = (backendUser: IApiUser): IUser => {
   return {
     id: backendUser.id,
-    name: backendUser.nombre || backendUser.name || "Sin nombre",
+    name: backendUser.nombre || "Sin nombre",
     email: backendUser.email,
     role: mapRole(backendUser.rol),
   };
