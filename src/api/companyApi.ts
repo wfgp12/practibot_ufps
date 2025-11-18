@@ -25,7 +25,7 @@ export const companyApi = {
     return mapCompanyFromApi(res);
   },
  
-  update: async (id: string, data: IRegisterCompanyData): Promise<ICompany> => {
+  update: async (id: number, data: IRegisterCompanyData): Promise<ICompany> => {
     const { data: res } = await axiosClient.put<IApiResponse<IApiCompany>>(`/empresas/${id}/editar`, data);
     return mapCompanyFromApi(res.data);
   },

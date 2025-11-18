@@ -1,113 +1,87 @@
 import { useState, useEffect, useCallback } from "react";
 import { companyApi } from "@/api/companyApi";
 import type { ICompany, IRegisterCompanyData } from "@/models/ICompany";
-import type { IApiPaginatedResponse } from "@/models/IApi";
-
-interface TableState<T> {
-    data: T[];
-    total: number;
-    page: number;
-    pageSize: number;
-    filters: Record<string, string>;
-}
 export const useCompanies = () => {
-    const [companies, setCompanies] = useState<TableState<ICompany>>({
-        data: [],
-        total: 0,
-        page: 1,
-        pageSize: 10,
-        filters: {},
-    });
-
-    const [pendingCompanies, setPendingCompanies] = useState<TableState<ICompany>>({
-        data: [],
-        total: 0,
-        page: 1,
-        pageSize: 10,
-        filters: {},
-    });
+    const [companies, setCompanies] = useState<ICompany[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [filters, setFilters] = useState<Partial<Record<keyof ICompany, unknown>>>({});
     const [loading, setLoading] = useState(false);
+
+    const [pendingCompanies, setPendingCompanies] = useState<ICompany[]>([]);
+    const [pendingTotal, setPendingTotal] = useState(0);
+    const [pendingPage, setPendingPage] = useState(1);
+    const [pendingPageSize, setPendingPageSize] = useState(10);
+    const [pendingFilters, setPendingFilters] = useState<Partial<Record<keyof ICompany, unknown>>>({});
+    const [pendingLoading, setPendingLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     /** 📦 Obtener empresas (no pendientes) */
-    const fetchCompanies = useCallback(
-        async (params?: Partial<TableState<ICompany>>) => {
-            try {
-                setLoading(true);
-                setError(null);
+    const fetchCompanies = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-                const cleanFilters = Object.fromEntries(
-                    Object.entries(params?.filters ?? {}).filter(
-                        ([, value]) => value && value.toLowerCase() !== "all"
-                    )
-                );
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters ?? {}).filter(
+                    ([, value]) => value && value?.toString().toLowerCase() !== "all"
+                )
+            );
 
-                const query = {
-                    page: params?.page ?? companies.page,
-                    pageSize: params?.pageSize ?? companies.pageSize,
-                    ...cleanFilters,
-                };
+            const response = await companyApi.getAll({
+                page,
+                pageSize,
+                ...cleanFilters,
+            });
 
-                const response: IApiPaginatedResponse<ICompany> = await companyApi.getAll(query);
-
-                setCompanies(prev => ({
-                    ...prev,
-                    data: response.data,
-                    total: response.total,
-                    page: response.page,
-                    filters: params?.filters ?? prev.filters,
-                }));
-            } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : "Error al obtener empresas");
-            } finally {
-                setLoading(false);
-            }
-        },
-        [companies]
+            setCompanies(response.data);
+            setTotal(response.total);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Error al obtener empresas");
+        } finally {
+            setLoading(false);
+        }
+    },
+        [page, pageSize, filters]
     );
 
     /** 📦 Obtener empresas pendientes */
     const fetchPendingCompanies = useCallback(
-        async (params?: Partial<TableState<ICompany>>) => {
+        async () => {
             try {
-                setLoading(true);
+                setPendingLoading(true);
                 setError(null);
 
                 const cleanFilters = Object.fromEntries(
-                    Object.entries(params?.filters ?? {}).filter(
-                        ([, value]) => value && value !== "ALL"
+                    Object.entries(pendingFilters ?? {}).filter(
+                        ([, value]) => value && value?.toString().toLowerCase() !== "all"
                     )
                 );
 
-                const query = {
-                    page: params?.page ?? pendingCompanies.page,
-                    pageSize: params?.pageSize ?? pendingCompanies.pageSize,
+                const response = await companyApi.getPending({
+                    page: pendingPage,
+                    pageSize: pendingPageSize,
                     ...cleanFilters,
-                };
+                });
 
-                const response: IApiPaginatedResponse<ICompany> = await companyApi.getPending(query);
-
-                setPendingCompanies(prev => ({
-                    ...prev,
-                    data: response.data,
-                    total: response.total,
-                    page: response.page,
-                    filters: params?.filters ?? prev.filters,
-                }));
+                setPendingCompanies(response.data)
+                setPendingTotal(response.total);
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : "Error al obtener empresas pendientes");
             } finally {
-                setLoading(false);
+                setPendingLoading(false);
             }
         },
-        [pendingCompanies]
+        [pendingPage, pendingPageSize, pendingFilters]
     );
 
-    /** 🔁 Cargar ambos listados al iniciar */
     useEffect(() => {
         fetchCompanies();
+    }, [fetchCompanies]);
+    useEffect(() => {
         fetchPendingCompanies();
-    }, []);
+    }, [fetchPendingCompanies]);
 
     const fetchCompanyById = useCallback(async (id: string | number) => {
         try {
@@ -127,17 +101,13 @@ export const useCompanies = () => {
     const approveCompany = useCallback(async (id: string | number) => {
         try {
             setLoading(true);
+
             const updated = await companyApi.approve(id);
-            setPendingCompanies(prev => ({
-                ...prev,
-                data: prev.data.filter(c => c.id !== id),
-                total: prev.total - 1,
-            }));
-            setCompanies(prev => ({
-                ...prev,
-                data: [updated, ...prev.data],
-                total: prev.total + 1,
-            }));
+
+            setPendingCompanies(prev => prev.filter(c => c.id !== id));
+            setCompanies(prev => [updated, ...prev]);
+            setTotal(prev => prev + 1);
+
             return updated;
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Error al aprobar empresa");
@@ -152,11 +122,8 @@ export const useCompanies = () => {
         try {
             setLoading(true);
             await companyApi.reject(id);
-            setPendingCompanies(prev => ({
-                ...prev,
-                data: prev.data.filter(c => c.id !== id),
-                total: prev.total - 1,
-            }));
+
+            setPendingCompanies(prev => prev.filter(c => c.id !== id));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Error al rechazar empresa");
         } finally {
@@ -169,10 +136,11 @@ export const useCompanies = () => {
         try {
             setLoading(true);
             const updated = await companyApi.toggleState(id, estado);
-            setCompanies(prev => ({
-                ...prev,
-                data: prev.data.map(c => (c.id === id ? updated : c)),
-            }));
+
+            setCompanies(prev =>
+                prev.map(c => (c.id === id ? updated : c))
+            );
+
             return updated;
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Error al cambiar estado de empresa");
@@ -196,23 +164,20 @@ export const useCompanies = () => {
     }, [fetchCompanies]);
 
     /** 🔄 Actualizar empresa */
-    const updateCompany = useCallback(
-        async (id: string, data: IRegisterCompanyData) => {
+    const updateCompany = useCallback(async (id: number, data: IRegisterCompanyData) => {
             try {
                 setLoading(true);
                 const updated = await companyApi.update(id, data);
 
-                // Actualiza la empresa en la lista general
-                setCompanies(prev => ({
-                    ...prev,
-                    data: prev.data.map(c => (c.id === id ? updated : c)),
-                }));
+                // Actualizar en aprobadas
+                setCompanies(prev =>
+                    prev.map(c => (c.id === id ? updated : c))
+                );
 
-                // También actualiza en pendientes si existiera
-                setPendingCompanies(prev => ({
-                    ...prev,
-                    data: prev.data.map(c => (c.id === id ? updated : c)),
-                }));
+                // Actualizar en pendientes si existe
+                setPendingCompanies(prev =>
+                    prev.map(c => (c.id === id ? updated : c))
+                );
 
                 return updated;
             } catch (err: unknown) {
@@ -226,10 +191,35 @@ export const useCompanies = () => {
     );
 
     return {
+        /** Empresas normales */
         companies,
+        total,
+        page,
+        pageSize,
+        filters,
+
+        /** Pendientes */
         pendingCompanies,
+        pendingTotal,
+        pendingPage,
+        pendingPageSize,
+        pendingFilters,
+
+        /** Estados */
         loading,
+        pendingLoading,
         error,
+
+        /** Setters */
+        setPage,
+        setPageSize,
+        setFilters,
+        setPendingPage,
+        setPendingPageSize,
+        setPendingFilters,
+        setTotal,
+
+        /** Actions */
         fetchCompanies,
         fetchPendingCompanies,
         fetchCompanyById,

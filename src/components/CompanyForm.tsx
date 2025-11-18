@@ -15,7 +15,6 @@ const representativeSchema = z.object({
   nombreCompleto: z.string().min(3, "Nombre obligatorio"),
   tipoDocumento: z.string().min(1, "Tipo de documento obligatorio"),
   numeroDocumento: z.string().min(5, "Documento inválido"),
-  cargo: z.string().min(2, "Cargo obligatorio"),
   telefono: z.string().optional(),
   correo: z.string().email("Correo inválido"),
 });
@@ -53,7 +52,6 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
         nombreCompleto: "",
         tipoDocumento: "",
         numeroDocumento: "",
-        cargo: "",
         telefono: "",
         correo: "",
       },
@@ -98,12 +96,10 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
           nombreCompleto: data.representanteLegal?.nombreCompleto || "",
           tipoDocumento: data.representanteLegal?.tipoDocumento || "",
           numeroDocumento: data.representanteLegal?.numeroDocumento || "",
-          cargo: data.representanteLegal?.cargo || "",
           telefono: data.representanteLegal?.telefono || "",
           email: data.representanteLegal?.correo || "",
         },
-      })
-      reset()
+      }).then(() => reset()) 
     } catch (error: unknown) {
       if (error instanceof Error) toast.error(error.message)
       else toast.error("Error desconocido")
@@ -237,11 +233,6 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
             <Label>Número de documento</Label>
             <Controller name="representanteLegal.numeroDocumento" control={control} render={({ field }) => <Input {...field} type="number" placeholder="1023456789" />} />
             {errors.representanteLegal?.numeroDocumento && <p className="text-red-600 text-sm">{errors.representanteLegal.numeroDocumento.message}</p>}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>Cargo</Label>
-            <Controller name="representanteLegal.cargo" control={control} render={({ field }) => <Input {...field} placeholder="Gerente General" />} />
-            {errors.representanteLegal?.cargo && <p className="text-red-600 text-sm">{errors.representanteLegal.cargo.message}</p>}
           </div>
 
           <div className="flex flex-col gap-2">

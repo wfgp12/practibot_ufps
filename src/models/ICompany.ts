@@ -5,7 +5,7 @@ export interface IApiRepresentative {
   nombreCompleto: string;
   tipoDocumento: string;
   numeroDocumento: string;
-  cargo: string;
+  // cargo: string;
   telefono?: string;
   email: string;
 }
@@ -39,7 +39,7 @@ export interface IRepresentative {
   nombre: string;
   tipoDocumento: string;
   numeroDocumento: string;
-  cargo: string;
+  // cargo: string;
   telefono: string;
   correo: string;
 }
@@ -82,7 +82,7 @@ export const mapCompanyFromApi = (api: IApiCompany): ICompany => ({
       nombre: api.representanteLegal.nombreCompleto,
       tipoDocumento: api.representanteLegal.tipoDocumento,
       numeroDocumento: api.representanteLegal.numeroDocumento,
-      cargo: api.representanteLegal.cargo,
+      // cargo: api.representanteLegal.cargo,
       telefono: api.representanteLegal.telefono || "",
       correo: api.representanteLegal.email,
     }
@@ -107,7 +107,7 @@ export const mapApiFromCompany = (company: ICompany): IApiCompany => {
       nombreCompleto: company.representanteLegal?.nombre || "",
       tipoDocumento: company.representanteLegal?.tipoDocumento || "",
       numeroDocumento: company.representanteLegal?.numeroDocumento || "",
-      cargo: company.representanteLegal?.cargo || "",
+      // cargo: company.representanteLegal?.cargo || "",
       email: company.representanteLegal?.correo || "",
       telefono: company.representanteLegal?.telefono,
     },

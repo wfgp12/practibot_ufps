@@ -19,7 +19,15 @@ import type { ICompany, IRegisterCompanyData } from "@/models/ICompany"
 import { useState } from "react"
 import { useAppDispatch, useAppSelector } from "@/store/hooks"
 import { hideLoader, showLoader } from "@/store/slices/uiSlice"
+import { Stepper } from "@/components/Stepper"
 
+const representanteSchema = z.object({
+  nombreCompleto: z.string().min(3, "Nombre obligatorio"),
+  tipoDocumento: z.string().min(1, "Tipo de documento obligatorio"),
+  numeroDocumento: z.string().min(5, "Documento inválido"),
+  telefono: z.string().optional(),
+  email: z.string().email("Correo inválido"),
+});
 
 const empresaSchema = z.object({
   nombre: z.string().min(3, "El nombre es obligatorio"),
@@ -29,19 +37,22 @@ const empresaSchema = z.object({
   email: z.string().email("Correo inválido"),
   sector: z.string().min(1, "Selecciona un sector"),
   descripcion: z.string().optional(),
+  representanteLegal: representanteSchema,
 })
 
 type CompanyFormSchema = z.infer<typeof empresaSchema>
 
 interface CreateCompanyModalProps {
   company?: ICompany
-  onSubmit: (data: IRegisterCompanyData, id?: string) => Promise<void>
+  onSubmit: (data: IRegisterCompanyData, id?: number) => Promise<void>
 }
 
 export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => {
   const dispatch = useAppDispatch()
   const { loading } = useAppSelector(state => state.ui)
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(0)
+  const steps = ["Empresa", "Representante Legal"]
 
   const form = useForm<CompanyFormSchema>({
     resolver: zodResolver(empresaSchema),
@@ -53,8 +64,16 @@ export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => 
       email: company?.correo || "",
       sector: company?.sector || "",
       descripcion: company?.descripcion || "",
+      representanteLegal: {
+        nombreCompleto: company?.representanteLegal?.nombre || "",
+        tipoDocumento: company?.representanteLegal?.tipoDocumento || "",
+        numeroDocumento: company?.representanteLegal?.numeroDocumento || "",
+        telefono: company?.representanteLegal?.telefono || "",
+        email: company?.representanteLegal?.correo || "",
+      }
     },
   })
+  const { formState: { errors } } = form;
 
   const sectores = [
     { label: "Tecnología", value: "tecnologia" },
@@ -80,6 +99,27 @@ export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => 
     }
   }
 
+  const nextStep = async () => {
+    const isValid = await form.trigger([
+      "nombre",
+      "nit",
+      "email",
+      "telefono",
+      "direccion",
+      "sector",
+      "descripcion",
+    ])
+
+    if (!isValid) {
+      toast.error("Hay errores en el formulario")
+      return
+    }
+
+    setStep(1)
+  }
+
+  const prevStep = () => setStep(0)
+
   const isEditMode = !!company
 
   return (
@@ -97,66 +137,183 @@ export const CompanyModal = ({ company, onSubmit }: CreateCompanyModalProps) => 
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid gap-3">
-            <Label>Nombre de la empresa</Label>
-            <Input {...form.register("nombre")} placeholder="Ej: TechSolutions S.A.S." />
-          </div>
+          <Stepper current={step} steps={steps} />
+          {step === 0 && (
+            <>
+              <div className="grid gap-3">
+                <Label>Nombre de la empresa</Label>
+                <Input {...form.register("nombre")} placeholder="Ej: TechSolutions S.A.S." />
+                {errors.nombre && <p className="text-red-600 text-sm">{errors.nombre.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>NIT</Label>
-            <Input {...form.register("nit")} placeholder="Ej: 901234567-8" />
-          </div>
+              <div className="grid gap-3">
+                <Label>NIT</Label>
+                <Input {...form.register("nit")} placeholder="Ej: 901234567-8" />
+                {errors.nit && <p className="text-red-600 text-sm">{errors.nit.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>Teléfono</Label>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-gray-500" />
-              <Input {...form.register("telefono")} placeholder="Ej: 3001234567" />
-            </div>
-          </div>
+              <div className="grid gap-3">
+                <Label>Teléfono</Label>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <Input {...form.register("telefono")} placeholder="Ej: 3001234567" />
+                </div>
+                {errors.telefono && <p className="text-red-600 text-sm">{errors.telefono.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>Dirección</Label>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-500" />
-              <Input {...form.register("direccion")} placeholder="Ej: Calle 10 #5-20" />
-            </div>
-          </div>
+              <div className="grid gap-3">
+                <Label>Dirección</Label>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gray-500" />
+                  <Input {...form.register("direccion")} placeholder="Ej: Calle 10 #5-20" />
+                </div>
+                {errors.direccion && <p className="text-red-600 text-sm">{errors.direccion.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>Correo electrónico</Label>
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-gray-500" />
-              <Input type="email" {...form.register("email")} placeholder="empresa@correo.com" />
-            </div>
-          </div>
+              <div className="grid gap-3">
+                <Label>Correo electrónico</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-gray-500" />
+                  <Input type="email" {...form.register("email")} placeholder="empresa@correo.com" />
+                </div>
+                {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>Sector</Label>
-            <Select onValueChange={(value) => form.setValue("sector", value)} value={form.watch("sector")} >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona un sector" />
-              </SelectTrigger>
-              <SelectContent>
-                {sectores.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="grid gap-3">
+                <Label>Sector</Label>
+                <Select onValueChange={(value) => form.setValue("sector", value)} value={form.watch("sector")} >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un sector" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sectores.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.sector && <p className="text-red-600 text-sm">{errors.sector.message}</p>}
+              </div>
 
-          <div className="grid gap-3">
-            <Label>Descripción (opcional)</Label>
-            <Textarea {...form.register("descripcion")} placeholder="Breve descripción de la empresa..." />
-          </div>
+              <div className="grid gap-3">
+                <Label>Descripción (opcional)</Label>
+                <Textarea {...form.register("descripcion")} placeholder="Breve descripción de la empresa..." />
+                {errors.descripcion && <p className="text-red-600 text-sm">{errors.descripcion.message}</p>}
+              </div>
 
-          <div className="pt-2 flex justify-end">
-            <Button type="submit" className={`w-full disabled:bg-gray-500 bg-red-500 hover:bg-red-800`} disabled={loading}>
-              {loading ? (isEditMode ? "Actualizando..." : "Creando...") : isEditMode ? "Actualizar" : "Registrar Empresa"}
-            </Button>
-          </div>
+              <div className="pt-2 flex justify-end">
+                <Button type="button" onClick={nextStep} className="w-full bg-red-600 hover:bg-red-700">
+                  Siguiente
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <div className="flex flex-col gap-2">
+                <Label>Nombre completo</Label>
+                <Input
+                  {...form.register("representanteLegal.nombreCompleto")}
+                  placeholder="Pepito Pérez"
+                />
+                {errors.representanteLegal?.nombreCompleto && (
+                  <p className="text-red-600 text-sm">
+                    {errors.representanteLegal.nombreCompleto.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Tipo de documento</Label>
+                <Select
+                  value={form.watch("representanteLegal.tipoDocumento")}
+                  onValueChange={(value) =>
+                    form.setValue("representanteLegal.tipoDocumento", value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona el tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CC">Cédula</SelectItem>
+                    <SelectItem value="NIT">NIT</SelectItem>
+                    <SelectItem value="CE">Cédula de extranjería</SelectItem>
+                    <SelectItem value="PA">Pasaporte</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {errors.representanteLegal?.tipoDocumento && (
+                  <p className="text-red-600 text-sm">
+                    {errors.representanteLegal.tipoDocumento.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Número de documento</Label>
+                <Input
+                  type="number"
+                  {...form.register("representanteLegal.numeroDocumento")}
+                  placeholder="1023456789"
+                />
+                {errors.representanteLegal?.numeroDocumento && (
+                  <p className="text-red-600 text-sm">
+                    {errors.representanteLegal.numeroDocumento.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Teléfono</Label>
+                <Input
+                  type="tel"
+                  {...form.register("representanteLegal.telefono")}
+                  placeholder="+57 300 1122334"
+                />
+                {errors.representanteLegal?.telefono && (
+                  <p className="text-red-600 text-sm">
+                    {errors.representanteLegal.telefono.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>Correo</Label>
+                <Input
+                  type="email"
+                  {...form.register("representanteLegal.email")}
+                  placeholder="rep@empresa.co"
+                />
+                {errors.representanteLegal?.email && (
+                  <p className="text-red-600 text-sm">
+                    {errors.representanteLegal.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <Button type="button" onClick={prevStep} variant="outline">
+                  Atrás
+                </Button>
+
+                <Button
+                  type="submit"
+                  className={` disabled:bg-gray-500 bg-red-500 hover:bg-red-800`}
+                  disabled={loading}
+                >
+                  {loading
+                    ? isEditMode
+                      ? "Actualizando..."
+                      : "Creando..."
+                    : isEditMode
+                      ? "Actualizar"
+                      : "Registrar Empresa"}
+                </Button>
+              </div>
+            </>
+          )}
         </form>
       </DialogContent>
     </Dialog>

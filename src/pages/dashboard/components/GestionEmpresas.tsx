@@ -11,7 +11,12 @@ import { useNavigate } from "react-router";
 
 export const GestionEmpresas = () => {
     const navigate = useNavigate();
-    const { companies, pendingCompanies, createCompany, fetchCompanies, fetchPendingCompanies } = useCompanies();
+    const { 
+        companies, page, total, pageSize,
+        pendingCompanies, pendingPage, pendingTotal,pendingPageSize,
+        setPage, setFilters, setPendingPage, setPendingFilters,
+        createCompany, 
+    } = useCompanies();
     const columnasConvenios: Column<ICompany>[] = [
         { key: "nombre", title: "Empresa", filterType: "text" },
         { key: "nit", title: "NIT", filterType: "text" },
@@ -34,7 +39,7 @@ export const GestionEmpresas = () => {
                         ${estado === "INACTIVA" ? "border-red-500 text-red-500" : ""}
                     `}
                 >
-                    {estado}
+                    {estado as string}
                 </Badge>
             )
         },
@@ -81,11 +86,14 @@ export const GestionEmpresas = () => {
 
                     <Table
                         columns={columnasConvenios}
-                        data={companies.data}
-                        total={companies.total}
-                        page={companies.page}
-                        pageSize={companies.pageSize}                        
-                        onChange={({ filters, page }) => fetchCompanies({ filters, page })} 
+                        data={companies}
+                        total={total}
+                        page={page}
+                        pageSize={pageSize}                        
+                        onChange={({ filters, page }) => {
+                            setFilters(filters);
+                            setPage(page);
+                        }} 
                     
                     />
                 </>
@@ -95,9 +103,9 @@ export const GestionEmpresas = () => {
             label: (
                 <div className="flex items-center gap-2">
                     Solicitudes
-                    {pendingCompanies.total > 0 && (
+                    {pendingTotal > 0 && (
                         <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            {pendingCompanies.total}
+                            {pendingTotal}
                         </span>
                     )}
                 </div>
@@ -110,11 +118,14 @@ export const GestionEmpresas = () => {
                     </h5>
                     <Table 
                         columns={columnasSolicitudes} 
-                        data={pendingCompanies.data} 
-                        total={pendingCompanies.total}
-                        page={pendingCompanies.page}
-                        pageSize={pendingCompanies.pageSize}
-                        onChange={({ filters, page }) => fetchPendingCompanies({ filters, page })}
+                        data={pendingCompanies} 
+                        total={pendingTotal}
+                        page={pendingPage}
+                        pageSize={pendingPageSize}
+                        onChange={({ filters, page }) => {
+                            setPendingFilters(filters);
+                            setPendingPage(page);
+                        }}
                     />
                 </>
             ),
