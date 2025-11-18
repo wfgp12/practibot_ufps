@@ -39,7 +39,6 @@ export interface IRepresentative {
   nombre: string;
   tipoDocumento: string;
   numeroDocumento: string;
-  // cargo: string;
   telefono: string;
   correo: string;
 }
