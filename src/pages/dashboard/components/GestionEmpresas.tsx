@@ -75,8 +75,8 @@ export const GestionEmpresas = () => {
 
     const tabs: TabItem[] = [
         {
-            label: "Convenios",
-            value: "convenios",
+            label: "Empresas",
+            value: "empresas",
             content: (
                 <>
                     <div className="flex justify-between items-center mb-4">
@@ -138,7 +138,7 @@ export const GestionEmpresas = () => {
                 <CardTitle>Gestión de Empresas</CardTitle>
             </CardHeader>
             <CardContent>
-                <TabsSection tabs={tabs} defaultValue="convenios" />
+                <TabsSection tabs={tabs} defaultValue="empresas" />
             </CardContent>
         </Card>
     );

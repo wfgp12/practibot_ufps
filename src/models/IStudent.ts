@@ -28,79 +28,92 @@ export interface IApiPractica {
 export interface IApiStudent {
   id: number;
   usuarioId: number;
-  codigo: string;
-  cedula: string;
-  telefono: string;
-  perfilCompleto: boolean;
+  documento: string | null;
+  codigo: string | null;
+  perfil?: string | null;
+  empresaId?: number | null;
+  empresaAsignada?: string | null;
+  estadoProceso?: string | null;
   activo: boolean;
-  descripcion?: string;
-  area?: string;
+  experiencia?: string | null;
   habilidadesTecnicas?: string[];
   habilidadesBlandas?: string[];
-  experiencia?: string;
+  telefono?: string | null;
+  programaAcademico?: string | null;
+  semestre?: number | null;
+  area?: string | null;
+  perfilCompleto: boolean;
+  hojaVidaArchivoUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+
   usuario: {
     id: number;
     nombre: string;
     email: string;
+    password?: string | null;
     rol: string;
     creadoEn: string;
     actualizadoEn: string;
   };
-  postulaciones?: IApiPostulacion[];
-  practicas?: IApiPractica[];
+
+  postulaciones: IApiPostulacion[];
+  practicas: IApiPractica[];
 }
 
 /** Interfaz plana para el frontend */
 export interface IStudent {
   id: number;
   name: string;
-  code: string;
-  document: string;
-  phone: string;
+  code: string | null;
+  document: string | null;
+  phone: string | null;
   email: string;
+  perfilProfesional?: string | null;
   profileComplete: boolean;
   active: boolean;
-  description?: string;
-  area?: string;
+  area?: string | null;
   technicalSkills?: string[];
   softSkills?: string[];
-  experience?: string;
-  applications?: IApiPostulacion[];
-  internships?: IApiPractica[];
+  experience?: string | null;
+  applications: IApiPostulacion[];
+  internships: IApiPractica[];
+  createdAt: string;
 }
 
 /** Mapper: convierte IApiStudent a IStudent */
-export const mapApiStudentToStudent = (apiStudent: IApiStudent): IStudent => {
+export const mapApiStudentToStudent = (api: IApiStudent): IStudent => {
   return {
-    id: apiStudent.id,
-    name: apiStudent.usuario.nombre,
-    code: apiStudent.codigo,
-    document: apiStudent.cedula,
-    phone: apiStudent.telefono,
-    email: apiStudent.usuario.email,
-    profileComplete: apiStudent.perfilCompleto,
-    active: apiStudent.activo,
-    description: apiStudent.descripcion,
-    area: apiStudent.area,
-    technicalSkills: apiStudent.habilidadesTecnicas,
-    softSkills: apiStudent.habilidadesBlandas,
-    experience: apiStudent.experiencia,
-    applications: apiStudent.postulaciones || [],
-    internships: apiStudent.practicas || [],
+    id: api.id,
+    name: api.usuario.nombre,
+    code: api.codigo,
+    document: api.documento,
+    phone: api.telefono ?? null,
+    email: api.usuario.email,
+    perfilProfesional: api.perfil ?? null,
+    profileComplete: api.perfilCompleto,
+    active: api.activo,
+    area: api.area,
+    technicalSkills: api.habilidadesTecnicas || [],
+    softSkills: api.habilidadesBlandas || [],
+    experience: api.experiencia || null,
+    applications: api.postulaciones ?? [],
+    internships: api.practicas ?? [],
+    createdAt: api.createdAt,
   };
 };
 
 /** Mapper inverso: convierte IStudent (frontend) a formato esperado por la API */
 export const mapStudentToApiPayload = (student: Partial<IStudent>) => {
   return {
-    descripcion: student.description,
-    area: student.area,
+    documento: student.document,
     codigo: student.code,
-    cedula: student.document,
     telefono: student.phone,
+    area: student.area,
     habilidadesTecnicas: student.technicalSkills,
     habilidadesBlandas: student.softSkills,
     experiencia: student.experience,
+    perfil: student.profileComplete,
     perfilCompleto: student.profileComplete,
     activo: student.active,
     usuario: {

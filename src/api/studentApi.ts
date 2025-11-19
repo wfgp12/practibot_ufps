@@ -3,10 +3,27 @@ import axiosClient from "./axiosClient";
 import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 
 export const studentApi = {
-  createStudent: async (payload: { nombre: string; email: string, codigo: string, cedula: string }): Promise<IStudent> => {
+  createStudent: async (payload: { nombre: string; email: string, codigo: string, documento: string }): Promise<IStudent> => {
     const response = await axiosClient.post<IApiResponse<IApiStudent>>("/estudiantes", payload);
     return mapApiStudentToStudent(response.data.data);
   },
+
+  cargarMasivo: async (archivo: File): Promise<IApiResponse<unknown>> => {
+  const formData = new FormData();
+  formData.append("archivo", archivo);
+
+  const response = await axiosClient.post<IApiResponse<unknown>>(
+    "/estudiantes/cargar",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+},
 
   getStudents: async (skip = 0, take = 10): Promise<IApiPaginatedResponse<IStudent>> => {
     const response = await axiosClient.get<IApiPaginatedResponse<IApiStudent>>(

@@ -68,7 +68,7 @@ export const StudentModal = ({ student, onSuccess }: StudentModalProps) => {
                     nombre: values.name,
                     email: values.email,
                     codigo: values.code,
-                    cedula: values.document,
+                    documento: values.document,
                 });
                 toast.success("🎉 Estudiante creado correctamente");
                 reset();

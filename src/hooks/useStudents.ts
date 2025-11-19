@@ -72,6 +72,24 @@ export const useStudents = (initialSkip = 0, initialTake = 10) => {
       }
     };
 
+    const cargarMasivo = async (file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await studentApi.cargarMasivo(file);
+
+      // refrescar lista después del cargue
+      await fetchStudents();
+
+      return result; // por si quieres mostrar los detalles
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchStudents(initialSkip, initialTake);
   }, []);
@@ -88,5 +106,6 @@ export const useStudents = (initialSkip = 0, initialTake = 10) => {
     fetchStudents,
     setPageNumber,
     setPageSizeNumber,
+    cargarMasivo
   };
 };

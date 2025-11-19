@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useStudents } from "@/hooks/useStudents";
 import type { IStudent } from "@/models/IStudent";
 import { StudentModal } from "./student/StudentModal";
+import { CargarMasivoModal } from "./student/CargueMasivoModal";
+import { format } from "date-fns";
 
 export const GestionEstudiantes = () => {
     const {
@@ -22,7 +24,15 @@ export const GestionEstudiantes = () => {
 
     const columns: Column<IStudent>[] = [
         { key: "name", title: "Nombre" },
+        { key: "code", title: "Código" },
+        { key: "document", title: "Documento" },
         { key: "email", title: "Correo institucional" },
+        {
+            key: "createdAt", title: "Fecha de registro", render: (value) => {
+                if (!value) return "—";
+                return format(new Date(String(value)), "dd-MM-yyyy");
+            },
+        },
         {
             key: "active",
             title: "Estado",
@@ -39,7 +49,7 @@ export const GestionEstudiantes = () => {
                 <div className="flex  space-x-2">
                     <Button
                         variant="outline"
-                        className={`${student.active ?"text-red-600 border-red-600 hover:bg-red-600": "text-zinc-600 border-zinc-600 hover:bg-zinc-600"} hover:text-white`}
+                        className={`${student.active ? "text-red-600 border-red-600 hover:bg-red-600" : "text-zinc-600 border-zinc-600 hover:bg-zinc-600"} hover:text-white`}
                         onClick={() => student.active ? deactivate(Number(id)) : reactivate(Number(id))}
                     >
                         {student.active ? "Desactivar" : "Activar"}
@@ -58,7 +68,10 @@ export const GestionEstudiantes = () => {
             <CardContent>
                 <div className="flex justify-between items-center mb-4">
                     <h5 className="text-lg font-medium">Listado de estudiantes</h5>
-                    <StudentModal onSuccess={fetchStudents} />
+                    <div className="flex gap-2">
+                        <CargarMasivoModal onSuccess={fetchStudents} />
+                        <StudentModal onSuccess={fetchStudents} />
+                    </div>
                 </div>
 
                 <Table
