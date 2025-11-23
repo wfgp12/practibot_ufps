@@ -55,7 +55,7 @@ export const StudentProfileModal = ({ student, onSave }: Props) => {
             document: student.document || "",
             phone: student.phone || "",
             area: student.area || "",
-            description: student.description || "",
+            description: student.perfilProfesional || "",
             technicalSkills: student.technicalSkills?.join(", ") || "",
             softSkills: student.softSkills?.join(", ") || "",
             experience: student.experience || "",
@@ -70,7 +70,7 @@ export const StudentProfileModal = ({ student, onSave }: Props) => {
             document: student.document || "",
             phone: student.phone || "",
             area: student.area || "",
-            description: student.description || "",
+            description: student.perfilProfesional || "",
             technicalSkills: student.technicalSkills?.join(", ") || "",
             softSkills: student.softSkills?.join(", ") || "",
             experience: student.experience || "",
@@ -82,7 +82,7 @@ export const StudentProfileModal = ({ student, onSave }: Props) => {
             const payload: Partial<IStudent> = {
                 phone: values.phone,
                 area: values.area,
-                description: values.description,
+                perfilProfesional: values.description,
                 technicalSkills: values.technicalSkills
                     ? values.technicalSkills.split(",").map((s) => s.trim())
                     : [],

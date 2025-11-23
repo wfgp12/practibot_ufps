@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Outlet, Route, Routes } from 'react-router'
 import { Toaster } from 'sonner';
 
 import { useAppDispatch } from '@/store/hooks';
 import { loadUserThunk } from '@/store/thunks/authThunks';
 
-import { CompanyRegister, Dashboard, HomePage, LoginPage } from '@/pages'
 import { VacancyDetail } from '@/pages/dashboard/components/vancancy/VacancyDetail';
 import { CompanyDetail } from '@/pages/dashboard/components/company/CompanyDetail';
 import { AgreementRequest } from './pages/dashboard/components/agreement/AgreementRequest';
@@ -17,6 +16,12 @@ import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 
 import './App.css'
+import Spinner from './components/Spinner';
+
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DashboardPage = lazy(() => import('@/pages/Dashboard'));
+const CompanyRegisterPage = lazy(() => import('@/pages/CompanyRegister'));
 
 function App() {
   const dispatch = useAppDispatch();
@@ -26,24 +31,24 @@ function App() {
   }, [dispatch]);
 
   useEffect(() => {
-  createChat({
-    webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
-    initialMessages: [
-      '¡Hola! 👋',
-      'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
-    ],
-    i18n: {
-      en: {
-        title: '¡Hola! 👋',
-        subtitle: "Inicia un chat. Estamos aquí para ayudarte 24/7.",
-        footer: '',
-        getStarted: 'Nueva Conversación',
-        inputPlaceholder: 'Escribe tu pregunta..',
-        closeButtonTooltip: 'Cerrar', // <- obligatorio
+    createChat({
+      webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
+      initialMessages: [
+        '¡Hola! 👋',
+        'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
+      ],
+      i18n: {
+        en: {
+          title: '¡Hola! 👋',
+          subtitle: "Inicia un chat. Estamos aquí para ayudarte 24/7.",
+          footer: '',
+          getStarted: 'Nueva Conversación',
+          inputPlaceholder: 'Escribe tu pregunta..',
+          closeButtonTooltip: 'Cerrar', // <- obligatorio
+        },
       },
-    },
-  });
-}, []);
+    });
+  }, []);
 
   return (
     <>
@@ -52,18 +57,24 @@ function App() {
         <Route path="/" element={
           <PublicRoute>
             <Layout>
-              <HomePage />
+              <Suspense fallback={<Spinner />}>
+                <HomePage />
+              </Suspense>
             </Layout>
           </PublicRoute>
         } />
         <Route path="/login" element={
           <PublicRoute>
-            <LoginPage />
+            <Suspense fallback={<Spinner />}>
+              <LoginPage />
+            </Suspense>
           </PublicRoute>
         } />
         <Route path="/registro-empresa" element={
           <PublicRoute>
-            <CompanyRegister />
+            <Suspense fallback={<Spinner />}>
+              <CompanyRegisterPage />
+            </Suspense>
           </PublicRoute>
         } />
 
@@ -78,7 +89,11 @@ function App() {
             </PrivateRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={
+            <Suspense fallback={<Spinner />}>
+              <DashboardPage />
+            </Suspense>
+          } />
           <Route path="agreement" element={<AgreementRequest />} />
           <Route path="agreement/:id" element={<AgreementRequest />} />
           <Route path="vacancy/:id" element={<VacancyDetail />} />

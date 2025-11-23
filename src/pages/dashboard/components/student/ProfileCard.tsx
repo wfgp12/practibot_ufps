@@ -141,7 +141,7 @@ export const ProfileCard = () => {
 
           <p className="col-span-2 text-zinc-600 text-sm leading-relaxed">
             <span className="font-bold text-zinc-800">Descripción:</span>{" "}
-            {student.description || (
+            {student.perfilProfesional || (
               <span className="text-zinc-500 italic">
                 Sin descripción personal
               </span>

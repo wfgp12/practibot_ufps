@@ -4,7 +4,7 @@ import { CompanyDashboard } from "./dashboard/CompanyDashboard";
 import { StudentDashboard } from "./dashboard/StudentDashboard";
 import { useEffect } from "react";
 
-export const Dashboard = () => {
+const DashboardPage = () => {
   const { user } = useAppSelector(state => state.auth);
 
   useEffect(() => {
@@ -30,3 +30,6 @@ export const Dashboard = () => {
       return <div>Rol no reconocido</div>;
   }
 }
+
+
+export default DashboardPage;

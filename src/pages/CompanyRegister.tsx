@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import { CompanyForm } from "@/components/CompanyForm"
 import type { IRegisterCompanyData } from "@/models/ICompany"
 
-export const CompanyRegister = () => {
+const CompanyRegisterPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -67,3 +67,6 @@ export const CompanyRegister = () => {
     </div>
   )
 }
+
+
+export default CompanyRegisterPage;

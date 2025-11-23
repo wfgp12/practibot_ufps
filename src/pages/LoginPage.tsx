@@ -18,7 +18,7 @@ type LoginFormData = {
   password: string
 }
 
-export const LoginPage = () => {
+const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch()
 
@@ -166,3 +166,5 @@ export const LoginPage = () => {
     </div>
   );
 }
+
+export default LoginPage;

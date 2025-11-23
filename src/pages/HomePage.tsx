@@ -27,7 +27,7 @@ const steps = [
   }
 ]
 
-export const HomePage = () => {
+const HomePage = () => {
   const { vacancies } = useVacancies();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -137,3 +137,5 @@ export const HomePage = () => {
     </div>
   )
 }
+
+export default HomePage;
