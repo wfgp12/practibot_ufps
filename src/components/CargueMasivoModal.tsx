@@ -10,27 +10,47 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { useStudents } from "@/hooks/useStudents";
 
-export const CargarMasivoModal = ({ onSuccess }: { onSuccess?: () => void }) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const { cargarMasivo } = useStudents();
-    const [file, setFile] = useState<File | null>(null);
+interface CargarMasivoProps {
+    title: string;
+    buttonLabel: string;
+    showPdfSection?: boolean;
+    handleSubmit: (excelFile: File, pdfFiles: File[]) => Promise<void>;
+}
+
+export const CargarMasivoModal = ({
+    title,
+    buttonLabel,
+    showPdfSection = false,
+    handleSubmit
+}: CargarMasivoProps) => {
+    const excelRef = useRef<HTMLInputElement>(null);
+    const pdfsRef = useRef<HTMLInputElement>(null);
+
+    const [excelFile, setExcelFile] = useState<File | null>(null);
+    const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const reset = () => {
+        setExcelFile(null);
+        setPdfFiles([]);
+        if (excelRef.current) {
+            excelRef.current.value = "";
+        }
+        if (pdfsRef.current) {
+            pdfsRef.current.value = "";
+        }
+    };
+
     const handleUpload = async () => {
-        if (!file) return;
+        if (!excelFile) return;
 
         setLoading(true);
         try {
-            await cargarMasivo(file);
-            onSuccess?.();
+            await handleSubmit(excelFile, pdfFiles);
             setOpen(false);
-            setFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ""; 
-            }
+            reset();
         } catch (err) {
             console.error(err);
         } finally {
@@ -41,7 +61,7 @@ export const CargarMasivoModal = ({ onSuccess }: { onSuccess?: () => void }) => 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const droppedFile = e.dataTransfer.files[0];
-        if (droppedFile) setFile(droppedFile);
+        if (droppedFile) setExcelFile(droppedFile);
     };
 
     return (
@@ -49,13 +69,13 @@ export const CargarMasivoModal = ({ onSuccess }: { onSuccess?: () => void }) => 
             <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                     <Upload size={18} />
-                    Cargar estudiantes
+                    {buttonLabel}
                 </Button>
             </DialogTrigger>
 
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Carga masiva de estudiantes</DialogTitle>
+                    <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
 
                 <div
@@ -74,27 +94,54 @@ export const CargarMasivoModal = ({ onSuccess }: { onSuccess?: () => void }) => 
 
                     <input
                         id="input-file"
-                        ref={fileInputRef}
+                        ref={excelRef}
                         type="file"
                         hidden
                         accept=".csv,.xlsx"
                         onChange={(e) => {
                             const f = e.target.files?.[0];
-                            if (f) setFile(f);
+                            if (f) setExcelFile(f);
                         }}
                     />
                 </div>
 
-                {file && (
+                {excelFile && (
                     <p className="text-sm mt-3 text-center text-green-600">
-                        Archivo seleccionado: <strong>{file.name}</strong>
+                        Archivo seleccionado: <strong>{excelFile.name}</strong>
                     </p>
+                )}
+
+                {showPdfSection && (
+                    <div className="mb-4">
+                        <p className="font-medium mb-1">Archivos PDF</p>
+                        <input
+                            ref={pdfsRef}
+                            type="file"
+                            accept="application/pdf"
+                            multiple
+                            onChange={(e) => {
+                                const fs = e.target.files;
+                                if (fs) setPdfFiles(Array.from(fs));
+                            }}
+                            className="border rounded p-2 w-full"
+                        />
+
+                        {pdfFiles.length > 0 && (
+                            <p className="text-sm text-green-600 mt-1">
+                                {pdfFiles.length} archivo(s)
+                            </p>
+                        )}
+                    </div>
                 )}
 
                 <DialogFooter>
                     <Button
                         onClick={handleUpload}
-                        disabled={!file || loading}
+                        disabled={
+                            !excelFile ||
+                            loading ||
+                            (showPdfSection && pdfFiles.length === 0)
+                        }
                         className="w-full"
                     >
                         {loading ? "Cargando..." : "Procesar archivo"}

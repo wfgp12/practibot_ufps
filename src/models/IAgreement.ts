@@ -13,6 +13,18 @@ export const AGREEMENT_STATUSES = [
 export type AgreementApiType = (typeof AGREEMENT_TYPES)[number];
 export type AgreementApiStatus = (typeof AGREEMENT_STATUSES)[number];
 
+export interface IMassiveCreatedAgreement {
+  id: number;
+  nombre: string;
+  empresaId: number;
+}
+
+export interface IMassiveFailedAgreement {
+  nombre: string;
+  reason: string;
+  row: number; 
+}
+
 export interface AgreementApi {
   id: number;
   empresaId: number;

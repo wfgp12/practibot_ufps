@@ -1,4 +1,4 @@
-import { mapAgreementFromApi, type Agreement, type AgreementApi } from "@/models/IAgreement";
+import { mapAgreementFromApi, type Agreement, type AgreementApi, type IMassiveCreatedAgreement, type IMassiveFailedAgreement } from "@/models/IAgreement";
 import axiosClient from "./axiosClient";
 import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 
@@ -34,6 +34,36 @@ export const agreementApi = {
     );
 
     return mapAgreementFromApi(data.data);
+  },
+  uploadMassiveAgreements: async (
+    archivoData: File,
+    archivos: File[]
+  ): Promise<{
+    created: IMassiveCreatedAgreement[];
+    failed: IMassiveFailedAgreement[];
+  }> => {
+
+    const formData = new FormData();
+    formData.append("archivoData", archivoData);
+
+    archivos.forEach((file) => {
+      formData.append("archivos", file);
+    });
+
+    const { data } = await axiosClient.post<
+      IApiResponse<{
+        created: IMassiveCreatedAgreement[];
+        failed: IMassiveFailedAgreement[];
+      }>
+    >(
+      "/convenios/cargar",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return data.data;
   },
   createAgreement: async (): Promise<Agreement> => {
     const { data } = await axiosClient.post<IApiResponse<AgreementApi>>("/convenios/iniciar");

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { mapAgreementFiltersToApi, type Agreement } from "@/models/IAgreement";
+import { mapAgreementFiltersToApi, type Agreement, type IMassiveCreatedAgreement, type IMassiveFailedAgreement } from "@/models/IAgreement";
 import { agreementApi } from "@/api/agreementApi";
 import { useAppSelector } from "@/store/hooks";
 
@@ -108,6 +108,34 @@ export const useAgreements = (companyId?: number) => {
     }
   };
 
+  const uploadMassiveAgreements = async (
+    archivoData: File,
+    archivos: File[]
+  ): Promise<{
+    created: IMassiveCreatedAgreement[];
+    failed: IMassiveFailedAgreement[];
+  }> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const resp = await agreementApi.uploadMassiveAgreements(
+        archivoData,
+        archivos
+      );
+      await fetchAgreements();
+      await fetchPending();
+
+      return resp;
+    } catch (err) {
+      console.error(err);
+      setError("Error al cargar convenios masivamente");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAgreements();
   }, [fetchAgreements]);
@@ -138,5 +166,6 @@ export const useAgreements = (companyId?: number) => {
     fetchAgreements,
     fetchPending,
     createAgreementByDirector,
+    uploadMassiveAgreements
   };
 };
