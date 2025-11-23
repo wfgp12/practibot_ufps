@@ -90,13 +90,16 @@ export const useVacancies = () => {
     [fetchTableData]
   );
 
-  const fetchListCompanies = useCallback(() => {
+  const fetchListCompanies = useCallback((estados?: string[]) => {
     setLoading(true);
-    companyApi.listCompanies()
+    const query = estados ? `?estados=${estados.join(",")}` : "";
+
+    companyApi.listCompanies(query)
       .then(setCompaniesList)
       .catch((err: ApiError) => setError(err?.message ?? "Error al obtener empresas"))
       .finally(() => setLoading(false));
   }, []);
+
 
   const fetchVacancyById = useCallback((id: string): Promise<Vacancy | null> => {
     setLoading(true);
@@ -117,7 +120,7 @@ export const useVacancies = () => {
       .finally(() => setLoading(false));
   }, [fetchPendingVacancies]);
 
-  const registerVacancy = useCallback(async(formData: IFormRegisterVacancy) => {
+  const registerVacancy = useCallback(async (formData: IFormRegisterVacancy) => {
     setLoading(true);
     vacanciesApi.registerApproved(formData)
       .then(() => fetchVacancies())

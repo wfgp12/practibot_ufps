@@ -24,7 +24,7 @@ export const companyApi = {
     const { data: res } = await axiosClient.post<IApiCompany>("/empresas/registro", data);
     return mapCompanyFromApi(res);
   },
- 
+
   update: async (id: number, data: IRegisterCompanyData): Promise<ICompany> => {
     const { data: res } = await axiosClient.put<IApiResponse<IApiCompany>>(`/empresas/${id}/editar`, data);
     return mapCompanyFromApi(res.data);
@@ -38,7 +38,7 @@ export const companyApi = {
 
   /** 🟢 Listar todas las empresas */
   getAll: async (params?: PaginationParams): Promise<IApiPaginatedResponse<ICompany>> => {
-    const { data } = await axiosClient.get<IApiPaginatedResponse<IApiCompany>>("/empresas", {params});
+    const { data } = await axiosClient.get<IApiPaginatedResponse<IApiCompany>>("/empresas", { params });
     return {
       data: data.data.map(mapCompanyFromApi),
       total: data.total,
@@ -81,10 +81,9 @@ export const companyApi = {
     return mapCompanyFromApi(data.data);
   },
 
-  async listCompanies(): Promise<CompanyOption[]> {
-  const { data } = await axiosClient.get<IApiResponse<CompanyOption[]>>(
-    "/empresas/listar"
-  );
-  return data.data;
-}
+  async listCompanies(query?: string): Promise<CompanyOption[]> {
+    const url = query ? `/empresas/listar${query}` : "/empresas/listar";
+    const { data } = await axiosClient.get<IApiResponse<CompanyOption[]>>(url);
+    return data.data;
+  }
 };

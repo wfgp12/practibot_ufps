@@ -141,7 +141,7 @@ export const CompanyDetail = () => {
                                     {(userRole === "EMPRESA" && isOwner) || userRole === "DIRECTOR" ? (
                                         <>
                                             <Button className="bg-[#424242] text-white hover:bg-gray-700" onClick={handleToggleStatus}>
-                                                {company.estado === "APROBADA" ? "Desactivar" : "Activar"}
+                                                {company.estado === "APROBADA" || company.estado === "HABILITADA" ? "Desactivar" : "Activar"}
                                             </Button>
                                             <CompanyModal
                                                 company={company}
@@ -251,7 +251,7 @@ export const CompanyDetail = () => {
                 </Card>
             </SectionComponent>
             {/* Sección de convenios asociados a la empresa */}
-            {company.estado === "APROBADA" || company.estado === "INACTIVA" ? (
+            {company.estado === "APROBADA" || company.estado === "INACTIVA" || company.estado === "HABILITADA" ? (
                 <SectionComponent classNameContainer="pt-2" classNameContent="max-w-4xl">
                     <div className="flex items-center w-full justify-between border-b-4 border-red-600 pb-2 mb-4">
                         <h2 className="text-xl text-gray-500 font-bold">Convenios</h2>
@@ -261,12 +261,6 @@ export const CompanyDetail = () => {
                     </div>
                     <Card className="w-full border border-border/60 shadow-sm">
                         <CardContent>
-                            {/* {loadingAgreements && (
-                            <p className="text-center text-gray-500 py-6">Cargando convenios...</p>
-                        )}
-                        {errorAgreements && (
-                            <p className="text-center text-red-500 py-6">{errorAgreements}</p>
-                        )} */}
                             {agreements.length === 0 ? (
                                 <div className="flex items-center justify-between border border-dashed border-amber-400/70 bg-amber-50/60 px-6 py-4 rounded-md">
                                     <div className="flex items-center gap-3">

@@ -2,19 +2,22 @@ import { Button } from "@/components";
 import { Table, type Column } from "@/components/Table";
 import { TabsSection, type TabItem } from "@/components/TabsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CompanyModal } from "./company/CompanyModal";
+import { CargarMasivoModal } from "@/components/CargueMasivoModal";
 
 import type { Agreement } from "@/models/IAgreement";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router";
 import { useAgreements } from "@/hooks/useAgreements";
 import { format } from "date-fns";
+import { AgreementModal } from "./agreement/AgreementModal";
 
 export const GestionConvenios = () => {
     const navigate = useNavigate();
     const {
         agreements, total, page, pageSize,
         pendingAgreements, totalPending, pagePending, pageSizePending,
+        fetchAgreements,
+        uploadMassiveAgreements,
         setFilters,
         setPage,
         setPendingFilters,
@@ -40,14 +43,14 @@ export const GestionConvenios = () => {
             },
             filterType: "date"
         },
-        { 
-            key: "endDate", 
-            title: "Fecha Fin", 
+        {
+            key: "endDate",
+            title: "Fecha Fin",
             render: (value) => {
                 if (!value) return "—";
                 return format(new Date(String(value)), "dd-MM-yyyy");
             },
-            filterType: "date" 
+            filterType: "date"
         },
         {
             key: "status", title: "Estado",
@@ -144,7 +147,17 @@ export const GestionConvenios = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Convenios de empresas</h5>
-                        <CompanyModal onSubmit={async () => { }} />
+                        <div className="flex gap-2">
+                            <CargarMasivoModal
+                                title="Cargue Masivo de Convenios"
+                                buttonLabel="Cargar convenios"
+                                showPdfSection={true}
+                                handleSubmit={async (excelFile, pdfFiles) => {
+                                    await uploadMassiveAgreements(excelFile, pdfFiles);
+                                }}
+                             />
+                            <AgreementModal onCreated={fetchAgreements} />
+                        </div>
                     </div>
 
                     <Table

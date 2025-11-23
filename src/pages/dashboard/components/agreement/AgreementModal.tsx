@@ -16,8 +16,10 @@ import { Handshake, Upload } from "lucide-react";
 import { useAgreements } from "@/hooks/useAgreements";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useVacancies } from "@/hooks/useVacancies";
 
 const schema = z.object({
+    empresaId: z.number(),
     nombre: z.string().min(3, "El nombre es obligatorio"),
     descripcion: z.string().optional(),
     tipo: z.enum(["MACRO", "ESPECIFICO"]),
@@ -30,8 +32,9 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export const AgreementModal = ({ empresaId, onCreated }: { empresaId: number, onCreated?: () => Promise<void> }) => {
+export const AgreementModal = ({ empresaId, onCreated }: { empresaId?: number, onCreated?: () => Promise<void> }) => {
     const [open, setOpen] = useState(false);
+    const { companiesList, fetchListCompanies, loading: loadingEmpresas } = useVacancies();
     const { createAgreementByDirector } = useAgreements();
     const {
         register,
@@ -43,7 +46,9 @@ export const AgreementModal = ({ empresaId, onCreated }: { empresaId: number, on
     } = useForm<FormValues>({
         resolver: zodResolver(schema),
         defaultValues: {
+            empresaId,
             estado: "EN_REVISION",
+            tipo: "MACRO",
         },
     });
 
@@ -51,10 +56,16 @@ export const AgreementModal = ({ empresaId, onCreated }: { empresaId: number, on
         if (!open) reset();
     }, [open, reset]);
 
+    useEffect(() => {
+        if (!empresaId) {
+            fetchListCompanies(["APROBADA", "HABILITADA"]);
+        }
+    }, [empresaId, fetchListCompanies]);
+
     const onSubmit = async (data: FormValues) => {
         try {
             await createAgreementByDirector({
-                empresaId,
+                empresaId: data.empresaId,
                 nombre: data.nombre,
                 descripcion: data.descripcion,
                 tipo: data.tipo,
@@ -86,6 +97,30 @@ export const AgreementModal = ({ empresaId, onCreated }: { empresaId: number, on
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
+                    {!empresaId && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Empresa</label>
+                            <Select
+                                value={watch("empresaId")?.toString() || ""}
+                                onValueChange={(v) => setValue("empresaId", Number(v))}
+                                disabled={loadingEmpresas}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccione una empresa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {companiesList.map((e) => (
+                                        <SelectItem key={e.id} value={e.id.toString()}>
+                                            {e.nombre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.empresaId && (
+                                <p className="text-red-500 text-xs mt-1">{errors.empresaId.message}</p>
+                            )}
+                        </div>
+                    )}
                     {/* Nombre */}
                     <div>
                         <label className="block text-sm font-medium">Nombre</label>
