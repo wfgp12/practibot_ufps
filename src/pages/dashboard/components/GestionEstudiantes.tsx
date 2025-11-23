@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useStudents } from "@/hooks/useStudents";
 import type { IStudent } from "@/models/IStudent";
 import { StudentModal } from "./student/StudentModal";
-import { CargarMasivoModal } from "./student/CargueMasivoModal";
+import { CargarMasivoModal } from "@/components/CargueMasivoModal";
 import { format } from "date-fns";
 
 export const GestionEstudiantes = () => {
@@ -19,6 +19,7 @@ export const GestionEstudiantes = () => {
         reactivate,
         fetchStudents,
         setPageNumber,
+        cargarMasivo,
     } = useStudents();
 
 
@@ -69,7 +70,13 @@ export const GestionEstudiantes = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h5 className="text-lg font-medium">Listado de estudiantes</h5>
                     <div className="flex gap-2">
-                        <CargarMasivoModal onSuccess={fetchStudents} />
+                        <CargarMasivoModal
+                            title="Cargue Masivo de Estudiantes"
+                            buttonLabel="Cargar estudiantes"
+                            handleSubmit={async (excelFile) => {
+                                await cargarMasivo(excelFile);
+                            }}
+                        />
                         <StudentModal onSuccess={fetchStudents} />
                     </div>
                 </div>

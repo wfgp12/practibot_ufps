@@ -72,7 +72,7 @@ export const useStudents = (initialSkip = 0, initialTake = 10) => {
       }
     };
 
-    const cargarMasivo = async (file: File) => {
+  const cargarMasivo = async (file: File) => {
     setLoading(true);
     setError(null);
     try {
