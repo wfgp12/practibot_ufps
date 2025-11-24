@@ -21,6 +21,7 @@ export interface IApiCompany {
   usuario: Partial<IApiUser>;
   representanteLegal?: IApiRepresentative;
   habilitada?: boolean;
+  createdAt: string;
 }
 
 export interface IRegisterCompanyData {
@@ -55,6 +56,7 @@ export interface ICompany {
   descripcion: string;
   representanteLegal?: IRepresentative;
   isEnabled?: boolean;
+  creadoEn: string
 }
 
 export interface CompanyOption {
@@ -74,7 +76,7 @@ export const mapCompanyFromApi = (api: IApiCompany): ICompany => ({
   sector: api.sector || "",
   descripcion: api.descripcion || "",
   isEnabled: api.habilitada || false,
-
+  creadoEn: api.createdAt,
   representanteLegal: api.representanteLegal
     ? {
       id: api.representanteLegal.id,
@@ -101,6 +103,7 @@ export const mapApiFromCompany = (company: ICompany): IApiCompany => {
     direccion: company.direccion,
     sector: company.sector,
     descripcion: company.descripcion,
+    createdAt: company.creadoEn,
     representanteLegal: {
       id: company.representanteLegal?.id || 0,
       nombreCompleto: company.representanteLegal?.nombre || "",

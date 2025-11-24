@@ -56,9 +56,6 @@ export const GestionConvenios = () => {
             key: "status", title: "Estado",
             filterType: "select",
             filterOptions: [
-                { label: "Pendiente de firma", value: "Pendiente de firma" },
-                { label: "Pendiente de revisión", value: "Pendiente de revisión" },
-                { label: "En revisión", value: "En revisión" },
                 { label: "Aprobado", value: "Aprobado" },
                 { label: "Rechazado", value: "Rechazado" },
                 { label: "Vencido", value: "Vencido" },
@@ -68,10 +65,7 @@ export const GestionConvenios = () => {
                     variant="outline"
                     className={`
                         ${estado === "Aprobado" ? "border-green-500 text-green-500" : ""}
-                        ${estado === "Pendiente de firma" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
-                        ${estado === "Pendiente de revisión" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
-                        ${estado === "En revisión" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
-                        ${estado === "Rechazado" ? "border-red-500 text-red-500" : ""}
+                       ${estado === "Rechazado" ? "border-red-500 text-red-500" : ""}
                         ${estado === "Vencido" ? "border-red-500 text-red-500" : ""}
                     `}
                 >
@@ -107,20 +101,14 @@ export const GestionConvenios = () => {
                 { label: "Pendiente de firma", value: "Pendiente de firma" },
                 { label: "Pendiente de revisión", value: "Pendiente de revisión" },
                 { label: "En revisión", value: "En revisión" },
-                { label: "Aprobado", value: "Aprobado" },
-                { label: "Rechazado", value: "Rechazado" },
-                { label: "Vencido", value: "Vencido" },
             ],
             render: (estado) => (
                 <Badge
                     variant="outline"
                     className={`
-                        ${estado === "Aprobado" ? "border-green-500 text-green-500" : ""}
                         ${estado === "Pendiente de firma" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
                         ${estado === "Pendiente de revisión" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
                         ${estado === "En revisión" ? "border-e-yellow-400-500 text-yellow-400-500" : ""}
-                        ${estado === "Rechazado" ? "border-red-500 text-red-500" : ""}
-                        ${estado === "Vencido" ? "border-red-500 text-red-500" : ""}
                     `}
                 >
                     {String(estado)}

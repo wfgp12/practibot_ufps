@@ -9,6 +9,7 @@ import type { ICompany } from "@/models/ICompany";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router";
 import { CargarMasivoModal } from "@/components/CargueMasivoModal";
+import { format } from "date-fns";
 
 export const GestionEmpresas = () => {
     const navigate = useNavigate();
@@ -25,11 +26,21 @@ export const GestionEmpresas = () => {
         { key: "correo", title: "Correo", filterType: "text" },
         { key: "telefono", title: "Teléfono" },
         {
+            key: "creadoEn",
+            title: "Fecha Creación",
+            render: (value) => {
+                if (!value) return "—";
+                return format(new Date(String(value)), "dd-MM-yyyy");
+            },
+            filterType: "date"
+        },
+        {
             key: "estado", title: "Estado",
             filterType: "select",
             filterOptions: [
+                { label: "Habilitada", value: "HABILITADA" },
                 { label: "Aprobada", value: "APROBADA" },
-                { label: "Inactiva", value: "INACTIVA" },
+                { label: "Inhabillitada", value: "INHABILITADA" },
                 { label: "Rechazada", value: "RECHAZADA" },
             ],
             render: (estado) => (
@@ -83,7 +94,7 @@ export const GestionEmpresas = () => {
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Empresas con convenio</h5>
                         <div className="flex gap-2">
-                            <CargarMasivoModal 
+                            <CargarMasivoModal
                                 title="Cargue Masivo de Empresas"
                                 buttonLabel="Cargar empresas"
                                 handleSubmit={async (excelFile) => {
