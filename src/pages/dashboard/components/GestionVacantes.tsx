@@ -8,6 +8,7 @@ import { useVacancies } from "@/hooks/useVacancies";
 import type { Vacancy } from "@/models/IVacancy";
 import { useNavigate } from "react-router";
 import { VacancyModal } from "./vancancy/VacancyModal";
+import { format } from "date-fns";
 
 export const GestionVacantes = () => {
     const { vacancies, pendingVacancies, registerVacancy, fetchVacancies, fetchPendingVacancies } = useVacancies();
@@ -46,6 +47,15 @@ export const GestionVacantes = () => {
                     </div>
                 );
             },
+        },
+        {
+            key: "createAt",
+            title: "Fecha Creación",
+            render: (value) => {
+                if (!value) return "—";
+                return format(new Date(String(value)), "dd-MM-yyyy");
+            },
+            filterType: "date"
         },
         {
             key: "status",

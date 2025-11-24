@@ -17,6 +17,7 @@ export interface Vacancy {
   status: "Open" | "Closed" | "Pending" | "Rejected"
   convenio?: string
   director?: string
+  createAt: string
 }
 
 // ╔══════════════════════════════════════════════╗
@@ -75,6 +76,7 @@ export const mapApiVacancyToVacancy = (
   status: mapApiStatusToFront(apiVacancy.estado),
   convenio: apiVacancy.convenio?.nombre,
   director: apiVacancy.directorValida?.usuario?.nombre,
+  createAt: apiVacancy.creadaEn! ?? "",
 })
 
 // ✅ Para listas
@@ -114,7 +116,7 @@ export const mapFormToApiRegisterVacancy = (form: Partial<IFormRegisterVacancy>)
 // ║                FILTROS                       ║
 // ╚══════════════════════════════════════════════╝
 export type VacancyFilters = Partial<
-  Pick<Vacancy, "title" | "company" | "modality" | "area" | "location" | "workday" | "status">
+  Pick<Vacancy, "title" | "company" | "modality" | "area" | "location" | "workday" | "status" | "createAt">
 > & {
   technicalSkills?: string
   softSkills?: string
@@ -133,6 +135,7 @@ export const mapVacancyFiltersToApi = (filters: VacancyFilters = {}) => {
   if (filters.location) mapped.ubicacion = filters.location
   if (filters.workday) mapped.tipoJornada = filters.workday
   if (filters.status) mapped.estado = mapFrontStatusToApi(filters.status)
+  if (filters.createAt) mapped.creadaEn = filters.createAt
 
   return mapped
 }
