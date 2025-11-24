@@ -18,17 +18,28 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useVacancies } from "@/hooks/useVacancies";
 
-const schema = z.object({
-    empresaId: z.number(),
-    nombre: z.string().min(3, "El nombre es obligatorio"),
-    descripcion: z.string().optional(),
-    tipo: z.enum(["MACRO", "ESPECIFICO"]),
-    estado: z.enum(["EN_REVISION", "APROBADO", "RECHAZADO"]),
-    observaciones: z.string().optional(),
-    file: z.instanceof(File).optional(),
-    fechaInicio: z.string().nonempty("La fecha de inicio es obligatoria"),
-    fechaFin: z.string().nonempty("La fecha de fin es obligatoria"),
-});
+const today = new Date().toISOString().split("T")[0];
+
+const schema = z
+    .object({
+        empresaId: z.number(),
+        nombre: z.string().min(3, "El nombre es obligatorio"),
+        descripcion: z.string().optional(),
+        tipo: z.enum(["MACRO", "ESPECIFICO"]),
+        estado: z.enum(["EN_REVISION", "APROBADO", "RECHAZADO"]),
+        observaciones: z.string().optional(),
+        file: z.instanceof(File).optional(),
+        fechaInicio: z.string().nonempty("La fecha de inicio es obligatoria"),
+        fechaFin: z.string().nonempty("La fecha de fin es obligatoria"),
+    })
+    .refine((data) => data.fechaInicio >= today, {
+        path: ["fechaInicio"],
+        message: "La fecha de inicio no puede ser antes de hoy",
+    })
+    .refine((data) => data.fechaFin >= data.fechaInicio, {
+        path: ["fechaFin"],
+        message: "La fecha de fin no puede ser menor que la fecha de inicio",
+    });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -174,14 +185,14 @@ export const AgreementModal = ({ empresaId, onCreated }: { empresaId?: number, o
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-medium">Fecha de inicio</label>
-                            <Input type="date" {...register("fechaInicio")} />
+                            <Input type="date" min={today} {...register("fechaInicio")} />
                             {errors.fechaInicio && (
                                 <p className="text-red-500 text-xs mt-1">{errors.fechaInicio.message}</p>
                             )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Fecha de fin</label>
-                            <Input type="date" {...register("fechaFin")} />
+                            <Input type="date" min={today} {...register("fechaFin")} />
                             {errors.fechaFin && (
                                 <p className="text-red-500 text-xs mt-1">{errors.fechaFin.message}</p>
                             )}
