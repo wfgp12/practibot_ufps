@@ -113,3 +113,13 @@ export const mapApiFromCompany = (company: ICompany): IApiCompany => {
   }
 
 }
+
+export interface IMassiveUploadCreatedItem {
+  nombre: string;
+  empresa: IApiCompany; // la empresa viene completa desde el back
+}
+
+export interface IMassiveUploadFailedItem {
+  nombre: string;
+  error: string;
+}

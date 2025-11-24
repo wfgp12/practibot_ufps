@@ -1,6 +1,6 @@
 import type { IApiPaginatedResponse, IApiResponse } from "@/models/IApi";
 import axiosClient from "./axiosClient";
-import { mapCompanyFromApi, type CompanyOption, type IApiCompany, type ICompany, type IRegisterCompanyData } from "@/models/ICompany";
+import { mapCompanyFromApi, type CompanyOption, type IApiCompany, type ICompany, type IMassiveUploadCreatedItem, type IMassiveUploadFailedItem, type IRegisterCompanyData } from "@/models/ICompany";
 
 
 interface PaginationParams {
@@ -85,5 +85,20 @@ export const companyApi = {
     const url = query ? `/empresas/listar${query}` : "/empresas/listar";
     const { data } = await axiosClient.get<IApiResponse<CompanyOption[]>>(url);
     return data.data;
+  },
+
+  uploadMassive: async (formData: FormData) => {
+    const { data } = await axiosClient.post<IApiResponse<{
+      created: IMassiveUploadCreatedItem[];
+      failed: IMassiveUploadFailedItem[];
+    }>>(
+      "/empresas/cargar",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    return data;
   }
 };

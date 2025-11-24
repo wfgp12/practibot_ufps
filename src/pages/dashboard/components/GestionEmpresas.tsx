@@ -8,14 +8,15 @@ import { useCompanies } from "@/hooks/useCompanies";
 import type { ICompany } from "@/models/ICompany";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router";
+import { CargarMasivoModal } from "@/components/CargueMasivoModal";
 
 export const GestionEmpresas = () => {
     const navigate = useNavigate();
-    const { 
+    const {
         companies, page, total, pageSize,
-        pendingCompanies, pendingPage, pendingTotal,pendingPageSize,
+        pendingCompanies, pendingPage, pendingTotal, pendingPageSize,
         setPage, setFilters, setPendingPage, setPendingFilters,
-        createCompany, 
+        createCompany, uploadCompanies,
     } = useCompanies();
     const columnasConvenios: Column<ICompany>[] = [
         { key: "nombre", title: "Empresa", filterType: "text" },
@@ -81,7 +82,16 @@ export const GestionEmpresas = () => {
                 <>
                     <div className="flex justify-between items-center mb-4">
                         <h5 className="text-lg font-medium">Empresas con convenio</h5>
-                        <CompanyModal onSubmit={createCompany} />
+                        <div className="flex gap-2">
+                            <CargarMasivoModal 
+                                title="Cargue Masivo de Empresas"
+                                buttonLabel="Cargar empresas"
+                                handleSubmit={async (excelFile) => {
+                                    await uploadCompanies(excelFile);
+                                }}
+                            />
+                            <CompanyModal onSubmit={createCompany} />
+                        </div>
                     </div>
 
                     <Table
@@ -89,12 +99,12 @@ export const GestionEmpresas = () => {
                         data={companies}
                         total={total}
                         page={page}
-                        pageSize={pageSize}                        
+                        pageSize={pageSize}
                         onChange={({ filters, page }) => {
                             setFilters(filters);
                             setPage(page);
-                        }} 
-                    
+                        }}
+
                     />
                 </>
             ),
@@ -116,9 +126,9 @@ export const GestionEmpresas = () => {
                     <h5 className="text-lg font-medium mb-4">
                         Solicitudes Empresas
                     </h5>
-                    <Table 
-                        columns={columnasSolicitudes} 
-                        data={pendingCompanies} 
+                    <Table
+                        columns={columnasSolicitudes}
+                        data={pendingCompanies}
                         total={pendingTotal}
                         page={pendingPage}
                         pageSize={pendingPageSize}

@@ -165,30 +165,52 @@ export const useCompanies = () => {
 
     /** 🔄 Actualizar empresa */
     const updateCompany = useCallback(async (id: number, data: IRegisterCompanyData) => {
-            try {
-                setLoading(true);
-                const updated = await companyApi.update(id, data);
+        try {
+            setLoading(true);
+            const updated = await companyApi.update(id, data);
 
-                // Actualizar en aprobadas
-                setCompanies(prev =>
-                    prev.map(c => (c.id === id ? updated : c))
-                );
+            // Actualizar en aprobadas
+            setCompanies(prev =>
+                prev.map(c => (c.id === id ? updated : c))
+            );
 
-                // Actualizar en pendientes si existe
-                setPendingCompanies(prev =>
-                    prev.map(c => (c.id === id ? updated : c))
-                );
+            // Actualizar en pendientes si existe
+            setPendingCompanies(prev =>
+                prev.map(c => (c.id === id ? updated : c))
+            );
 
-                return updated;
-            } catch (err: unknown) {
-                setError(err instanceof Error ? err.message : "Error al actualizar empresa");
-                return null;
-            } finally {
-                setLoading(false);
-            }
-        },
+            return updated;
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Error al actualizar empresa");
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    },
         []
     );
+
+    const uploadCompanies = useCallback(async (file: File) => {
+        setLoading(true);
+        setError(null);
+
+        const formData = new FormData();
+        formData.append("archivo", file);
+
+        try {
+            const res = await companyApi.uploadMassive(formData);
+            await fetchCompanies();
+            await fetchPendingCompanies();
+            return res;
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error ? err.message : "Error al cargar empresas";
+            setError(message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     return {
         /** Empresas normales */
@@ -228,5 +250,6 @@ export const useCompanies = () => {
         toggleCompanyState,
         createCompany,
         updateCompany,
+        uploadCompanies
     };
 };
