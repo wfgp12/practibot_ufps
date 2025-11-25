@@ -6,6 +6,7 @@ import { Table, type Column } from "@/components/Table";
 import { useVacancies } from "@/hooks/useVacancies";
 import type { Vacancy } from "@/models/IVacancy";
 import { useNavigate } from "react-router";
+import { Badge } from "@/components";
 
 export const VacanciesList = () => {
   const { vacancies, fetchVacancies, loading } = useVacancies();
@@ -21,32 +22,43 @@ export const VacanciesList = () => {
     {
       key: "title",
       title: "Título",
-      filterType: "text",
     },
     {
       key: "area",
       title: "Área",
-      filterType: "text",
     },
     {
       key: "modality",
       title: "Modalidad",
-      filterType: "select",
-      filterOptions: [
-        { label: "Presencial", value: "PRESENCIAL" },
-        { label: "Remoto", value: "REMOTO" },
-        { label: "Híbrido", value: "HIBRIDO" },
-      ],
     },
     {
       key: "company",
       title: "Empresa",
-      filterType: "text",
     },
     {
-      key: "location",
-      title: "Ubicación",
-      filterType: "text",
+      key: "technicalSkills",
+      title: "Habilidades Técnicas",
+      render: (skills) => {
+        if (!Array.isArray(skills) || skills.length === 0) return "—";
+
+        const visibleSkills = skills.slice(0, 3);
+        const hasMore = skills.length > 3;
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {visibleSkills.map((skill, index) => (
+              <Badge key={index} variant="outline">
+                {skill}
+              </Badge>
+            ))}
+            {hasMore && (
+              <Badge variant="secondary" className="opacity-70">
+                ...
+              </Badge>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "id",
@@ -80,7 +92,7 @@ export const VacanciesList = () => {
   };
 
   return (
-    <Card className="border border-zinc-200 shadow-sm">
+    <Card className="border border-zinc-200 shadow-sm w-full">
       <CardHeader>
         <h2 className="text-lg font-semibold text-zinc-800">
           Vacantes disponibles

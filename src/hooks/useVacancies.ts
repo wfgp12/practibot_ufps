@@ -90,6 +90,12 @@ export const useVacancies = () => {
     [fetchTableData]
   );
 
+  const fetchPersonalizedVacancies = useCallback(
+    (params?: Partial<TableState<Vacancy>>) =>
+      fetchTableData(vacanciesApi.getPersonalized, setVacancies, params),
+    [fetchTableData]
+  );
+
   const fetchListCompanies = useCallback((estados?: string[]) => {
     setLoading(true);
     const query = estados ? `?estados=${estados.join(",")}` : "";
@@ -190,12 +196,15 @@ export const useVacancies = () => {
         case "EMPRESA":
           fetchCompanyVacancies();
           break;
+        case "ESTUDIANTE":
+          fetchPersonalizedVacancies();
+          break;
         default:
           fetchVacancies();
       }
     };
     loadVacancies();
-  }, [user, fetchVacancies, fetchPendingVacancies, fetchCompanyVacancies]);
+  }, [user, fetchVacancies, fetchPendingVacancies, fetchCompanyVacancies, fetchPersonalizedVacancies]);
 
   return {
     vacancies,

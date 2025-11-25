@@ -113,7 +113,7 @@ export const mapStudentToApiPayload = (student: Partial<IStudent>) => {
     habilidadesTecnicas: student.technicalSkills,
     habilidadesBlandas: student.softSkills,
     experiencia: student.experience,
-    perfil: student.profileComplete,
+    perfil: student.perfilProfesional,
     perfilCompleto: student.profileComplete,
     activo: student.active,
     usuario: {

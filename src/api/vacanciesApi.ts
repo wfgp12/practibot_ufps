@@ -53,7 +53,7 @@ export const vacanciesApi = {
             pageSize, // ✅ agregado
         };
     },
-    getByCompany : async (params?: {
+    getByCompany: async (params?: {
         page?: number;
         limit?: number;
         titulo?: string;
@@ -124,4 +124,20 @@ export const vacanciesApi = {
     async inactivate(id: string): Promise<void> {
         await axiosClient.patch(`/vacantes/${id}/inactivar`);
     },
+
+    async getPersonalized(params?: { page?: number; limit?: number; }): Promise<IApiPaginatedResponse<Vacancy>> {
+        const { data } = await axiosClient.get<IApiPaginatedResponse<IApiVacancy>>(
+            "/vacantes/personalizadas",
+            { params }
+        );
+
+        const pageSize = params?.limit ?? 10;
+
+        return {
+            data: mapApiVacancies(data.data),
+            total: data.total,
+            page: data.page,
+            pageSize,
+        };
+    }
 };
