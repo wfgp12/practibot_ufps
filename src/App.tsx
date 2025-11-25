@@ -1,22 +1,23 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Outlet, Route, Routes } from 'react-router'
+import { Outlet, Route, Routes } from 'react-router';
 import { Toaster } from 'sonner';
 
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loadUserThunk } from '@/store/thunks/authThunks';
 
 import { VacancyDetail } from '@/pages/dashboard/components/vancancy/VacancyDetail';
 import { CompanyDetail } from '@/pages/dashboard/components/company/CompanyDetail';
 import { AgreementRequest } from './pages/dashboard/components/agreement/AgreementRequest';
-import { Layout, PrivateRoute, PublicRoute } from '@/components'
+import { Layout, PrivateRoute, PublicRoute } from '@/components';
 import LoaderBottomRight from '@/components/Loader';
 // import { ChatbotButton } from '@/components/ChatbotButton';
 // import { ChatbotSidebar } from '@/components/ChatbotSidebar';
 import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 
-import './App.css'
+import './App.css';
 import Spinner from './components/Spinner';
+import { useNotificationsSocket } from './hooks/useNotificationsSocket';
 
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
@@ -25,6 +26,8 @@ const CompanyRegisterPage = lazy(() => import('@/pages/CompanyRegister'));
 
 function App() {
   const dispatch = useAppDispatch();
+  const { user, token } = useAppSelector((state) => state.auth);
+  useNotificationsSocket();
 
   useEffect(() => {
     dispatch(loadUserThunk());
@@ -32,7 +35,8 @@ function App() {
 
   useEffect(() => {
     createChat({
-      webhookUrl: 'https://n8n.juanpctsoftware.online/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
+      webhookUrl: 'https://n8n.applab.ufps.edu.co/webhook/d3694e2f-6241-4822-96b0-cdd33004998e/chat',
+      allowFileUploads: true,
       initialMessages: [
         '¡Hola! 👋',
         'Mi nombre es PractiBOT. ¿Cómo puedo ayudarte hoy?'
@@ -47,8 +51,12 @@ function App() {
           closeButtonTooltip: 'Cerrar', // <- obligatorio
         },
       },
+      metadata: {
+        userRole: user?.role || null,
+        token: token || null,
+      },
     });
-  }, []);
+  }, [user, token]);
 
   return (
     <>
@@ -111,7 +119,7 @@ function App() {
         expand
       />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
