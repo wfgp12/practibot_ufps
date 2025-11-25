@@ -10,6 +10,7 @@ import logoUfps from "@/assets/Logo-nuevo-vertical.png";
 import escudoColombia from "@/assets/Escudo_presidencial_republica_de_Colombia.png";
 import bannerBackground from "@/assets/banner.png";
 import { useLocation, useNavigate } from "react-router";
+import NotificationBell from "../NotificationBell";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -139,7 +140,8 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                <div>
+                <div className="flex items-center gap-4">
+                    {isAuthenticated && <NotificationBell />}
                     {isAuthenticated ? (
                         <button
                             onClick={handleLogout}
