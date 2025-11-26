@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { markAsRead } from "@/store/slices/notificationsSlice";
+import { socket } from "@/lib/socket";
 
 const NotificationBell = () => {
   const dispatch = useAppDispatch();
@@ -38,7 +39,10 @@ const NotificationBell = () => {
             items.map((n) => (
               <div
                 key={n.id}
-                onClick={() => dispatch(markAsRead(n.id))}
+                onClick={() => {
+                    dispatch(markAsRead(n.id))
+                    socket.emit("mark-notification-read", { notificacionId: n.id });
+                }}
                 className={`p-3 border-b border-neutral-700 cursor-pointer 
                   hover:bg-neutral-700 transition
                   ${!n.leida ? "bg-neutral-700/40" : ""}`}

@@ -4,6 +4,7 @@ import { loginSuccess } from "../slices/authSlice"
 import { hideLoader, showLoader } from "../slices/uiSlice"
 
 import { authApi } from "@/api/authApi"
+import { reconnectSocket } from "@/lib/socket"
 
 interface LoginPayload {
   nit?: string
@@ -20,6 +21,7 @@ export const loginThunk = createAsyncThunk(
       const response = await authApi.login(payload);
       localStorage.setItem("token", response.token);
       dispatch(loginSuccess(response));
+      reconnectSocket();
       return response;
     } catch (error) {
       // error ya es string seguro

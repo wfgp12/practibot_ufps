@@ -18,6 +18,7 @@ import { createChat } from '@n8n/chat';
 import './App.css';
 import Spinner from './components/Spinner';
 import { useNotificationsSocket } from './hooks/useNotificationsSocket';
+import { loadNotificationsThunk } from './store/thunks/notificationsThunks';
 
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
@@ -30,7 +31,9 @@ function App() {
   useNotificationsSocket();
 
   useEffect(() => {
-    dispatch(loadUserThunk());
+    dispatch(loadUserThunk()).then(() => {
+      dispatch(loadNotificationsThunk());
+    });
   }, [dispatch]);
 
   useEffect(() => {
