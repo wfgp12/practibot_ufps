@@ -15,6 +15,14 @@ type FormValues = {
     archivo: FileList;
 };
 
+const CATEGORIAS_VALIDAS = [
+    { value: "GENERAL", label: "General" },
+    { value: "CRONOGRAMA", label: "Cronograma" },
+    { value: "CONVENIO_PLANTILLA", label: "Convenio de Plantilla" },
+    { value: "DOCUMENTO_EMPRESA", label: "Documento de Empresa" },
+    { value: "DOCUMENTO_ESTUDIANTE", label: "Documento de Estudiante" },
+];
+
 export const GestionDocumentos = () => {
     const {
         documents,
@@ -103,10 +111,11 @@ export const GestionDocumentos = () => {
                                     {...register("categoria", { required: "Selecciona una categoría" })}
                                     defaultValue="GENERAL"
                                 >
-                                    <option value="GENERAL">General</option>
-                                    <option value="CONVENIO_PLANTILLA">Convenio</option>
-                                    <option value="ESTUDIANTE">Estudiante</option>
-                                    <option value="EMPRESA">Empresa</option>
+                                    {
+                                        CATEGORIAS_VALIDAS.map((cat) => (
+                                            <option key={cat.value} value={cat.value}> {cat.label} </option>
+                                        ))
+                                    }
                                 </select>
                                 {errors.categoria && (
                                     <p className="text-sm text-red-500">{errors.categoria.message}</p>

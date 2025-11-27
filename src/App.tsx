@@ -19,6 +19,7 @@ import './App.css';
 import Spinner from './components/Spinner';
 import { useNotificationsSocket } from './hooks/useNotificationsSocket';
 import { loadNotificationsThunk } from './store/thunks/notificationsThunks';
+import { StudentDetail } from './pages/dashboard/components/student/StudentDetail';
 
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
@@ -108,6 +109,7 @@ function App() {
           <Route path="agreement" element={<AgreementRequest />} />
           <Route path="agreement/:id" element={<AgreementRequest />} />
           <Route path="vacancy/:id" element={<VacancyDetail />} />
+          <Route path="student/:id" element={<StudentDetail />} />
           <Route path="company/:id" element={<CompanyDetail />} />
         </Route>
       </Routes>

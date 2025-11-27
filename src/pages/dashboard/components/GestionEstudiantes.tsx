@@ -6,6 +6,8 @@ import type { IStudent } from "@/models/IStudent";
 import { StudentModal } from "./student/StudentModal";
 import { CargarMasivoModal } from "@/components/CargueMasivoModal";
 import { format } from "date-fns";
+import { Eye } from "lucide-react";
+import { Link } from "react-router";
 
 export const GestionEstudiantes = () => {
     const {
@@ -21,7 +23,6 @@ export const GestionEstudiantes = () => {
         setPageNumber,
         cargarMasivo,
     } = useStudents();
-
 
     const columns: Column<IStudent>[] = [
         { key: "name", title: "Nombre" },
@@ -55,7 +56,9 @@ export const GestionEstudiantes = () => {
                     >
                         {student.active ? "Desactivar" : "Activar"}
                     </Button>
-                    <StudentModal student={student} onSuccess={() => fetchStudents()} />
+                    <Link to={`/dashboard/student/${id}`} className="flex items-center gap-2 bg-red-600 px-3 py-1.5 rounded-md text-white hover:bg-red-800 transition">
+                        <Eye className="w-4 h-4" /> Ver
+                    </Link>
                 </div>
             ),
         },
