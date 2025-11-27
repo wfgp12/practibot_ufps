@@ -13,11 +13,13 @@ import {
   Wrench,
   Users,
   Layers,
+  Eye,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FileUploadModal } from "@/components/FileUpload";
 
 export const ProfileCard = () => {
-  const { student, completeProfile, updateStudent, loading } = useStudent(undefined);
+  const { student, completeProfile, updateStudent, uploadResume, fetchStudent, loading } = useStudent(undefined);
 
   if (loading) {
     return (
@@ -59,10 +61,36 @@ export const ProfileCard = () => {
           Mi perfil de practicante
         </h2>
 
-        <StudentProfileModal
-          student={student}
-          onSave={student.profileComplete ? updateStudent : completeProfile}
-        />
+        <div className="flex items-center gap-2">
+          {student.profileComplete && (
+            <>
+              <FileUploadModal
+                title={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
+                buttonLabel={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
+                accept=".pdf,.doc,.docx"
+                handleSubmit={async (file) => {
+                  await uploadResume(file);
+                  await fetchStudent();
+                }}
+              />
+              {student.hojaDeVidaUrl && (
+                <a
+                  href={student.hojaDeVidaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-zinc-600 px-3 py-1.5 rounded-md text-sm hover:bg-zinc-800 transition text-white"
+                >
+                  <Eye className="w-4 h-4 text-white-500" />
+                  Ver Hoja de Vida
+                </a>
+              )}
+            </>
+          )}
+          <StudentProfileModal
+            student={student}
+            onSave={student.profileComplete ? updateStudent : completeProfile}
+          />
+        </div>
       </CardHeader>
 
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm text-zinc-700">
@@ -95,9 +123,8 @@ export const ProfileCard = () => {
           <Activity className="w-4 h-4 text-red-500" />
           <span className="font-bold">Estado:</span>{" "}
           <span
-            className={`${
-              student.active ? "text-green-600" : "text-zinc-500"
-            } font-semibold`}
+            className={`${student.active ? "text-green-600" : "text-zinc-500"
+              } font-semibold`}
           >
             {student.active ? "Activo" : "Inactivo"}
           </span>

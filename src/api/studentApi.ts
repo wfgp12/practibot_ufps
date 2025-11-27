@@ -9,21 +9,21 @@ export const studentApi = {
   },
 
   cargarMasivo: async (archivo: File): Promise<IApiResponse<unknown>> => {
-  const formData = new FormData();
-  formData.append("archivo", archivo);
+    const formData = new FormData();
+    formData.append("archivo", archivo);
 
-  const response = await axiosClient.post<IApiResponse<unknown>>(
-    "/estudiantes/cargar",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+    const response = await axiosClient.post<IApiResponse<unknown>>(
+      "/estudiantes/cargar",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-  return response.data;
-},
+    return response.data;
+  },
 
   getStudents: async (skip = 0, take = 10): Promise<IApiPaginatedResponse<IStudent>> => {
     const response = await axiosClient.get<IApiPaginatedResponse<IApiStudent>>(
@@ -69,10 +69,30 @@ export const studentApi = {
   },
 
   completeProfile: async (id: number, payload: Partial<IStudent>): Promise<IStudent> => {
-  const response = await axiosClient.patch<IApiResponse<IApiStudent>>(
-    `/estudiantes/${id}/completar-perfil`,
-    { ...payload, perfilCompleto: true }
-  );
-  return mapApiStudentToStudent(response.data.data);
-},
+    const response = await axiosClient.patch<IApiResponse<IApiStudent>>(
+      `/estudiantes/${id}/completar-perfil`,
+      { ...payload, perfilCompleto: true }
+    );
+    return mapApiStudentToStudent(response.data.data);
+  },
+
+  subirHojaDeVida: async (id: number, archivo: File) => {
+    const formData = new FormData();
+    formData.append("archivo", archivo);
+
+    const response = await axiosClient.post<IApiResponse<{
+      hojaVidaUrl: string,
+      documentoId: number
+    }>>(
+      `/estudiantes/${id}/subirhoja`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  },
 };

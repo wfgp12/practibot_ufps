@@ -67,10 +67,30 @@ export const useStudent = (id?: number | null) => {
     setLoading(true);
     setError(null);
     try {
-      
+
       const data = await studentApi.completeProfile(student.id, mapStudentToApiPayload(payload));
       setStudent(data);
       return data;
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uploadResume = async (archivo: File): Promise<void> => {
+    if (!student) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await studentApi.subirHojaDeVida(student.id, archivo);
+
+      // Si el backend retorna la URL, actualizamos el estudiante en el state
+      if (res.data?.hojaVidaUrl) {
+        setStudent(prev => prev ? { ...prev, hojaDeVidaUrl: res.data.hojaVidaUrl } : prev);
+      }
+
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       throw err;
@@ -117,5 +137,5 @@ export const useStudent = (id?: number | null) => {
     if (id !== null) fetchStudent();
   }, [id]);
 
-  return { student, loading, error, fetchStudent, createStudent, updateStudent, completeProfile, deactivate, reactivate };
+  return { student, loading, error, fetchStudent, createStudent, updateStudent, completeProfile, uploadResume, deactivate, reactivate };
 };

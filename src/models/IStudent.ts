@@ -43,7 +43,7 @@ export interface IApiStudent {
   semestre?: number | null;
   area?: string | null;
   perfilCompleto: boolean;
-  hojaVidaArchivoUrl?: string | null;
+  hojaDeVidaUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 
@@ -79,6 +79,7 @@ export interface IStudent {
   applications: IApiPostulacion[];
   internships: IApiPractica[];
   createdAt: string;
+  hojaDeVidaUrl?: string;
 }
 
 /** Mapper: convierte IApiStudent a IStudent */
@@ -100,6 +101,7 @@ export const mapApiStudentToStudent = (api: IApiStudent): IStudent => {
     applications: api.postulaciones ?? [],
     internships: api.practicas ?? [],
     createdAt: api.createdAt,
+    hojaDeVidaUrl: api.hojaDeVidaUrl || undefined,
   };
 };
 
