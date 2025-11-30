@@ -25,6 +25,8 @@ const HomePage = lazy(() => import('@/pages/HomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const DashboardPage = lazy(() => import('@/pages/Dashboard'));
 const CompanyRegisterPage = lazy(() => import('@/pages/CompanyRegister'));
+const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 
 function App() {
   const dispatch = useAppDispatch();
@@ -32,10 +34,15 @@ function App() {
   useNotificationsSocket();
 
   useEffect(() => {
-    dispatch(loadUserThunk()).then(() => {
-      dispatch(loadNotificationsThunk());
-    });
+    dispatch(loadUserThunk())
   }, [dispatch]);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(loadNotificationsThunk());
+    }
+  }, [user, dispatch]);
+
 
   useEffect(() => {
     createChat({
@@ -86,6 +93,21 @@ function App() {
           <PublicRoute>
             <Suspense fallback={<Spinner />}>
               <CompanyRegisterPage />
+            </Suspense>
+          </PublicRoute>
+        } />
+        <Route path="/recuperar-password" element={
+          <PublicRoute>
+            <Suspense fallback={<Spinner />}>
+              <ForgotPasswordPage />
+            </Suspense>
+          </PublicRoute>
+        } />
+
+        <Route path="/reset-password" element={
+          <PublicRoute>
+            <Suspense fallback={<Spinner />}>
+              <ResetPasswordPage />
             </Suspense>
           </PublicRoute>
         } />

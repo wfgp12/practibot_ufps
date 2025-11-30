@@ -1,6 +1,6 @@
 import { signInWithPopup } from "firebase/auth";
 import { useForm, type SubmitHandler } from "react-hook-form"
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -58,15 +58,13 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-[360px] shadow-lg rounded-xl relative">
         <div className="absolute top-3 left-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-1 text-gray-300 hover:text-gray-400 group"
-            onClick={() => navigate(-1)}
+          <Link
+            to="/"
+            className="flex items-center gap-1 text-gray-300 hover:text-gray-400 group"   
           >
             <ChevronLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
             <span className="text-sm">Cancelar</span>
-          </Button>
+          </Link>
         </div>
         <CardHeader className="text-center mt-6">
           <h1 className="text-red-600 font-bold text-xl">Prácticas UFPS</h1>
@@ -155,12 +153,12 @@ const LoginPage = () => {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <a
-            href="#"
+          <Link
+            to="/recuperar-password"
             className="text-sm text-red-600 hover:underline"
           >
             ¿Olvidaste tu contraseña?
-          </a>
+          </Link>
         </CardFooter>
       </Card>
     </div>

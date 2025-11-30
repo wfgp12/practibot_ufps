@@ -100,5 +100,18 @@ export const companyApi = {
     );
 
     return data;
-  }
+  },
+
+  recoverPassword: async (nit: string): Promise<{ message: string }> => {
+    const { data } = await axiosClient.post("/empresas/recuperar", { nit });
+    return data;
+  },
+
+  resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
+    const { data } = await axiosClient.post("/empresas/restablecer", {
+      token,
+      nuevaPassword: newPassword,
+    });
+    return data;
+  },
 };
