@@ -20,7 +20,8 @@ export const GestionEstudiantes = () => {
         deactivate,
         reactivate,
         fetchStudents,
-        setPageNumber,
+        setPage,
+        setFilters,
         cargarMasivo,
     } = useStudents();
 
@@ -91,7 +92,15 @@ export const GestionEstudiantes = () => {
                     page={page}
                     pageSize={pageSize}
                     loading={loading}
-                    onChange={({ page }) => setPageNumber(page)}
+                    onChange={({ page, filters }) => {
+                        setPage(page);
+                        setFilters({
+                            codigo: filters.code,
+                            documento: filters.document,
+                            email: filters.email,
+                            nombre: filters.name,
+                        });
+                    }}
                 />
 
                 {error && (

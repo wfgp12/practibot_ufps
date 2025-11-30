@@ -1,3 +1,4 @@
+import { mapPostulationsResponse, type IApiPostulationsResponse } from "@/models/IPostulation";
 import axiosClient from "./axiosClient";
 
 export interface Usuario {
@@ -74,6 +75,19 @@ export const PostulationApi = {
   create: async (data: CreatePostulationDTO): Promise<Postulation> => {
     const response = await axiosClient.post<{ data: Postulation }>("/postulaciones/crear", data);
     return response.data.data;
+  },
+
+  postulateMultiple: async (
+    vacanteId: number,
+    estudianteIds: number[]
+  ): Promise<ReturnType<typeof mapPostulationsResponse>> => {
+    const response = await axiosClient.post<{ data: IApiPostulationsResponse }>(
+      `/postulaciones/${vacanteId}/postulaciones`,
+      { estudianteIds }
+    );
+
+    // Convertir la respuesta completa
+    return mapPostulationsResponse(response.data.data);
   },
 
   getMine: async (

@@ -2,6 +2,7 @@ import { Table } from "@/components"; // ajusta según donde tengas tu Table
 import { Card, CardContent, SectionComponent, Badge } from "@/components";
 import { useEffect, useState, useCallback } from "react";
 import { PostulationApi, type Postulation } from "@/api/postulationApi";
+import { AssignStudentsModal } from "./AssignStudentModal";
 
 export const VacancyDetailPostulations = ({ vacancyId, userRole }: { vacancyId: number; userRole: string }) => {
     const [postulations, setPostulations] = useState<Postulation[]>([]);
@@ -31,6 +32,12 @@ export const VacancyDetailPostulations = ({ vacancyId, userRole }: { vacancyId: 
         <SectionComponent classNameContainer="pt-2" classNameContent="max-w-4xl">
             <div className="flex items-center w-full justify-between border-b-4 border-red-600 pb-2 mb-4">
                 <h2 className="text-xl text-gray-500 font-bold">Postulaciones</h2>
+                {userRole === "DIRECTOR" || userRole === "ADMIN" ? (
+                    <AssignStudentsModal
+                        vacancyId={vacancyId}
+                        onAssigned={fetchPostulations}
+                    />
+                ) : null}
             </div>
 
             <Card className="w-full border border-border/60 shadow-sm">

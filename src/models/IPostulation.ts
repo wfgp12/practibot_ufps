@@ -1,5 +1,6 @@
-// import { mapApiVacancyToVacancy, mapFormToApiVacancy, type IApiVacancy, type Vacancy } from "./IVacancy";
-// import { mapApiStudentToStudent, mapStudentToApiPayload, type IApiStudent, type IStudent } from "./IStudent";
+
+import { mapApiStudentToStudent, type IApiStudent } from "./IStudent";
+import { mapApiVacancyToVacancy, type IApiVacancy } from "./IVacancy";
 
 /** ======== BACKEND MODELS (API) ======== */
 export interface IApiPostulation {
@@ -9,8 +10,15 @@ export interface IApiPostulation {
     estado: "EN_REVISION" | "ACEPTADA" | "RECHAZADA" | "CANCELADA";
     fechaPostula: string; // ISO string
     comentario?: string;
-    // estudiante?: IApiStudent; // opcional si viene expandido
-    // vacante?: IApiVacancy;
+    estudiante?: IApiStudent; // opcional si viene expandido
+    vacante?: IApiVacancy;
+}
+
+export interface IApiPostulationsResponse {
+    totalRecibidos: number;
+    creados: number[];
+    yaPostulados: number[];
+    detalle: IApiPostulation[];
 }
 
 /** ======== FRONTEND MODELS ======== */
@@ -21,8 +29,15 @@ export interface IPostulation {
     status: "IN_REVIEW" | "ACCEPTED" | "REJECTED" | "CANCELLED";
     createdAt: Date;
     comment?: string;
-    // student?: IStudent;
-    // vacancy?: Vacancy;
+    student?: ReturnType<typeof mapApiStudentToStudent>;
+    vacancy?: ReturnType<typeof mapApiVacancyToVacancy>;
+}
+
+export interface IPostulationsResponse {
+    totalReceived: number;
+    created: number[];
+    alreadyApplied: number[];
+    detail: IPostulation[];
 }
 
 /** ======== REQUEST DTOs ======== */
@@ -45,8 +60,17 @@ export const mapPostulationFromApi = (api: IApiPostulation): IPostulation => ({
     status: convertirEstadoApiAFront(api.estado),
     createdAt: new Date(api.fechaPostula),
     comment: api.comentario,
-    // student: api.estudiante ? mapApiStudentToStudent(api.estudiante) : undefined,
-    // vacancy: api.vacante ? mapApiVacancyToVacancy(api.vacante) : undefined,
+    student: api.estudiante ? mapApiStudentToStudent(api.estudiante) : undefined,
+    vacancy: api.vacante ? mapApiVacancyToVacancy(api.vacante) : undefined,
+});
+
+export const mapPostulationsResponse = (
+    api: IApiPostulationsResponse
+): IPostulationsResponse => ({
+    totalReceived: api.totalRecibidos,
+    created: api.creados,
+    alreadyApplied: api.yaPostulados,
+    detail: api.detalle.map(mapPostulationFromApi),
 });
 
 /** Convierte una postulación del front al formato esperado por el API */
@@ -57,8 +81,6 @@ export const mapPostulationToApi = (front: IPostulation): IApiPostulation => ({
     estado: convertirEstadoFrontAApi(front.status),
     fechaPostula: front.createdAt.toISOString(),
     comentario: front.comment,
-    // estudiante: front.student ? mapStudentToApiPayload(front.student) : undefined,
-    // vacante: front.vacancy ? mapFormToApiVacancy(front.vacancy) : undefined,
 });
 
 /** ======== HELPERS ======== */

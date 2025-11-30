@@ -25,9 +25,39 @@ export const studentApi = {
     return response.data;
   },
 
-  getStudents: async (skip = 0, take = 10): Promise<IApiPaginatedResponse<IStudent>> => {
+  getStudents: async (params: {
+    skip?: number;
+    take?: number;
+    nombre?: string;
+    email?: string;
+    codigo?: string;
+    documento?: string;
+  }): Promise<IApiPaginatedResponse<IStudent>> => {
     const response = await axiosClient.get<IApiPaginatedResponse<IApiStudent>>(
-      `/estudiantes?skip=${skip}&take=${take}`
+      "/estudiantes",
+      { params }
+    );
+
+    return {
+      message: response.data.message,
+      data: response.data.data.map(mapApiStudentToStudent),
+      total: response.data.total,
+      page: response.data.page,
+      pageSize: response.data.pageSize,
+    };
+  },
+
+  getStudentsForVacancy: async (vacancyId: number, params: {
+    skip?: number;
+    take?: number;
+    nombre?: string;
+    email?: string;
+    codigo?: string;
+    documento?: string;
+  }): Promise<IApiPaginatedResponse<IStudent>> => {
+    const response = await axiosClient.get<IApiPaginatedResponse<IApiStudent>>(
+      `/estudiantes/vacancia/${vacancyId}`,
+      { params }
     );
 
     return {

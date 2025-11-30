@@ -68,10 +68,10 @@ export const AgreementModal = ({ empresaId, onCreated }: { empresaId?: number, o
     }, [open, reset]);
 
     useEffect(() => {
-        if (!empresaId) {
+        if (!empresaId && open) {
             fetchListCompanies(["APROBADA", "HABILITADA"]);
         }
-    }, [empresaId, fetchListCompanies]);
+    }, [empresaId, fetchListCompanies, open]);
 
     const onSubmit = async (data: FormValues) => {
         try {
