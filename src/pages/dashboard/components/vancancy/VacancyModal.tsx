@@ -84,8 +84,8 @@ export const VacancyModal = ({ vacancy, onSubmit }: VacancyModalProps) => {
     });
 
     useEffect(() => {
-        if (user?.role !== "EMPRESA") fetchListCompanies();
-    }, [user, fetchListCompanies]);
+        if (user?.role !== "EMPRESA" && open) fetchListCompanies();
+    }, [open, fetchListCompanies, user]);
 
     const handleSubmit = async (values: VacancyFormSchema) => {
         dispatch(showLoader());

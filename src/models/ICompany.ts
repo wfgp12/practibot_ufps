@@ -32,6 +32,7 @@ export interface IRegisterCompanyData {
   direccion?: string;
   sector?: string;
   descripcion?: string;
+  programaId: number;
   representanteLegal?: Omit<IApiRepresentative, "id">;
 }
 

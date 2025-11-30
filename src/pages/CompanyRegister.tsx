@@ -3,7 +3,7 @@
 import { useNavigate } from "react-router"
 import { ChevronLeft } from "lucide-react"
 
-  import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useAppDispatch } from "@/store/hooks"
 import { companyApi } from "@/api/companyApi"

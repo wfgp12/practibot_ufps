@@ -8,8 +8,9 @@ import { toast } from "sonner"
 import type { IRegisterCompanyData } from "@/models/ICompany"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Stepper } from "./Stepper"
+import ProgramApi from "@/api/ProgramApi"
 
 const representativeSchema = z.object({
   nombreCompleto: z.string().min(3, "Nombre obligatorio"),
@@ -27,6 +28,7 @@ const companySchema = z.object({
   direccion: z.string().min(5, "La dirección es obligatoria"),
   sector: z.string().min(3, "El sector es obligatorio"),
   descripcion: z.string().optional(),
+  programaId: z.string().min(1, "Selecciona un programa"),
   representanteLegal: representativeSchema,
 });
 
@@ -48,6 +50,7 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
       direccion: "",
       sector: "",
       descripcion: "",
+      programaId: "",
       representanteLegal: {
         nombreCompleto: "",
         tipoDocumento: "",
@@ -60,6 +63,21 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
   })
   const [step, setStep] = useState(0)
   const steps = ["Empresa", "Representante Legal"]
+
+  const [programas, setProgramas] = useState<{ id: number; nombre: string }[]>([])
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await ProgramApi.getSelectList()
+        setProgramas(res)
+      } catch (err) {
+        console.error(err)
+        toast.error("No se pudieron cargar los programas")
+      }
+    }
+    load()
+  }, [])
 
   const nextStep = async () => {
     const isValid = await trigger([
@@ -92,6 +110,7 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
         direccion: data.direccion || "",
         sector: data.sector || "",
         descripcion: data.descripcion || "",
+        programaId: Number(data.programaId),
         representanteLegal: {
           nombreCompleto: data.representanteLegal?.nombreCompleto || "",
           tipoDocumento: data.representanteLegal?.tipoDocumento || "",
@@ -99,7 +118,7 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
           telefono: data.representanteLegal?.telefono || "",
           email: data.representanteLegal?.correo || "",
         },
-      }).then(() => reset()) 
+      }).then(() => reset())
     } catch (error: unknown) {
       if (error instanceof Error) toast.error(error.message)
       else toast.error("Error desconocido")
@@ -162,27 +181,54 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
             {errors.direccion && <p className="text-red-600 text-sm">{errors.direccion.message}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Sector empresarial</Label>
-            <Controller
-              name="sector"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un sector" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tecnologia">Tecnología</SelectItem>
-                    <SelectItem value="comercio">Comercio</SelectItem>
-                    <SelectItem value="salud">Salud</SelectItem>
-                    <SelectItem value="educacion">Educación</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-2 w-full">
+              <Label>Sector empresarial</Label>
+              <Controller
+                name="sector"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tecnologia">Tecnología</SelectItem>
+                      <SelectItem value="comercio">Comercio</SelectItem>
+                      <SelectItem value="salud">Salud</SelectItem>
+                      <SelectItem value="educacion">Educación</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.sector && <p className="text-red-600 text-sm">{errors.sector.message}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2 w-full">
+              <Label>Programa al que aplica</Label>
+              <Controller
+                name="programaId"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={"Selecciona un programa"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {programas.map((p) => (
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {p.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.programaId && (
+                <p className="text-red-600 text-sm">{errors.programaId.message}</p>
               )}
-            />
-            {errors.sector && <p className="text-red-600 text-sm">{errors.sector.message}</p>}
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -251,7 +297,7 @@ export const CompanyForm = ({ defaultValues, onSubmit, submitLabel = "Enviar" }:
             <Button type="submit" disabled={isSubmitting} className="bg-red-600 hover:bg-red-700">
               {isSubmitting ? "Enviando..." : submitLabel}
             </Button>
-            
+
           </div>
 
         </>

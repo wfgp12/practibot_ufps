@@ -128,10 +128,15 @@ export const useVacancies = () => {
 
   const registerVacancy = useCallback(async (formData: IFormRegisterVacancy) => {
     setLoading(true);
-    vacanciesApi.registerApproved(formData)
-      .then(() => fetchVacancies())
-      .catch((err: ApiError) => setError(err?.message ?? "Error al registrar vacante"))
-      .finally(() => setLoading(false));
+    try {
+      await vacanciesApi.registerApproved(formData)
+      fetchVacancies()
+    } catch (error) {
+      console.error(error);
+      setError((error as ApiError)?.message ?? "Error al registrar vacante"); 
+    } finally {
+      setLoading(false);
+    }
   }, [fetchVacancies]);
 
   const updateVacancy = useCallback((formData: IFormRegisterVacancy, id: string) => {
