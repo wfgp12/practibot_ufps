@@ -4,6 +4,7 @@ import { GestionVacantes } from "./components/GestionVacantes"
 import { GestionDocumentos } from "./components/GestionDocumentos"
 import { GestionEstudiantes } from "./components/GestionEstudiantes"
 import { GestionEmpresas } from "./components/GestionEmpresas"
+import { ReportesResumenContainer } from "@/components/ReportesResumenContainer"
 // import { QuickReports } from "./components/QuickReports"
 
 export const AdminDashboard = () => {
@@ -26,10 +27,9 @@ export const AdminDashboard = () => {
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="documentos">
                 <GestionDocumentos />
             </SectionComponent>
-            {/* 
             <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="reportes">
-                <QuickReports/>
-            </SectionComponent> */}
+                <ReportesResumenContainer/>
+            </SectionComponent>
         </>
     )
 }
