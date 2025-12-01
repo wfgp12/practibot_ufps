@@ -1,5 +1,6 @@
-import { mapPostulationsResponse, type IApiPostulationsResponse } from "@/models/IPostulation";
 import axiosClient from "./axiosClient";
+import { mapPostulationFromApi, mapPostulationsResponse, type IApiPostulation, type IApiPostulationsResponse, type IPostulation, } from "@/models/IPostulation";
+import type { IApiResponse, IApiPaginatedResponse } from "@/models/IApi";
 
 export interface Usuario {
   id: number;
@@ -114,13 +115,67 @@ export const PostulationApi = {
     estado?: Postulation["estado"],
     page?: number,
     limit?: number
-  ): Promise<{ data: Postulation[]; total: number; page: number; limit: number; totalPages: number }> => {
+  ) => {
     const params: Record<string, unknown> = {};
     if (estado) params.estado = estado;
     if (page) params.page = page;
     if (limit) params.limit = limit;
 
     const response = await axiosClient.get(`/postulaciones/vacante/${vacanteId}`, { params });
-    return response.data;
+    return {
+      data: response.data.data.map(mapPostulationFromApi),
+      total: response.data.total,
+      page: response.data.page,
+      pageSize: response.data.pageSize,
+    };
   },
+
+  getByCompany: async (
+    filtros?: {
+      vacante?: string;
+      estado?: Postulation["estado"];
+      estudiante?: string;
+      fechaPostula?: string; // formato "YYYY-MM-DD"
+      page?: number;
+      limit?: number;
+    }
+  ) => {
+    const params: Record<string, unknown> = {};
+
+    if (filtros?.vacante) params.vacante = filtros.vacante;
+    if (filtros?.estado) params.estado = filtros.estado;
+    if (filtros?.estudiante) params.estudiante = filtros.estudiante;
+    if (filtros?.fechaPostula) params.fechaPostula = filtros.fechaPostula;
+    if (filtros?.page) params.page = filtros.page;
+    if (filtros?.limit) params.limit = filtros.limit;
+
+    const response = await axiosClient.get<IApiPaginatedResponse<IApiPostulation>>("/postulaciones/empresa", { params });
+    return {
+      data: response.data.data.map(mapPostulationFromApi),
+      total: response.data.total,
+      page: response.data.page,
+      pageSize: response.data.pageSize,
+    };
+  },
+
+  updateStatus: async (
+    postulationId: number,
+    estado: Postulation["estado"]
+  ): Promise<IPostulation> => {
+    const response = await axiosClient.patch<IApiResponse<IApiPostulation>>(
+      `/postulaciones/${postulationId}/estado`,
+      { estado }
+    );
+
+    // Mapear a tu modelo de frontend
+    return mapPostulationFromApi(response.data.data);
+  },
+
+  getById: async (postulationId: number): Promise<IPostulation> => {
+  const response = await axiosClient.get<IApiResponse<IApiPostulation>>(
+    `/postulaciones/${postulationId}`
+  );
+
+  return mapPostulationFromApi(response.data.data);
+},
 };

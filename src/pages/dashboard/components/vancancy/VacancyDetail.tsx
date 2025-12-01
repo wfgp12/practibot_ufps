@@ -45,7 +45,7 @@ export const VacancyDetail = () => {
 
     // 🔄 Revisar si el estudiante ya aplicó
     const checkPostulations = useCallback(async () => {
-        if (!id) return;
+        if (!id || userRole !== "ESTUDIANTE") return;
         try {
             const postulaciones = await PostulationApi.getMine();
             const exists = postulaciones.data.some(
@@ -57,7 +57,7 @@ export const VacancyDetail = () => {
         } catch (error) {
             console.error(error);
         }
-    }, [id]);
+    }, [id , userRole]);
 
     useEffect(() => {
         checkPostulations();

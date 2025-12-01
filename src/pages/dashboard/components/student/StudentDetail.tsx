@@ -4,40 +4,80 @@ import { StudentModal } from "./StudentModal";
 import { FileUploadModal } from "@/components/FileUpload";
 import { useStudent } from "@/hooks/useStudent";
 import { Eye, User, Mail, Hash, IdCard, Briefcase, Activity, Phone, Layers, Users, Wrench, ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router";
-import { SectionComponent, Skeleton } from "@/components";
+import { useNavigate, useParams, useSearchParams } from "react-router";
+import { Button, SectionComponent, Skeleton } from "@/components";
+import { useAppSelector } from "@/store/hooks";
+import { toast } from "sonner";
+import { usePostulation } from "@/hooks/usePostulation";
 
 export const StudentDetail = () => {
     const { id } = useParams<{ id: string }>();
+    const { user } = useAppSelector(state => state.auth);
     const navigate = useNavigate();
     const { student, fetchStudent, uploadResume, loading } = useStudent(Number(id));
     const [showResume, setShowResume] = useState(false);
 
+    const [params] = useSearchParams();
+    const postulationId = params.get("postulation");
+
+    const { postulacion, updatePostulationStatus, loading: loadingPostulation } = usePostulation(Number(postulationId));
+
     if (loading) {
-    return (
-      <Card className="border border-zinc-200 shadow-sm w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="w-5 h-5 rounded-full bg-zinc-300" />
-            <Skeleton className="h-5 w-48 bg-zinc-300" />
-          </div>
-          <Skeleton className="h-8 w-32 rounded-md bg-zinc-300" />
-        </CardHeader>
+        return (
+            <Card className="border border-zinc-200 shadow-sm w-full">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="w-5 h-5 rounded-full bg-zinc-300" />
+                        <Skeleton className="h-5 w-48 bg-zinc-300" />
+                    </div>
+                    <Skeleton className="h-8 w-32 rounded-md bg-zinc-300" />
+                </CardHeader>
 
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mt-2">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <Skeleton className="w-4 h-4 rounded-full bg-zinc-300" />
-              <Skeleton className="h-4 w-40 bg-zinc-300" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 mt-2">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                            <Skeleton className="w-4 h-4 rounded-full bg-zinc-300" />
+                            <Skeleton className="h-4 w-40 bg-zinc-300" />
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+        );
+    }
 
-  console.log('student', student);
-    if (!student) return <p>No hay estudiante seleccionado</p>;
+    if (!student) return <SectionComponent classNameContent="max-w-6xl" classNameContainer="pt-0">
+        <p>No hay estudiante seleccionado</p>;
+    </SectionComponent>
+
+    const handleApprove = async () => {
+        try {
+            updatePostulationStatus("ACCEPTED");
+            toast.success("¡Postulación aprobada correctamente!");
+            navigate("/dashboard");
+        } catch (error: unknown) {
+            console.error(error);
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error("Error al aprobar postulación");
+            }
+        }
+    }
+    
+    const handleReject = async () => {
+        try {
+            updatePostulationStatus("REJECTED");
+            toast.success("¡La postulación ha sido rechazada!");
+            navigate("/dashboard");
+        } catch (error: unknown) {
+            console.error(error);
+            if (error instanceof Error) {
+                toast.error(error.message);
+            } else {
+                toast.error("Error al rechazar postulación");
+            }
+        }
+    };
 
     return (
         <SectionComponent classNameContent="max-w-6xl" classNameContainer="pt-0">
@@ -56,7 +96,16 @@ export const StudentDetail = () => {
                         Detalle de estudiante
                     </h2>
                     <div className="flex items-center gap-2">
-                        <StudentModal student={student} onSuccess={fetchStudent} />
+                        {user?.role === "EMPRESA" ? postulacion?.status === "IN_REVIEW" &&
+                            <>
+                                <Button className="bg-[#AA1916] text-white hover:bg-red-800" onClick={handleApprove} disabled={loadingPostulation}>
+                                    Aprobar
+                                </Button>
+                                <Button className="bg-[#424242] text-white hover:bg-gray-700" variant="destructive" onClick={handleReject} disabled={loadingPostulation}>
+                                    Rechazar
+                                </Button>
+                            </>
+                            : <StudentModal student={student} onSuccess={fetchStudent} />}
                         {student.hojaDeVidaUrl && student.hojaDeVidaUrl !== "" && (
                             <button
                                 className="flex items-center gap-2 bg-zinc-600 px-3 py-1.5 rounded-md text-white hover:bg-zinc-800 transition"
@@ -66,15 +115,17 @@ export const StudentDetail = () => {
                                 {showResume ? "Ocultar Hoja de Vida" : "Mostrar Hoja de Vida"}
                             </button>
                         )}
-                        <FileUploadModal
-                            title={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
-                            buttonLabel={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
-                            accept=".pdf,.doc,.docx"
-                            handleSubmit={async (file) => {
-                                await uploadResume(file);
-                                await fetchStudent();
-                            }}
-                        />
+                        {user?.role === "ESTUDIANTE" &&
+                            <FileUploadModal
+                                title={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
+                                buttonLabel={student.hojaDeVidaUrl ? "Actualizar Hoja de Vida" : "Subir Hoja de Vida"}
+                                accept=".pdf,.doc,.docx"
+                                handleSubmit={async (file) => {
+                                    await uploadResume(file);
+                                    await fetchStudent();
+                                }}
+                            />
+                        }
                     </div>
                 </CardHeader>
 

@@ -15,12 +15,22 @@ import { useAgreements } from "@/hooks/useAgreements";
 
 import type { Vacancy } from "@/models/IVacancy";
 import type { Agreement } from "@/models/IAgreement";
+import { usePostulations } from "@/hooks/usePostulations";
+import { convertirEstadoFrontAApi, type IPostulation } from "@/models/IPostulation";
 
 export const CompanyDashboard = () => {
   const { company, loading, error } = useCompany();
   const navigate = useNavigate();
 
   const { companyVacancies, fetchCompanyVacancies, addVacancy } = useVacancies();
+  const {
+    postulaciones,
+    page: pagePostulaciones,
+    pageSize: pageSizePostulaciones,
+    loading: loadingPostulaciones,
+    setFilters,
+    setPage,
+  } = usePostulations();
   const { agreements, loading: loadingAgreements } = useAgreements(company?.id ? Number(company.id) : undefined);
 
 
@@ -144,6 +154,68 @@ export const CompanyDashboard = () => {
           className="border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white"
         >
           Ver detalle
+        </Button>
+      ),
+    },
+  ];
+
+  const columnasPostulaciones: Column<IPostulation>[] = [
+    {
+      key: "vacancy",
+      title: "Vacante",
+      render: (_, p) => p.vacancy?.title || "—",
+    },
+    {
+      key: "student",
+      title: "Estudiante",
+      render: (_, p) => p.student?.name || "—",
+    },
+    {
+      key: "status",
+      title: "Estado",
+      // filterType: "select",
+      filterOptions: [
+        { label: "En revisión", value: "EN_REVISION" },
+        { label: "Aceptada", value: "ACEPTADA" },
+        { label: "Rechazada", value: "RECHAZADA" },
+        { label: "Cancelada", value: "CANCELADA" },
+      ],
+      render: (_, p) => {
+        const estado = p.status;
+        return (
+          <Badge
+            variant="outline"
+            className={
+              estado === "IN_REVIEW"
+                ? "border-yellow-500 text-yellow-600"
+                : estado === "ACCEPTED"
+                  ? "border-green-500 text-green-600"
+                  : estado === "REJECTED"
+                    ? "border-red-500 text-red-600"
+                    : "border-gray-400 text-gray-600"
+            }
+          >
+            {String(estado)}
+          </Badge>
+        );
+      },
+    },
+    {
+      key: "createdAt",
+      title: "Fecha",
+      render: (_, p) => (p.createdAt ? new Date(p.createdAt).toLocaleDateString("es-CO") : "—"),
+    },
+    {
+      key: "id",
+      title: "Acciones",
+      align: "center",
+      render: (_value, record) => (
+        <Button
+          className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+          variant="outline"
+          onClick={() => navigate(`/dashboard/student/${record.student?.id}?postulation=${record.id}`)}
+        >
+          Ver postulación
         </Button>
       ),
     },
@@ -289,36 +361,68 @@ export const CompanyDashboard = () => {
       }
 
       {company.isEnabled && (
-        <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
-          <Card className="w-full">
-            <CardHeader className="flex flex-col gap-1">
-              <div className="w-full flex flex-row items-center justify-between ">
-                <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                  Vacantes
-                </CardTitle>
-                <VacancyModal onSubmit={async (data) => {
-                  try {
-                    await addVacancy(data);
-                    toast.success("Vacante enviada a revisión");
-                  } catch (error) {
-                    console.error(error);
-                    toast.error("Error al enviar la vacante");
-                  }
-                }} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table
-                columns={columnasVacantes}
-                data={companyVacancies.data}
-                page={companyVacancies.page}
-                total={companyVacancies.total}
-                pageSize={companyVacancies.pageSize}
-                onChange={({ filters, page }) => fetchCompanyVacancies({ filters, page })}
-              />
-            </CardContent>
-          </Card>
-        </SectionComponent>
+        <>
+          <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="vacantes">
+            <Card className="w-full">
+              <CardHeader className="flex flex-col gap-1">
+                <div className="w-full flex flex-row items-center justify-between ">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    Vacantes
+                  </CardTitle>
+                  <VacancyModal onSubmit={async (data) => {
+                    try {
+                      await addVacancy(data);
+                      toast.success("Vacante enviada a revisión");
+                    } catch (error) {
+                      console.error(error);
+                      toast.error("Error al enviar la vacante");
+                    }
+                  }} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table
+                  columns={columnasVacantes}
+                  data={companyVacancies.data}
+                  page={companyVacancies.page}
+                  total={companyVacancies.total}
+                  pageSize={companyVacancies.pageSize}
+                  onChange={({ filters, page }) => fetchCompanyVacancies({ filters, page })}
+                />
+              </CardContent>
+            </Card>
+          </SectionComponent>
+          <SectionComponent classNameContainer="py-10" classNameContent="max-w-6xl" id="postulaciones">
+            <Card className="w-full">
+              <CardHeader className="flex flex-col gap-1">
+                <div className="w-full flex flex-row items-center justify-between ">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                    Postulaciones
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table
+                  loading={loadingPostulaciones}
+                  columns={columnasPostulaciones}
+                  data={postulaciones}
+                  page={pagePostulaciones}
+                  total={postulaciones.length}
+                  pageSize={pageSizePostulaciones}
+                  onChange={({ filters, page }) => {
+                    setFilters({
+                      estado: convertirEstadoFrontAApi(filters.status as IPostulation["status"]),
+                      fechaPostula: filters.createdAt,
+                      estudiante: filters.student,
+                      vacante: filters.vacancy,
+                    });
+                    setPage(page);
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </SectionComponent>
+        </>
       )}
     </div >
   );

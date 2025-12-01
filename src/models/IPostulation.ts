@@ -99,7 +99,7 @@ const convertirEstadoApiAFront = (
     }
 };
 
-const convertirEstadoFrontAApi = (
+export const convertirEstadoFrontAApi = (
     estado: IPostulation["status"]
 ): IApiPostulation["estado"] => {
     switch (estado) {
